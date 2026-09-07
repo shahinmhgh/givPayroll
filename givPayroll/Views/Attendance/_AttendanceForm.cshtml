@@ -1,0 +1,436 @@
+﻿@model Attendance
+
+<link rel="stylesheet"
+      href="~/pages/css/modal.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/validation.css" />
+
+
+<form id="attendanceForm"  method="post">
+    @Html.AntiForgeryToken() 
+
+    <input type="hidden"  asp-for="Id" />
+    <input type="hidden"  asp-for="PersonnelId" />
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+
+            @(Model.Id == 0
+                ? "ثبت حضور و غیاب"
+                : "ویرایش حضور و غیاب")
+
+        </h5>
+
+    </div>
+
+
+    <div id="attendanceSaveLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"
+             alt="ذخیره ..." />
+
+    </div>
+
+
+    <div class="modal-body">
+
+        <div class="row">
+
+
+            <!-- Date -->
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="AttendanceDate"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="AttendanceDate"
+                       class="form-control" />
+
+                <span asp-validation-for="AttendanceDate"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Personnel -->
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="PersonnelId"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="PersonnelId"
+                       class="form-control" />
+
+                <span asp-validation-for="PersonnelId"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Working Expected -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="WorkingExpectedMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="WorkingExpectedMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Working -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="WorkingMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="WorkingMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Extra -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="ExtraMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="ExtraMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Holiday -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="HolidayMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="HolidayMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Delay -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="DelayMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="DelayMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Early -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="EarlyArrivalMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="EarlyArrivalMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Normal Leave -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="LeaveNormalMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="LeaveNormalMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Without Salary -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="LeaveWithoutSalaryMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="LeaveWithoutSalaryMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Sick -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="LeaveSickMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="LeaveSickMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Absence -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="AbsenceMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="AbsenceMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Mission -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="MissionMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="MissionMinute"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Status -->
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="Status"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="Status"
+                       type="number"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Has Worked -->
+
+            <div class="col-md-4 mb-3">
+
+                <div class="form-check mt-4">
+
+                    <input asp-for="HasWorked"
+                           class="form-check-input" />
+
+                    <label asp-for="HasWorked"
+                           class="form-check-label">
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button id="btnSaveAttendance"
+                type="button"
+                class="btn btn-primary"
+                onclick="saveAttendance()">
+
+            ثبت
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    function saveAttendance() {
+
+        var form =
+            $("#attendanceForm");
+
+
+        if (!form.valid()) {
+
+            return false;
+
+        }
+
+
+        $("#btnSaveAttendance")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> ذخیره...'
+            );
+
+
+        $("#attendanceSaveLoading")
+            .show();
+
+
+        let id =
+            $("[name=Id]").val();
+
+
+        let url =
+            id == 0
+                ? "/Attendance/Create"
+                : "/Attendance/Edit";
+
+
+        $.ajax({
+
+            url: url,
+
+            type: "POST",
+
+            data: form.serialize(),
+
+
+            success:
+                function(result) {
+
+                    if (result.success) {
+
+                        $("#attendanceModal")
+                            .modal("hide");
+
+
+                        loadAttendance();
+
+
+                        Swal.fire({
+
+                            icon: "success",
+
+                            title:
+                                "ثبت با موفقیت انجام شد",
+
+                            timer: 1200,
+
+                            showConfirmButton:
+                                false
+
+                        });
+
+                    }
+
+                },
+
+
+            error:
+                function(xhr) {
+
+                    console.log(
+                        xhr.responseText
+                    );
+
+
+                    Swal.fire({
+
+                        icon: "error",
+
+                        title:
+                            "ثبت انجام نشد"
+
+                    });
+
+                },
+
+
+            complete:
+                function() {
+
+                    $("#attendanceSaveLoading")
+                        .hide();
+
+
+                    $("#btnSaveAttendance")
+                        .prop("disabled", false)
+                        .html("ثبت");
+
+                }
+
+        });
+
+    }
+
+</script>

@@ -1,0 +1,262 @@
+﻿@model Company
+
+<link rel="stylesheet" href="~/pages/css/modal.css" />
+<link rel="stylesheet" href="~/pages/css/validation.css" />
+
+
+<form id="companyForm" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden"
+           name="Id"
+           value="@Model.Id" />
+
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+            @(Model.Id == 0
+                ? "شرکت جدید"
+                : "ویرایش شرکت")
+        </h5>
+
+    </div>
+
+
+    <div id="saveLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"
+             alt="ذخیره ..." />
+
+    </div>
+
+
+    <div class="row col-md-12">
+
+        <!-- ============================================= -->
+        <!-- Left -->
+        <!-- ============================================= -->
+
+        <div class="col-md-6">
+
+            <div class="modal-body position-relative">
+
+                <!-- Name -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(m => m.CompanyName)
+                    </label>
+
+                    <input asp-for="CompanyName"
+                           class="form-control" />
+
+                    <span asp-validation-for="CompanyName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Insurance Code -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(
+                            m => m.InsuranceCode)
+                    </label>
+
+                    <input asp-for="InsuranceCode"
+                           class="form-control" />
+
+                    <span asp-validation-for="InsuranceCode"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- Right -->
+        <!-- ============================================= -->
+
+        <div class="col-md-6">
+
+            <div class="modal-body">
+
+                <!-- Address -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(m => m.Address)
+                    </label>
+
+                    <textarea asp-for="Address"
+                              class="form-control"
+                              rows="6"></textarea>
+
+                    <span asp-validation-for="Address"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================= -->
+    <!-- Footer -->
+    <!-- ============================================= -->
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button id="btnSaveCompany"
+                type="button"
+                class="btn btn-primary"
+                onclick="saveCompany()">
+
+            ثبت
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    function saveCompany() {
+
+        var form = $("#companyForm");
+
+
+        console.log(
+            "Valid:",
+            form.valid()
+        );
+
+
+        if (!form.valid()) {
+            return false;
+        }
+
+
+        $("#btnSaveCompany")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> Saving...'
+            );
+
+
+        $("#saveLoading").show();
+
+
+        let id =
+            $("[name=Id]").val();
+
+
+        let url =
+            id == 0
+                ? "/Company/Create"
+                : "/Company/Edit";
+
+
+        $.ajax({
+
+            url: url,
+
+            type: "POST",
+
+            data: form.serialize(),
+
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#companyModal")
+                        .modal("hide");
+
+
+                    loadCompanyData();
+
+
+                    Swal.fire({
+
+                        icon: "success",
+
+                        title:
+                            "ثبت با موفقیت انجام شد",
+
+                        timer: 1200,
+
+                        showConfirmButton: false
+
+                    });
+
+                }
+
+            },
+
+
+            error: function(xhr) {
+
+                console.log(
+                    xhr.responseText
+                );
+
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "ثبت انجام نشد",
+
+                    text:
+                        "خطایی در ذخیره اطلاعات رخ داد."
+
+                });
+
+            },
+
+
+            complete: function() {
+
+                $("#saveLoading").hide();
+
+
+                $("#btnSaveCompany")
+                    .prop("disabled", false)
+                    .html("ثبت");
+
+            }
+
+        });
+
+    }
+
+</script>

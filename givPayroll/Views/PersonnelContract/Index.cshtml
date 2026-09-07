@@ -1,0 +1,504 @@
+﻿@{
+    ViewData["Title"] = "قراردادها";
+}
+
+<h2>قراردادها</h2>
+
+
+<div class="row mb-3">
+
+    <div class="col-md-2">
+        <input id="firstName"
+               class="form-control"
+               placeholder="نام" />
+    </div>
+
+
+    <div class="col-md-2">
+        <input id="lastName"
+               class="form-control"
+               placeholder="نام خانوادگی" />
+    </div>
+
+
+    <div class="col-md-3">
+
+        <select id="personnelId"
+                class="form-select">
+
+            <option value="0">
+                -- همه پرسنل --
+            </option>
+
+            @foreach (var p in ViewBag.Personnels)
+            {
+                <option value="@p.Value">
+                    @p.Text
+                </option>
+            }
+
+        </select>
+
+    </div>
+
+
+    <div class="col-md-2">
+
+        <select id="contractTypeId"
+                class="form-select">
+
+            <option value="0">
+                -- همه انواع قرارداد --
+            </option>
+
+            @foreach (var item in ViewBag.ContractTypes)
+            {
+                <option value="@item.Value">
+                    @item.Text
+                </option>
+            }
+
+        </select>
+
+    </div>
+
+
+    <div class="col-md-2">
+
+        <select id="statusId"
+                class="form-select">
+
+            <option value="0">
+                -- همه وضعیت ها --
+            </option>
+
+            @foreach (var item in ViewBag.ContractStatuses)
+            {
+                <option value="@item.Value">
+                    @item.Text
+                </option>
+            }
+
+        </select>
+
+    </div>
+
+
+    <div class="col-md-1">
+
+        <button id="btnSearch"
+                class="btn btn-primary">
+
+            <i class="fa fa-search"></i>
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="mb-3">
+
+    <button id="btnNew"
+            class="btn btn-success">
+
+        <i class="fa fa-plus"></i>
+
+        قرارداد جدید
+
+    </button>
+
+</div>
+
+
+<div id="contractTable"></div>
+
+
+<!-- =========================================================
+     Modal
+========================================================= -->
+
+<div class="modal fade"
+     id="contractModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="contractModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+        let currentPage = 1;
+
+        let pageSize = 10;
+
+        let sortColumn = "Id";
+
+        let sortDirection = "desc";
+
+
+        // =====================================================
+        // Load
+        // =====================================================
+
+        function loadData() {
+            $.ajax({
+
+                url: "/PersonnelContract/List",
+
+                type: "GET",
+
+                data:
+                {
+                    firstName:
+                        $("#firstName").val(),
+
+                    lastName:
+                        $("#lastName").val(),
+
+                    personnelId:
+                        $("#personnelId").val(),
+
+                    contractTypeId:
+                        $("#contractTypeId").val(),
+
+                    statusId:
+                        $("#statusId").val(),
+
+                    page:
+                        currentPage,
+
+                    pageSize:
+                        pageSize,
+
+                    sortColumn:
+                        sortColumn,
+
+                    sortDirection:
+                        sortDirection
+                },
+
+                success: function(data) {
+                    $("#contractTable")
+                        .html(data);
+                },
+
+                error: function(xhr) {
+                    console.log(xhr);
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "خطا",
+                        text: "خطا در دریافت اطلاعات قراردادها."
+                    });
+                }
+
+            });
+        }
+
+
+        // =====================================================
+        // Sorting
+        // =====================================================
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection =
+                    sortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+            }
+            else {
+                sortColumn = column;
+
+                sortDirection = "asc";
+            }
+
+
+            currentPage = 1;
+
+            loadData();
+        }
+
+
+        // =====================================================
+        // Page
+        // =====================================================
+
+        function goPage(page) {
+            if (page < 1)
+                return;
+
+            currentPage = page;
+
+            loadData();
+        }
+
+
+        function changePageSize(size) {
+            pageSize =
+                parseInt(size);
+
+            currentPage = 1;
+
+            loadData();
+        }
+
+
+        // =====================================================
+        // New
+        // =====================================================
+
+        function newContract() {
+            $("#tableLoading").show();
+            $.get(
+                "/PersonnelContract/Create",
+
+                function(data) {
+                    $("#contractModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#contractForm"
+                    );
+                     
+                     initContractSelect2();
+                             initContractDatePickers();
+                    $("#contractModal").modal("show");
+
+                     
+                    $("#tableLoading").hide();
+                }
+            );
+        }
+
+
+        // =====================================================
+        // Edit
+        // =====================================================
+
+        function editContract(id) {
+            $.get(
+                "/PersonnelContract/Edit/" + id,
+
+                function(data) {
+                    $("#contractModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#contractForm"
+                    );
+                    
+                    initContractSelect2();
+                    initContractDatePickers();
+                    $("#contractModal")
+                        .modal("show");
+
+                    
+                }
+            );
+        }
+
+
+        // =====================================================
+        // Delete
+        // =====================================================
+
+        function deleteContract(id) {
+            Swal.fire({
+
+                title: "حذف شود؟",
+
+                text:
+                    "آیا از حذف این قرارداد مطمئن هستید؟",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف",
+
+                confirmButtonColor:
+                    "#d33",
+
+                cancelButtonColor:
+                    "#6c757d"
+
+            }).then(function(result) {
+                if (!result.isConfirmed)
+                    return;
+
+
+                $.ajax({
+
+                    url:
+                        "/PersonnelContract/Delete/" + id,
+
+                    type:
+                        "DELETE",
+
+                    success:
+                        function(result) {
+                            if (result.success) {
+                                Swal.fire({
+
+                                    icon: "success",
+
+                                    title:
+                                        "قرارداد حذف شد",
+
+                                    timer: 1200,
+
+                                    showConfirmButton:
+                                        false
+                                });
+
+                            
+                                loadData();
+                            }
+                        },
+
+                    error:
+                        function() {
+                            Swal.fire({
+
+                                icon: "error",
+
+                                title:
+                                    "حذف انجام نشد"
+                            });
+                        }
+
+                });
+            });
+        }
+
+
+        // =====================================================
+        // Document Ready
+        // =====================================================
+
+        $(document).ready(function() {
+            loadData();
+
+
+            $("#btnSearch").click(function() {
+                currentPage = 1;
+
+                loadData();
+            });
+
+
+            $("#btnNew").click(function() {
+                newContract();
+            });
+
+
+            $("#firstName, #lastName")
+                .on("keypress", function(e) {
+                    if (e.which === 13) {
+                        currentPage = 1;
+
+                        loadData();
+                    }
+                });
+        });
+
+
+        // =====================================================
+        // Modal Drag
+        // =====================================================
+
+        $(document).on(
+            "mousedown",
+            ".modal-drag-handle",
+            function(e) {
+                let dialog =
+                    $(this)
+                        .closest(".modal-dialog");
+
+
+                let startX =
+                    e.clientX;
+
+                let startY =
+                    e.clientY;
+
+
+                let currentTransform =
+                    dialog.data("transform")
+                    ||
+                    {
+                        x: 0,
+                        y: 0
+                    };
+
+
+                $(document).on(
+                    "mousemove.contractDrag",
+                    function(e) {
+                        let x =
+                            currentTransform.x
+                            +
+                            (e.clientX - startX);
+
+
+                        let y =
+                            currentTransform.y
+                            +
+                            (e.clientY - startY);
+
+
+                        dialog.css(
+                            {
+                                transform:
+                                    `translate(${x}px, ${y}px)`
+                            });
+
+
+                        dialog.data(
+                            "transform",
+                            {
+                                x: x,
+                                y: y
+                            }
+                        );
+                    });
+
+
+                $(document).on(
+                    "mouseup.contractDrag",
+                    function() {
+                        $(document)
+                            .off(
+                                "mousemove.contractDrag"
+                            )
+                            .off(
+                                "mouseup.contractDrag"
+                            );
+                    }
+                );
+            }
+        );
+
+    </script>
+}

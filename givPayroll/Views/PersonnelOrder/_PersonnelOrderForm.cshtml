@@ -1,0 +1,741 @@
+﻿@model givPayroll.Models.PersonnelOrderViewModel
+
+@{
+    bool isEdit = Model.Id != 0;
+
+    string action =
+        isEdit ? "Edit" : "Create";
+}
+
+
+<form id="personnelOrderForm"
+    @*  asp-action="@action"
+      asp-controller="PersonnelOrder" *@
+      method="post">
+    @* onsubmit="return submitPersonnelOrderForm(this);"> *@
+
+    @Html.AntiForgeryToken()
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ContractId" type="hidden" />
+    <input asp-for="IsActive" type="hidden" />
+ 
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="modal-header">
+
+        <h5 class="modal-title">
+
+            @(isEdit
+                ? "ویرایش حکم پرسنلی"
+                : "حکم پرسنلی جدید")
+
+        </h5>
+
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal">
+        </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PERSONNEL ORDER -->
+        <!-- ================================================= -->
+
+        <div class="card mb-3">
+
+            <div class="card-header">
+
+                <strong>
+                    اطلاعات حکم
+                </strong>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-3">
+ 
+                    <!-- Personnel -->
+                    @if (@Model.Id == 0)
+                    {
+                        <div class="col-md-4">
+
+                            <label asp-for="PersonnelId"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="PersonnelId"
+                                    asp-items="Model.PersonnelList"
+                                    class="form-select"
+                                    id="personnelId">
+
+                                <option value="">
+                                    -- انتخاب پرسنل --
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="PersonnelId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <input asp-for="PersonnelId" type="hidden" />
+
+                        <div class="col-md-4">
+                            <label asp-for="PersonnelId"
+                                   class="form-label">
+                            </label>
+
+                            <input value="@Model.Personnel.FirstName   @Model.Personnel.LastName" type="text" readonly class="form-control"></input>
+
+                        </div>
+                    }
+
+                    <!-- personnelOrder -->
+                    <!-- No -->
+
+                    <div class="col-md-2">
+
+                        <label asp-for="No"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="No"
+                               class="form-control"
+                               type="number" readonly />
+
+                        <span asp-validation-for="No"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- Date -->
+                    <div class="col-md-2">
+                        <div id="IssueDateApp">
+                            <label class="form-label">
+                                تاریخ حکم پرسنل
+                            </label>
+                            <date-picker v-model="persianDate"
+                                         format="jYYYY/jMM/jDD"
+                                         display-format="jYYYY/jMM/jDD"
+                                         color="#0d6efd"
+                                         :editable="true"
+                                         placeholder="تاریخ حکم پرسنل">
+                            </date-picker>
+
+                            <input type="hidden"
+                                   name="IssueDate"
+                                   :value="gregorianDate">
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div id="StartDateApp">
+                            <label class="form-label">
+                                تاریخ شروع
+                            </label>
+                            <date-picker v-model="persianDate"
+                                         format="jYYYY/jMM/jDD"
+                                         display-format="jYYYY/jMM/jDD"
+                                         color="#0d6efd"
+                                         :editable="true"
+                                         placeholder="تاریخ شروع">
+                            </date-picker>
+
+                            <input type="hidden"
+                                   name="StartDate"
+                                   :value="gregorianDate">
+
+                        </div>
+                    </div>
+
+                   
+                    <div class="col-md-2">
+                        <div id="EndDateApp">
+                            <label class="form-label">
+                                تاریخ پایان
+                            </label>
+                            <date-picker v-model="persianDate"
+                                         format="jYYYY/jMM/jDD"
+                                         display-format="jYYYY/jMM/jDD"
+                                         color="#0d6efd"
+                                         :editable="true"
+                                         placeholder="تاریخ پایان">
+                            </date-picker>
+
+                            <input type="hidden"
+                                   name="EndDate"
+                                   :value="gregorianDate">
+
+                        </div>
+                    </div>
+
+                    <!-- Insurance -->
+
+                    <div class="row">
+                        <div class="col-md-4">
+
+                            <label asp-for="RuleInsuranceGroupId"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="RuleInsuranceGroupId"
+                                    asp-items="Model.RuleInsuranceGroupList"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- انتخاب گروه بیمه --
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="RuleInsuranceGroupId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="col-md-5">
+
+                            <label asp-for="JobId"
+                                   class="form-label">
+                            </label>
+
+                            <select asp-for="JobId"
+                                    asp-items="Model.JobList"
+                                    class=" select2"
+                                    id="jobId">
+
+                                <option value="">
+                                    -- انتخاب شغل--
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="JobId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Active -->
+                        @*   <div class="col-md-2">
+
+                            <div class="form-check mt-4">
+
+                                <input asp-for="IsActive"
+                                       class="form-check-input" />
+
+                                <label asp-for="IsActive"
+                                       class="form-check-label">
+                                </label>
+
+                            </div>
+
+                        </div> *@
+
+
+                        <!-- Description -->
+
+                        <div class="col-md-6">
+
+                            <label asp-for="Description"
+                                   class="form-label">
+                            </label>
+
+                            <textarea asp-for="Description"
+                                      class="form-control"
+                                      rows="2">
+                        </textarea>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- DETAILS -->
+        <!-- ================================================= -->
+
+        <div class="card">
+
+            <div class="card-header d-flex
+                justify-content-between
+                align-items-center">
+
+                <strong>
+                    اقلام حکم
+                </strong>
+
+                @*  <span class="text-muted">
+                    اقلامی که منبع آن‌ها PersonnelOrder است
+                </span> *@
+
+            </div>
+
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table
+                        table-bordered
+                        table-hover
+                        mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="width:80px">
+                                    ردیف
+                                </th>
+
+                                <th>
+                                    قلم حقوق
+                                </th>
+
+                               
+
+                                <th style="width:250px">
+                                    مبلغ
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @for (int i = 0;
+                                  i < Model.Details.Count;
+                                  i++)
+                            {
+                                <tr>
+
+                                    <td class="text-center">
+
+                                        @(i + 1)
+
+                                        <input asp-for="Details[i].SalaryItemId"
+                                               type="hidden" />
+
+                                        <input asp-for="Details[i].Id"
+                                               type="hidden" />
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong>
+                                            @Model.Details[i].SalaryItemName
+                                        </strong>
+
+                                    </td>
+
+
+                                  
+
+
+                                    <td>
+
+                                        @*   <input asp-for="Details[i].Amount"
+                                               class="form-control
+                                        salary-detail-amount"
+                                               type="number"
+                                               step="0.001"
+                                               min="0"
+                                               dir="ltr" /> *@
+                                        <input asp-for="Details[i].Amount"
+                                               class="form-control amount-input"
+                                               type="text"
+                                               dir="ltr"
+                                               value="@Model.Details[i].Amount.ToString("N0")" />
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FOOTER -->
+    <!-- ================================================= -->
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            انصراف
+
+        </button>
+
+
+        <button type="button"
+                class="btn btn-primary" onclick="savePersonnelOrder()">
+
+            <i class="bi bi-check-lg"></i>
+
+            ذخیره حکم
+
+        </button>
+
+    </div>
+
+</form>
+
+<script>
+    function initContractSelect2() {
+
+        if ($('#PersonnelId').length && $('#PersonnelId').is(':visible')) {
+
+            // Prevent duplicate initialization
+            if ($('#PersonnelId').hasClass('select2-hidden-accessible')) {
+                $('#PersonnelId').select2('destroy');
+            }
+
+            $('#PersonnelId').select2({
+                width: '100%',
+                dir: 'rtl',
+                placeholder: '-- انتخاب پرسنل --',
+                allowClear: false,
+                dropdownParent: $('#contractModal')
+            });
+
+        }
+        if ($('#jobId').length) {
+
+            // Prevent duplicate initialization
+            if ($('#jobId').hasClass('select2-hidden-accessible')) {
+                $('#jobId').select2('destroy');
+            }
+
+            $('#jobId').select2({
+                width: '100%',
+                dir: 'rtl',
+                placeholder: '-- انتخاب شغل --',
+                allowClear: false,
+                dropdownParent: $('#personnelOrderModal')
+            });
+        }
+    }
+</script>
+
+<script>
+    function initPersonnelOrderForm() {
+    // Select2
+    initContractSelect2();
+    // Date pickers
+    initContractDatePickers();
+    // Job
+    // var jobId = '@Model.JobId';
+    // alert(jobId);
+    // if (jobId && jobId !== "0") {
+    //     $('#jobId').val(jobId).trigger('change');
+    // }
+}
+</script>
+
+<script>
+    $(document).on('blur', '.amount-input', function() {
+
+        let value = $(this).val().replace(/,/g, '');
+
+        if (value !== '' && !isNaN(value)) {
+            $(this).val(
+                Number(value).toLocaleString('en-US')
+            );
+        }
+    });
+    $.validator.unobtrusive.parse(
+        '#personnelOrderForm'
+    );
+
+    $(document).ready(function() {
+        //initContractSelect2();
+        //initContractDatePickers();
+    });
+
+    let contractDatePickers = {};
+
+    function initContractDatePickers() {
+ 
+        initContractDatePicker(
+            '@Model.IssueDate.ToString("yyyy-MM-dd")',
+            '#IssueDateApp'
+        );
+
+        initContractDatePicker(
+            '@Model.StartDate.ToString("yyyy-MM-dd")',
+            '#StartDateApp'
+        );
+
+        initContractDatePicker(
+            '@Model.EndDate.GetValueOrDefault().ToString("yyyy-MM-dd")',
+            '#EndDateApp'
+        );
+    }
+
+
+    function initContractDatePicker(initialGregorianDate, elementSelector) {
+
+        const element = $(elementSelector);
+
+        // Element does not exist
+        if (!element.length) {
+            return;
+        }
+
+        // Destroy previous Vue instance
+        if (contractDatePickers[elementSelector]) {
+            contractDatePickers[elementSelector].$destroy();
+            contractDatePickers[elementSelector] = null;
+        }
+
+        let initialPersianDate = '';
+
+        if (initialGregorianDate) {
+
+            const date = moment(
+                initialGregorianDate,
+                [
+                    "M/D/YYYY h:mm:ss A",
+                    "M/D/YYYY HH:mm:ss",
+                    "YYYY-MM-DD"
+                ],
+                true
+            );
+
+            if (date.isValid()) {
+                initialPersianDate = date.format("jYYYY/jMM/jDD");
+            }
+        }
+
+        contractDatePickers[elementSelector] = new Vue({
+
+            el: elementSelector,
+
+            data: {
+                persianDate: initialPersianDate
+            },
+
+            components: {
+                DatePicker: VuePersianDatetimePicker
+            },
+
+            computed: {
+
+                gregorianDate() {
+
+                    if (!this.persianDate) {
+                        return '';
+                    }
+
+                    const date = moment(
+                        this.persianDate,
+                        "jYYYY/jMM/jDD",
+                        true
+                    );
+
+                    if (!date.isValid()) {
+                        return '';
+                    }
+
+                    return date.format("YYYY-MM-DD");
+                }
+            }
+        });
+    }
+
+    $(document).on('change', '#personnelId', function() {
+
+        const personnelId = $(this).val();
+        const contractDropdown = $('#contractId');
+
+        // Clear contracts
+        contractDropdown.empty();
+
+        contractDropdown.append(
+            $('<option>', {
+                value: '',
+                text: '-- انتخاب قرارداد --'
+            })
+        );
+
+        // No personnel selected
+        if (!personnelId) {
+            contractDropdown.prop('disabled', true);
+            return;
+        }
+
+        //contractDropdown.prop('disabled', true);
+
+        $.ajax({
+            url: '/PersonnelOrder/GetContract',
+            type: 'GET',
+            data: {
+                personnelId: personnelId
+            },
+
+            success: function(contracts) {
+                console.log(contracts);
+                $("ContractId").val(1);
+                // $.each(contracts, function(index, contract) {
+
+                //     contractDropdown.append(
+                //         $('<option>', {
+                //             value: contract.id,
+                //             text: contract.text
+                //         })
+                //     );
+
+                // });
+
+                //contractDropdown.prop('disabled', false);
+            },
+
+            error: function() {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطا',
+                    text: 'دریافت قراردادهای پرسنل انجام نشد.'
+                });
+
+                contractDropdown.prop('disabled', false);
+            }
+        });
+    });
+
+    function savePersonnelOrder() {
+
+        var form = $("#personnelOrderForm");
+
+        console.log("Valid:", form.valid());
+
+        if (!form.valid()) {
+            return false;   // IMPORTANT: do not continue
+        }
+
+        let issueDate = form.find("input[name='IssueDate']").val();
+        let startDate = form.find("input[name='StartDate']").val();
+        let endDate = form.find("input[name='EndDate']").val();
+        let personnelId = form.find("input[name='PersonnelId']").val();
+       
+        $("#btnSave")
+            .prop("disabled", true)
+            .html('<img src="/images/hourglass.gif" style="width:20px;height:20px;"> Saving...');
+
+        let id = $("[name=Id]").val();
+
+        let url = id == 0 ?
+            '/personnelOrder/Create' :
+            '/personnelOrder/Edit';
+
+        let dataForm = form.serialize();
+        let data = form.serializeArray();
+
+        data = data.filter(x => x.name !== "IssueDate");
+        data.push({ name: "IssueDate", value: issueDate });
+        data = data.filter(x => x.name !== "StartDate");
+        data.push({ name: "StartDate", value: startDate });
+        data = data.filter(x => x.name !== "EndDate");
+        data.push({ name: "EndDate", value: endDate });
+      
+
+        data = data.filter(x => x.name !== "PersonnelId");
+        data.push({ name: "PersonnelId", value: personnelId });
+
+        $.ajax({
+
+            url: url,
+            type: "POST",
+            data: $.param(data),
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#personnelOrderModal").modal("hide");
+
+                    location.reload();
+                    loadData();
+
+                    Swal.fire({
+                        icon: "success",
+                        title: result.message,
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                    
+                }
+            },
+
+            error: function() {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "ثبت انجام نشد"
+                });
+
+            },
+
+            complete: function() {
+
+                $("#saveLoading").hide();
+                // $("#btnSave").prop("disabled", false);
+
+                $("#btnSave")
+                    .prop("disabled", false)
+                    .html("Save");
+            }
+
+        });
+
+
+
+    }
+
+</script>

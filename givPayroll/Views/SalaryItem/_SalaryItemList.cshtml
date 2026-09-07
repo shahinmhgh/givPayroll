@@ -1,0 +1,238 @@
+﻿@model List<givPayroll.Models.SalaryItem>
+<link rel="stylesheet" href="~/pages/css/table.css" />
+<link href="~/pages/css/tooltip.css" rel="stylesheet" />
+@{
+    int page = ViewBag.Page;
+    int pageSize = ViewBag.PageSize;
+    int totalPages = ViewBag.TotalPages;
+    int totalCount = ViewBag.TotalCount;
+}
+@* <style>
+    .hasamount td {
+        background-color: lightgray !important;
+    }
+</style> *@
+
+@Html.AntiForgeryToken()
+
+<div class="table-responsive">
+
+    <table class="table table-bordered table-hover align-middle">
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    کد
+                </th>
+
+                <th>
+                    اولویت
+                </th>
+
+                <th>
+                    نام
+                </th>
+
+                <th>
+                    Label
+                </th>
+
+                <th>
+                    واحد
+                </th>
+
+                <th>
+                    منبع
+                </th>
+
+                <th>
+                    علامت
+                </th>
+
+                <th>
+                    روش
+                </th>
+
+                <th style="width:180px">
+                    عملیات
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @if (Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                       
+                        var amount = item.SalaryItemRules?
+                                .OrderByDescending(x => x.EffectiveDate)
+                                .FirstOrDefault()?.Amount;
+                        var mark = amount != null ? "*" : "";
+                    
+                    <tr >
+
+                        <td>
+                            <label style="color:red">@mark</label>  @item.Id
+                        </td>
+
+                        <td>
+                            @item.Priority
+                        </td>
+
+                        <td>
+                            @item.SalaryItemName
+                        </td>
+
+                        <td dir="ltr">
+                            @item.Label
+                        </td>
+
+                        <td>
+                            @item.Unit
+                        </td>
+
+                        <td dir="ltr">
+                            @item.Source
+                        </td>
+
+                        <td class="text-center">
+
+                            @if (item.PlusMinus == 1)
+                            {
+                                <span class="badge bg-success">
+                                    +
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    -
+                                </span>
+                            }
+
+                        </td>
+
+                        <td dir="ltr">
+                            @item.CalculationMode
+                        </td>
+
+                        <td>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-warning tooltip-btn"
+                                    onclick="openSalaryItemEdit(@item.Id)">
+
+                                   <i class="fa fa-edit"></i>
+                            <span class="tooltip-text">ویرایش</span>
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="btn btn-sm btn-danger tooltip-btn"
+                                    onclick="deleteSalaryItem(@item.Id)">
+
+                                   <i class="fa fa-trash"></i>
+                            <span class="tooltip-text">حذف</span>
+
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info tooltip-btn"
+                                    onclick="salaryItemRule(@item.Id)">
+
+                                <i class="fa fa-cog"></i>
+                                <span class="tooltip-text">قوانین حقوق</span>
+                               
+
+                            </button>
+                        </td>
+
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+
+                    <td colspan="9"
+                        class="text-center text-muted">
+
+                        رکوردی یافت نشد.
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+@if (totalPages > 1)
+{
+    <nav>
+
+        <ul class="pagination justify-content-center">
+
+            <li class="page-item @(page <= 1 ? "disabled" : "")">
+
+                <a class="page-link"
+                   href="javascript:void(0)"
+                   onclick="loadSalaryItems(@(page - 1))">
+
+                    قبلی
+
+                </a>
+
+            </li>
+
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == page ? "active" : "")">
+
+                    <a class="page-link"
+                       href="javascript:void(0)"
+                       onclick="loadSalaryItems(@i)">
+
+                        @i
+
+                    </a>
+
+                </li>
+            }
+
+
+            <li class="page-item @(page >= totalPages ? "disabled" : "")">
+
+                <a class="page-link"
+                   href="javascript:void(0)"
+                   onclick="loadSalaryItems(@(page + 1))">
+
+                    بعدی
+
+                </a>
+
+            </li>
+
+        </ul>
+
+    </nav>
+}
+
+
+<div class="text-muted text-center">
+
+    تعداد کل:
+    @totalCount
+
+</div>

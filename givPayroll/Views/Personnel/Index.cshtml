@@ -1,0 +1,247 @@
+﻿<style>
+    #personnelTable {
+        position: relative;
+        min-height: 300px;
+    }
+
+</style>
+@{
+    ViewData["Title"] = "پرسنل";
+}
+<h2>کارکنان</h2>
+
+
+<div class="row mb-3">
+
+    <div class="col">
+        <input id="firstName"
+               class="form-control"
+               placeholder="نام">
+    </div>
+
+
+    <div class="col">
+        <input id="lastName"
+               class="form-control"
+               placeholder="نام خانوادگی">
+    </div>
+
+
+    <div class="col">
+        <button id="btnSearch"
+                class="btn btn-primary">
+            جستجو
+        </button>
+
+        <button id="btnNew"
+                class="btn btn-success">
+            جدید
+        </button>
+    </div>
+
+</div>
+
+
+
+<div id="personnelTable"></div>
+
+<div class="modal fade" id="personnelModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" id="modalContent">
+        </div>
+    </div>
+</div>
+
+ 
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+        let currentPage = 1;
+        let pageSize = 10;
+
+        let sortColumn = "LastName";
+        let sortDirection = "asc";
+
+        function loadData() {
+            $("#tableLoading").show();
+
+            $.ajax({
+                url: "/Personnel/List",
+
+                data: {
+                    firstName: $("#firstName").val(),
+                    lastName: $("#lastName").val(),
+                    page: currentPage,
+                    pageSize: pageSize,
+                    sortColumn: sortColumn,
+                    sortDirection: sortDirection
+                },
+
+                success: function(data) {
+                    $("#personnelTable").html(data);
+                },
+
+                complete: function() {
+                    $("#tableLoading").hide();
+                }
+
+            });
+
+
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection =
+                    sortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+            }
+            else {
+                sortColumn = column;
+                sortDirection = "asc";
+            }
+
+
+            currentPage = 1;
+
+            loadData();
+        }
+
+        $(document).ready(function() {
+
+            loadData();
+
+
+            $("#btnSearch").click(function() {
+
+                currentPage = 1;
+                loadData();
+
+            });
+
+
+            $("#btnNew").click(function() {
+
+                $.get('/Personnel/Create',
+                    function(data) {
+
+                        $("#modalContent").html(data);
+
+                     
+                        $.validator.unobtrusive.parse("#personnelForm");
+                        $("#personnelModal").modal('show');
+
+                    });
+
+            });
+
+
+        });
+
+
+        function editPersonnel(id) {
+            $.get('/Personnel/Edit/' + id,
+                function(data) {
+
+                    $("#modalContent").html(data);
+
+                    $.validator.unobtrusive.parse("#personnelForm");
+                    $("#personnelModal")
+                        .modal('show');
+
+                });
+        }
+ 
+        function listPersonnelFamily(id) {
+            window.open(
+                '/PersonnelFamily/Index?personnelId=' + id,
+                '_blank'
+            );
+        }
+        function reportPersonnel(id) {
+            window.open(
+                '/Payroll/SalaryPdf?id=' + id,
+                '_blank'
+            );
+        }
+
+        function deletePersonnel(id) {
+
+            Swal.fire({
+
+                title: 'حذف شود؟',
+                text: 'مطمئنید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف شود',
+                cancelButtonText: 'انصراف',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d'
+
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    $.ajax({
+
+                        url: '/Personnel/Delete/' + id,
+                        type: 'DELETE',
+
+                        success: function() {
+
+                            Swal.fire(
+                                'Deleted!',
+                                'Personnel removed.',
+                                'success'
+                            );
+                            loadData();
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+    <script>
+        $(document).on("mousedown", ".modal-drag-handle", function(e) {
+
+            let dialog = $(this).closest(".modal-dialog");
+
+            let startX = e.clientX;
+            let startY = e.clientY;
+
+            let currentTransform = dialog.data("transform") || {
+                x: 0,
+                y: 0
+            };
+
+            $(document).on("mousemove.modalDrag", function(e) {
+
+                let x = currentTransform.x + (e.clientX - startX);
+                let y = currentTransform.y + (e.clientY - startY);
+
+                dialog.css({
+                    transform: `translate(${x}px, ${y}px)`
+                });
+
+                dialog.data("transform", {
+                    x: x,
+                    y: y
+                });
+            });
+
+            $(document).on("mouseup.modalDrag", function() {
+
+                $(document)
+                    .off("mousemove.modalDrag")
+                    .off("mouseup.modalDrag");
+
+            });
+
+        });
+    </script>
+}

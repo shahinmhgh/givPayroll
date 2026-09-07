@@ -1,0 +1,524 @@
+﻿@{
+    ViewData["Title"] = "احکام پرسنلی";
+}
+
+
+<style>
+
+    #personnelOrderTable {
+        position: relative;
+        min-height: 300px;
+    }
+
+</style>
+
+
+<div class="container-fluid">
+
+
+    <!-- =========================================================
+         TITLE
+         ========================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h2>
+            احکام پرسنلی
+        </h2>
+
+    </div>
+
+
+    <!-- =========================================================
+         SEARCH
+         ========================================================= -->
+
+    <div class="row mb-3">
+
+
+        <div class="col-md-5">
+
+            <input id="search"
+                   class="form-control"
+                   placeholder="جستجو بر اساس نام، نام خانوادگی یا شماره حکم" />
+
+        </div>
+
+
+        <div class="col-md-7">
+
+
+            <button id="btnSearch"
+                    class="btn btn-primary">
+
+                <i class="fa fa-search"></i>
+
+                جستجو
+
+            </button>
+
+
+            <button id="btnNew"
+                    class="btn btn-success">
+
+                <i class="fa fa-plus"></i>
+
+                حکم جدید
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TABLE
+         ========================================================= -->
+
+    <div id="personnelOrderTable">
+
+        <div id="tableLoading"
+             style="display:none">
+
+            <img src="~/images/hourglass.gif"
+                 style="width:40px"
+                 alt="loading" />
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =============================================================
+     MODAL
+     ============================================================= -->
+
+<div class="modal fade"
+     id="personnelOrderModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="modalContent">
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+
+        // ========================================================
+        // VARIABLES
+        // ========================================================
+
+        let currentPage = 1;
+
+        let pageSize = 10;
+
+        let sortColumn = "Id";
+
+        let sortDirection = "desc";
+
+
+        // ========================================================
+        // LOAD DATA
+        // ========================================================
+
+        function loadData() {
+
+            $("#tableLoading").show();
+
+
+            $.ajax({
+
+                url:
+                    "/PersonnelOrder/List",
+
+                type:
+                    "GET",
+
+                data: {
+
+                    search:
+                        $("#search").val(),
+
+                    page:
+                        currentPage,
+
+                    pageSize:
+                        pageSize,
+
+                    sortColumn:
+                        sortColumn,
+
+                    sortDirection:
+                        sortDirection
+                },
+
+
+                success: function (data) {
+
+                    $("#personnelOrderTable")
+                        .html(data);
+
+                },
+
+
+                error: function (xhr) {
+
+                    console.error(xhr);
+
+                    Swal.fire({
+
+                        icon: "error",
+
+                        title:
+                            "خطا",
+
+                        text:
+                            "دریافت اطلاعات انجام نشد."
+                    });
+
+                },
+
+
+                complete: function () {
+
+                    $("#tableLoading").hide();
+
+                }
+
+            });
+
+        }
+
+
+        // ========================================================
+        // SORT
+        // ========================================================
+
+        function sortTable(column) {
+
+            if (sortColumn === column) {
+
+                sortDirection =
+                    sortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+
+            }
+            else {
+
+                sortColumn = column;
+
+                sortDirection = "asc";
+            }
+
+
+            currentPage = 1;
+
+            loadData();
+        }
+
+
+        // ========================================================
+        // DOCUMENT READY
+        // ========================================================
+
+        $(document).ready(function () {
+
+
+            loadData();
+
+
+            // ----------------------------------------------------
+            // SEARCH
+            // ----------------------------------------------------
+
+            $("#btnSearch").click(function () {
+
+                currentPage = 1;
+
+                loadData();
+
+            });
+
+
+            // ----------------------------------------------------
+            // ENTER KEY
+            // ----------------------------------------------------
+
+            $("#search").on(
+                "keypress",
+                function (e) {
+
+                    if (e.which === 13) {
+
+                        currentPage = 1;
+
+                        loadData();
+                    }
+
+                });
+
+
+            // ----------------------------------------------------
+            // NEW
+            // ----------------------------------------------------
+
+            $("#btnNew").click(function () {
+
+                $.get(
+                    "/PersonnelOrder/Create",
+                    function (data) {
+
+                        $("#modalContent")
+                            .html(data);
+
+
+                        $.validator.unobtrusive.parse(
+                            "#personnelOrderForm"
+                        );
+
+                        // initContractSelect2();
+                        // initContractDatePickers();
+                        initPersonnelOrderForm();
+
+                        $("#personnelOrderModal")
+                            .modal("show");
+
+                    });
+
+            });
+
+        });
+
+
+        // ========================================================
+        // EDIT
+        // ========================================================
+
+        function editPersonnelOrder(id) {
+            
+            $.get(
+                "/PersonnelOrder/Edit/" + id,
+                function (data) {
+
+                    $("#modalContent")
+                        .html(data);
+
+                    
+                    $.validator.unobtrusive.parse(
+                        "#personnelOrderForm"
+                    );
+                    
+                    initPersonnelOrderForm();
+                
+                    $("#personnelOrderModal")
+                        .modal("show");
+
+                });
+
+        }
+
+
+        // ========================================================
+        // DELETE
+        // ========================================================
+
+        function deletePersonnelOrder(id) {
+
+            Swal.fire({
+
+                title:
+                    "حذف حکم؟",
+
+                text:
+                    "آیا از حذف این حکم اطمینان دارید؟",
+
+                icon:
+                    "warning",
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف",
+
+                confirmButtonColor:
+                    "#d33",
+
+                cancelButtonColor:
+                    "#6c757d"
+
+            }).then(function (result) {
+
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+
+                $.ajax({
+
+                    url:
+                        "/PersonnelOrder/Delete/" + id,
+
+                    type:
+                        "post",
+
+
+                    success: function (result) {
+
+                        if (result.success) {
+
+                            Swal.fire({
+
+                                icon:
+                                    "success",
+
+                                title:
+                                    "حکم حذف شد",
+
+                                timer:
+                                    1200,
+
+                                showConfirmButton:
+                                    false
+                            });
+
+
+                            loadData();
+                        }
+
+                    },
+
+
+                    error: function () {
+
+                        Swal.fire({
+
+                            icon:
+                                "error",
+
+                            title:
+                                "حذف انجام نشد"
+                        });
+
+                    }
+
+                });
+
+            });
+
+        }
+
+
+        
+
+
+    </script>
+
+
+    <!-- =========================================================
+         DRAG MODAL
+         ========================================================= -->
+
+    <script>
+
+        $(document).on(
+            "mousedown",
+            ".modal-drag-handle",
+            function (e) {
+
+
+                let dialog =
+                    $(this)
+                        .closest(".modal-dialog");
+
+
+                let startX =
+                    e.clientX;
+
+                let startY =
+                    e.clientY;
+
+
+                let currentTransform =
+                    dialog.data("transform")
+                    ||
+                    {
+                        x: 0,
+                        y: 0
+                    };
+
+
+                $(document).on(
+                    "mousemove.personnelOrderDrag",
+                    function (e) {
+
+
+                        let x =
+                            currentTransform.x +
+                            (e.clientX - startX);
+
+
+                        let y =
+                            currentTransform.y +
+                            (e.clientY - startY);
+
+
+                        dialog.css({
+
+                            transform:
+                                `translate(${x}px, ${y}px)`
+
+                        });
+
+
+                        dialog.data(
+                            "transform",
+                            {
+                                x: x,
+                                y: y
+                            });
+
+                    });
+
+
+                $(document).on(
+                    "mouseup.personnelOrderDrag",
+                    function () {
+
+                        $(document)
+                            .off(
+                                "mousemove.personnelOrderDrag")
+                            .off(
+                                "mouseup.personnelOrderDrag");
+
+                    });
+
+            });
+
+    </script>
+
+}

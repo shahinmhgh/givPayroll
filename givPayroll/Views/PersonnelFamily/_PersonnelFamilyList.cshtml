@@ -1,0 +1,308 @@
+﻿@using System.Globalization
+@model PagedResult<PersonnelFamily>
+
+
+<div id="tableContainer"
+     style="border:1px solid lightgray">
+
+    <table class="table table-bordered">
+
+        <thead class="colorWhitesmoke">
+
+            <tr>
+
+                <th class="fixed-column">
+                    #
+                </th>
+
+
+                <th onclick="sortFamilyTable('Id')"
+                    style="cursor:pointer">
+
+                    کد
+
+                    @if (ViewBag.SortColumn == "Id")
+                    {
+                        @(ViewBag.SortDirection == "asc"
+                            ? "▲"
+                            : "▼")
+                    }
+                    else
+                    {
+                        @("↕")
+                    }
+
+                </th>
+
+
+                <th onclick="sortFamilyTable('FamilyRelation')"
+                    style="cursor:pointer">
+
+                    نسبت
+
+                    @if (ViewBag.SortColumn == "FamilyRelation")
+                    {
+                        @(ViewBag.SortDirection == "asc"
+                            ? "▲"
+                            : "▼")
+                    }
+                    else
+                    {
+                        @("↕")
+                    }
+
+                </th>
+
+
+                <th onclick="sortFamilyTable('FirstName')"
+                    style="cursor:pointer">
+
+                    نام
+
+                    @if (ViewBag.SortColumn == "FirstName")
+                    {
+                        @(ViewBag.SortDirection == "asc"
+                            ? "▲"
+                            : "▼")
+                    }
+                    else
+                    {
+                        @("↕")
+                    }
+
+                </th>
+
+
+                <th onclick="sortFamilyTable('LastName')"
+                    style="cursor:pointer">
+
+                    نام خانوادگی
+
+                    @if (ViewBag.SortColumn == "LastName")
+                    {
+                        @(ViewBag.SortDirection == "asc"
+                            ? "▲"
+                            : "▼")
+                    }
+                    else
+                    {
+                        @("↕")
+                    }
+
+                </th>
+
+
+                <th>
+                    کد ملی
+                </th>
+
+
+                <th>
+                    جنسیت
+                </th>
+
+
+                <th class="colorWhitesmoke"
+                    style="cursor:pointer"
+                    onclick="sortTable('BirthDate')">
+
+                    تاریخ تولد
+
+                    <span>
+                        @if (ViewBag.SortColumn == "BirthDate")
+                        {
+                            @(ViewBag.SortDirection == "asc" ? "▲" : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+                    </span>
+
+                </th>
+
+
+                <th style="width:160px;">
+                    عملیات
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @{
+                int rowNumber =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize + 1;
+            }
+
+
+            @foreach (var p in Model.Items)
+            {
+                <tr>
+
+                    <td class="fixed-column">
+                        @rowNumber
+                    </td>
+
+
+                    <td>
+                        @p.Id
+                    </td>
+
+
+                    <td>
+                        @p.FamilyRelation?.FamilyRelationName
+                    </td>
+
+
+                    <td>
+                        @p.FirstName
+                    </td>
+
+
+                    <td>
+                        @p.LastName
+                    </td>
+
+
+                    <td>
+                        @p.NationalCode
+                    </td>
+
+
+                    <td>
+                        @p.Gender?.GenderName
+                    </td>
+
+
+                    <td>
+                        @if (p.BirthDate.HasValue)
+                        {
+                            var pc = new PersianCalendar();
+                            var date = p.BirthDate.Value;
+
+                            @($"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}")
+                        }
+                    </td>
+
+
+                    <td>
+
+                        <button class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="editPersonnelFamily(@p.Id)">
+
+                            <i class="fa fa-edit"></i>
+
+                            <span class="tooltip-text">
+                                ویرایش
+                            </span>
+
+                        </button>
+
+
+                        <button class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deletePersonnelFamily(@p.Id)">
+
+                            <i class="fa fa-trash"></i>
+
+                            <span class="tooltip-text">
+                                حذف
+                            </span>
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                rowNumber++;
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div id="pagerArea"
+     class="mt-3 d-flex justify-content-between">
+
+
+    <div>
+
+        <select asp-for="PageSize"
+                asp-items="Model.PageSizes"
+                class="form-select"
+                onchange="changeFamilyPageSize(this.value)">
+        </select>
+
+    </div>
+
+
+    <div>
+
+        <button class="btn btn-secondary"
+                onclick="goFamilyPage(1)">
+            اول
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goFamilyPage(@(Model.PageNumber - 1))">
+            قبلی
+        </button>
+
+
+        <span class="mx-2">
+
+            @Model.PageNumber /
+            @Model.TotalPages
+
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goFamilyPage(@(Model.PageNumber + 1))">
+            بعدی
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goFamilyPage(@Model.TotalPages)">
+            آخر
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function goFamilyPage(page)
+    {
+        if (page < 1 ||
+            page > @Model.TotalPages)
+            return;
+
+        currentPage = page;
+
+        loadFamilyData();
+    }
+
+
+    function changeFamilyPageSize(size)
+    {
+        pageSize = parseInt(size);
+
+        currentPage = 1;
+
+        loadFamilyData();
+    }
+
+</script>

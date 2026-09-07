@@ -1,0 +1,462 @@
+﻿@model PersonnelFamily
+
+<link rel="stylesheet"
+      href="~/pages/css/modal.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/validation.css" />
+
+
+<form id="personnelFamilyForm" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden"
+           asp-for="Id" />
+
+    <input type="hidden"
+           asp-for="PersonnelId" />
+
+    <input type="hidden"
+           asp-for="UserChanged" />
+    <input type="hidden"
+           asp-for="UserCreated" />
+
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+            @(Model.Id == 0
+                ? "وابسته جدید"
+                : "ویرایش وابسته")
+        </h5>
+
+    </div>
+
+
+    <div class="modal-body">
+
+        <div class="row">
+
+
+            <!-- Relation -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="PersonnelRelationId"
+                           class="form-label">
+
+                        نسبت با پرسنل
+
+                    </label>
+
+
+                    <select asp-for="PersonnelRelationId"
+                            asp-items="ViewBag.FamilyRelation"
+                            class="form-select">
+
+                        <option value="">
+                            -- نسبت را انتخاب کنید --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="PersonnelRelationId"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Gender -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="GenderID"
+                           class="form-label">
+
+                        جنسیت
+
+                    </label>
+
+
+                    <select asp-for="GenderID"
+                            asp-items="ViewBag.Gender"
+                            class="form-select">
+
+                        <option value="">
+                            -- جنسیت را انتخاب کنید --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="GenderID"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- First Name -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="FirstName"
+                           class="form-label">
+
+                        نام
+
+                    </label>
+
+                    <input asp-for="FirstName"
+                           class="form-control" />
+
+                    <span asp-validation-for="FirstName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Last Name -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="LastName"
+                           class="form-label">
+
+                        نام خانوادگی
+
+                    </label>
+
+                    <input asp-for="LastName"
+                           class="form-control" />
+
+                    <span asp-validation-for="LastName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- National Code -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="NationalCode"
+                           class="form-label">
+
+                        کد ملی
+
+                    </label>
+
+                    <input asp-for="NationalCode"
+                           class="form-control" />
+
+                    <span asp-validation-for="NationalCode"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ID No -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="IdNo"
+                           class="form-label">
+
+                        شماره شناسنامه
+
+                    </label>
+
+                    <input asp-for="IdNo"
+                           class="form-control" />
+
+                </div>
+
+            </div>
+
+
+            <!-- Issue Place -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="IssuePlace"
+                           class="form-label">
+
+                        محل صدور
+
+                    </label>
+
+                    <input asp-for="IssuePlace"
+                           class="form-control" />
+
+                </div>
+
+            </div>
+
+
+            <!-- Marriage Status -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <label asp-for="MaritalStatusId"
+                           class="form-label">
+
+                        وضعیت تأهل
+
+                    </label>
+
+
+                    <select asp-for="MaritalStatusId"
+                            asp-items="ViewBag.MarriageStatus"
+                            class="form-select">
+
+                        <option value="">
+                            -- وضعیت تأهل --
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- Birth Date -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <div id="BirthDateApp">
+                        <label class="form-label">
+                            تاریخ تولد
+                        </label>
+                        <date-picker v-model="persianDate"
+                                     format="jYYYY/jMM/jDD"
+                                     display-format="jYYYY/jMM/jDD"
+                                     color="#0d6efd"
+                                     :editable="true"
+                                     placeholder="تاریخ تولد">
+                        </date-picker>
+
+                        <input type="hidden"
+                               name="BirthDate"
+                               :value="gregorianDate">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button type="button"
+                id="btnSavePersonnelFamily"
+                class="btn btn-primary"
+                onclick="savePersonnelFamily()">
+
+            ثبت
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    var personnelDatePicker = null;
+
+    function initPersonnelDatePicker(initialGregorianDate) {
+
+        const element = document.getElementById("BirthDateApp");
+
+        if (!element) {
+            return;
+        }
+
+        // Destroy previous Vue instance if the modal was loaded again
+        if (personnelDatePicker) {
+            personnelDatePicker.$destroy();
+            personnelDatePicker = null;
+        }
+
+        let initialPersianDate = "";
+
+        if (initialGregorianDate) {
+            initialPersianDate =
+                moment(initialGregorianDate, "M/D/YYYY h:mm:ss A")
+                    .format("jYYYY/jMM/jDD");
+        }
+
+        personnelDatePicker = new Vue({
+
+            el: "#BirthDateApp",
+
+            data: {
+                persianDate: initialPersianDate
+            },
+
+            components: {
+                DatePicker: VuePersianDatetimePicker
+            },
+
+            computed: {
+
+                gregorianDate() {
+
+                    if (!this.persianDate) {
+                        return "";
+                    }
+
+                    return moment(
+                        this.persianDate,
+                        "jYYYY/jMM/jDD",
+                        true
+                    ).format("YYYY-MM-DD");
+                }
+
+            }
+
+        });
+    }
+
+
+    $(document).ready(function() {
+        var BirthDate = '@Model.BirthDate';
+       
+        initPersonnelDatePicker(BirthDate)
+
+    });
+
+    function savePersonnelFamily()
+    {
+        const form =
+            $("#personnelFamilyForm");
+
+        console.log(form.serialize());
+        if (!form.valid())
+        {
+            alert('err');
+            return false;
+        }
+
+        const id =
+            $("#personnelFamilyForm input[name='Id']")
+                .val();
+
+        const url =
+            id == 0
+                ? "/PersonnelFamily/Create"
+                : "/PersonnelFamily/Edit";
+
+        $("#btnSavePersonnelFamily")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> ثبت...'
+            );
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: form.serialize(),
+            success: function(result)
+            {
+                if (result.success)
+                {
+                    $("#personnelFamilyModal")
+                        .modal("hide");
+
+                    loadFamilyData();
+
+                    Swal.fire({
+                        icon: "success",
+                        title:
+                            "ثبت با موفقیت انجام شد",
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                }
+                else
+                {
+                    $("#personnelFamilyModalContent")
+                        .html(result);
+
+                    $.validator.unobtrusive.parse(
+                        "#personnelFamilyForm"
+                    );
+                }
+            },
+
+            error: function(xhr)
+            {
+                console.log("Status:", xhr.status);
+    console.log("Status Text:", xhr.statusText);
+    console.log("Response:", xhr.responseText);
+    console.log("Response JSON:", xhr.responseJSON);
+
+
+                Swal.fire({
+                    icon: "error",
+                    title:  "خطا",
+                    text:  "عملیات ثبت انجام نشد."
+                });
+            },
+
+            complete: function()
+            {
+                $("#btnSavePersonnelFamily")
+                    .prop("disabled", false)
+                    .html("ثبت");
+            }
+        });
+        return false;
+    }
+
+</script>

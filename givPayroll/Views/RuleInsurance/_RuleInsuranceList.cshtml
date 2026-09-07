@@ -1,0 +1,272 @@
+﻿@model givPayroll.Models.PagedResult<givPayroll.Models.RuleInsuranceViewModel>
+@using System.Globalization
+
+<link rel="stylesheet" href="~/pages/css/table.css" />
+<link href="~/pages/css/tooltip.css" rel="stylesheet" />
+
+<div class="table-responsive">
+
+    <table class="table table-bordered
+        table-hover align-middle">
+
+        <thead>
+
+            <tr>
+
+                <th style="width:70px">
+                    #
+                </th>
+
+                <th>
+                    گروه بیمه
+                </th>
+
+                <th class="colorWhitesmoke"
+                    style="cursor:pointer"
+                    onclick="sortTable('EffectiveDate')">
+
+                    تاریخ اجرا
+
+                    <span>
+                        @if (ViewBag.SortColumn == "EffectiveDate")
+                        {
+                            @(ViewBag.SortDirection == "asc" ? "▲" : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+                    </span>
+
+                </th>
+
+                <th>
+                    سهم بیمه‌شده
+                </th>
+
+                <th>
+                    سهم کارفرما
+                </th>
+
+                <th>
+                    بیکاری
+                </th>
+
+                <th style="width:150px">
+                    عملیات
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @if (!Model.Items.Any())
+            {
+                <tr>
+
+                    <td colspan="7"
+                        class="text-center text-muted p-4">
+
+                        رکوردی یافت نشد.
+
+                    </td>
+
+                </tr>
+            }
+            else
+            {
+                int row =
+                    ((Model.PageNumber - 1)
+                    * Model.PageSize) + 1;
+
+
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+
+                        <td class="text-center">
+                            @row
+                        </td>
+
+                        <td>
+                            @item.RuleInsuranceGroupName
+                        </td>
+
+                        <td>
+                            @if (item.EffectiveDate!=null)
+                            {
+                                var pc = new PersianCalendar();
+                                var date = item.EffectiveDate;
+
+                                @($"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}")
+                            }
+                        </td>
+
+                        <td dir="ltr">
+                            @item.EmployeeRate.ToString("0.##") %
+                        </td>
+
+                        <td dir="ltr">
+                            @item.EmployerRate.ToString("0.##") %
+                        </td>
+
+                        <td dir="ltr">
+                            @item.UnemploymentRate.ToString("0.##") %
+                        </td>
+
+
+                        <td class="text-center">
+
+                            <button type="button"
+                                    class=" btn btn-sm btn-warning tooltip-btn"
+                                    onclick="editRuleInsurance(@item.Id)">
+
+                                <i class="fa fa-pencil"></i>
+                                <span class="tooltip-text">ویرایش</span>
+                            </button>
+
+                          
+                            <button type="button"
+                                    class=" btn btn-sm btn-danger tooltip-btn"
+                                    onclick="deleteRuleInsurance(@item.Id)">
+
+                                <i class="fa fa-trash"></i>
+                                <span class="tooltip-text">حذف</span>
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                    row++;
+                }
+            }
+
+        </tbody>
+
+    </table>
+
+
+</div>
+<div id="pagerArea" class="mt-3 d-flex justify-content-between">
+
+
+    <div>
+
+       
+        <select asp-for="PageSize"
+                asp-items="Model.PageSizes"
+                class="form-select"
+                onchange="changePageSize(this.value)">
+        </select>
+    </div>
+
+
+
+    <div>
+
+        <button class="btn btn-secondary"
+                onclick="goPage(1)">
+            اول
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber - 1))">
+            قبلی
+        </button>
+
+
+
+        <span class="mx-2">
+            @Model.PageNumber / @Model.TotalPages
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber + 1))">
+            بعدی
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@Model.TotalPages)">
+            آخر
+        </button>
+
+
+    </div>
+
+
+</div>
+
+@* <!-- PAGINATION -->
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex
+        justify-content-between
+        align-items-center
+        mt-3">
+
+        <div>
+
+            تعداد:
+            <strong>
+                @Model.TotalRecords
+            </strong>
+
+        </div>
+
+
+        <div class="btn-group">
+
+            @for (int i = 1;
+                  i <= Model.TotalPages;
+                  i++)
+            {
+                <button type="button"
+                        class="btn
+                    @(i == Model.PageNumber
+                        ? "btn-primary"
+                        : "btn-outline-primary")"
+                        onclick="loadRuleInsuranceData(@i)">
+
+                    @i
+
+                </button>
+            }
+
+        </div>
+
+    </div>
+} *@
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            .forEach(el => new bootstrap.Tooltip(el));
+    });
+    function goPage(page)
+    {
+     if(page < 1 ||
+        page > @Model.TotalPages)
+        return;
+
+
+     currentPage=page;
+
+     loadData();
+    }
+ 
+    function changePageSize(size)
+    {
+        pageSize = parseInt(size);
+        currentPage=1;
+        loadData();
+    }
+
+</script>

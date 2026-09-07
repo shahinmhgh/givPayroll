@@ -1,0 +1,437 @@
+﻿@{
+    ViewData["Title"] = "قوانین مالیات";
+}
+
+<h2>قوانین مالیات</h2>
+
+
+<div class="row mb-3">
+
+    <div class="col-md-3">
+
+        <label class="form-label">
+            تاریخ اجرا
+        </label>
+
+        <input id="effectiveDate"
+               class="form-control"
+               type="date">
+
+    </div>
+
+
+    <div class="col-md-4 d-flex align-items-end">
+
+        <button id="btnSearch"
+                class="btn btn-primary me-2">
+
+            جستجو
+
+        </button>
+
+
+        <button id="btnNew"
+                class="btn btn-success">
+
+            جدید
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<div id="ruleTaxTable">
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL -->
+<!-- ========================================================= -->
+
+<div class="modal fade"
+     id="ruleTaxModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="ruleTaxModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+        let currentRuleTaxPage = 1;
+
+        let ruleTaxPageSize = 10;
+
+        let ruleTaxSortColumn =
+            "EffectiveDate";
+
+        let ruleTaxSortDirection =
+            "desc";
+
+
+        // =========================================================
+        // LOAD DATA
+        // =========================================================
+
+        function loadData() {
+
+            $.ajax({
+
+                url: "/RuleTax/List",
+
+                type: "GET",
+
+                data: {
+
+                    effectiveDate:
+                        $("#effectiveDate").val(),
+
+                    page:
+                        currentRuleTaxPage,
+
+                    pageSize:
+                        ruleTaxPageSize,
+
+                    sortColumn:
+                        ruleTaxSortColumn,
+
+                    sortDirection:
+                        ruleTaxSortDirection
+                },
+
+
+                success: function(data) {
+
+                    $("#ruleTaxTable")
+                        .html(data);
+
+                },
+
+
+                error: function() {
+
+                    Swal.fire({
+
+                        icon: "error",
+
+                        title: "خطا",
+
+                        text:
+                            "دریافت اطلاعات با خطا مواجه شد"
+
+                    });
+
+                }
+
+            });
+
+        }
+
+
+        // =========================================================
+        // SORT
+        // =========================================================
+
+        function sortTable(column) {
+
+            if (
+                ruleTaxSortColumn === column
+            ) {
+
+                ruleTaxSortDirection =
+                    ruleTaxSortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+
+            }
+            else {
+
+                ruleTaxSortColumn = column;
+
+                ruleTaxSortDirection = "asc";
+
+            }
+
+
+            currentRuleTaxPage = 1;
+
+            loadData();
+
+        }
+
+
+        // =========================================================
+        // DOCUMENT READY
+        // =========================================================
+
+        $(document).ready(function() {
+
+
+            loadData();
+
+
+            // -----------------------------------------------------
+            // Search
+            // -----------------------------------------------------
+
+            $("#btnSearch").click(function() {
+
+                currentRuleTaxPage = 1;
+
+                loadData();
+
+            });
+
+
+            // -----------------------------------------------------
+            // New
+            // -----------------------------------------------------
+
+            $("#btnNew").click(function() {
+
+                $.get(
+                    "/RuleTax/Create",
+
+                    function(data) {
+
+                        $("#ruleTaxModalContent")
+                            .html(data);
+
+
+                        $.validator.unobtrusive.parse(
+                            "#ruleTaxForm"
+                        );
+
+
+                        $("#ruleTaxModal")
+                            .modal("show");
+
+                    }
+                );
+
+            });
+
+        });
+
+
+        // =========================================================
+        // EDIT
+        // =========================================================
+
+        function editRuleTax(id) {
+
+            $.get(
+                "/RuleTax/Edit/" + id,
+
+                function(data) {
+
+                    $("#ruleTaxModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#ruleTaxForm"
+                    );
+
+
+                    $("#ruleTaxModal")
+                        .modal("show");
+
+                }
+            );
+
+        }
+
+
+        // =========================================================
+        // DELETE
+        // =========================================================
+
+        function deleteRuleTax(id) {
+
+            Swal.fire({
+
+                title: "حذف شود؟",
+
+                text:
+                    "آیا از حذف این قانون مالیات مطمئن هستید؟",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف",
+
+                confirmButtonColor:
+                    "#d33",
+
+                cancelButtonColor:
+                    "#6c757d"
+
+            }).then(function(result) {
+
+                if (!result.isConfirmed)
+                    return;
+
+
+                $.ajax({
+
+                    url:
+                        "/RuleTax/Delete/" + id,
+
+                    type:
+                        "DELETE",
+
+
+                    success: function(result) {
+
+                        if (result.success) {
+
+                            Swal.fire({
+
+                                icon:
+                                    "success",
+
+                                title:
+                                    result.message,
+
+                                timer:
+                                    1200,
+
+                                showConfirmButton:
+                                    false
+
+                            });
+
+
+                            loadData();
+
+                        }
+
+                    },
+
+
+                    error: function() {
+
+                        Swal.fire({
+
+                            icon:
+                                "error",
+
+                            title:
+                                "حذف انجام نشد"
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+        }
+
+    </script>
+
+
+    <!-- ========================================================= -->
+    <!-- DRAG MODAL -->
+    <!-- ========================================================= -->
+
+    <script>
+
+        $(document).on(
+            "mousedown",
+            ".modal-drag-handle",
+            function(e) {
+
+                let dialog =
+                    $(this).closest(".modal-dialog");
+
+
+                let startX =
+                    e.clientX;
+
+                let startY =
+                    e.clientY;
+
+
+                let currentTransform =
+                    dialog.data("transform") ||
+                    {
+                        x: 0,
+                        y: 0
+                    };
+
+
+                $(document).on(
+                    "mousemove.ruleTaxDrag",
+                    function(e) {
+
+                        let x =
+                            currentTransform.x +
+                            (e.clientX - startX);
+
+
+                        let y =
+                            currentTransform.y +
+                            (e.clientY - startY);
+
+
+                        dialog.css(
+                            "transform",
+                            `translate(${x}px, ${y}px)`
+                        );
+
+
+                        dialog.data(
+                            "transform",
+                            {
+                                x: x,
+                                y: y
+                            }
+                        );
+
+                    }
+                );
+
+
+                $(document).on(
+                    "mouseup.ruleTaxDrag",
+                    function() {
+
+                        $(document)
+                            .off(
+                                "mousemove.ruleTaxDrag"
+                            )
+                            .off(
+                                "mouseup.ruleTaxDrag"
+                            );
+
+                    }
+                );
+
+            }
+        );
+
+    </script>
+}

@@ -1,0 +1,410 @@
+﻿@using System.Globalization
+@model PagedResult<PersonnelContract>
+
+<link rel="stylesheet"
+      href="~/pages/css/table.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
+
+
+<div id="tableContainer"
+     style="border:1px solid lightgray">
+
+    <table class="table table-bordered">
+
+        <thead class="colorWhitesmoke">
+
+            <tr>
+
+                <th class="colorWhitesmoke fixed-column">
+                    #
+                </th>
+
+
+                <!-- Id -->
+
+                <th onclick="sortTable('Id')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Id)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Id")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Personnel -->
+
+                <th onclick="sortTable('Personnel')"
+                    style="cursor:pointer">
+
+                    پرسنل
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Personnel")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Contract Date -->
+
+                <th onclick="sortTable('ContractDate')"
+                    style="cursor:pointer">
+
+                    تاریخ قرارداد
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "ContractDate")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Contract Type -->
+
+                <th onclick="sortTable('ContractType')"
+                    style="cursor:pointer">
+
+                    نوع قرارداد
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "ContractType")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Start -->
+
+                <th onclick="sortTable('StartDate')"
+                    style="cursor:pointer">
+
+                    تاریخ شروع
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "StartDate")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- End -->
+
+                <th onclick="sortTable('EndDate')"
+                    style="cursor:pointer">
+
+                    تاریخ پایان
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "EndDate")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Status -->
+
+                <th>
+                    وضعیت
+                </th>
+
+
+
+
+                <th style="width:150px">
+                    عملیات
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @{
+                int rowNumber =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize
+                    + 1;
+            }
+
+
+            @foreach (var c in Model.Items)
+            {
+
+                <tr>
+
+                    <td class="colorWhitesmoke fixed-column">
+                        @rowNumber
+                    </td>
+
+
+                    <td>
+                        @c.Id
+                    </td>
+
+
+                    <td>
+                        @c.Personnel?.FirstName
+                        @c.Personnel?.LastName
+                    </td>
+
+
+                    <td>
+                        @if (c.ContractDate.HasValue)
+                        {
+                            var pc = new PersianCalendar();
+                            var date = c.ContractDate.Value;
+
+                            @($"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}")
+                        }
+                    </td>
+
+
+                    <td>
+                        @c.ContractType?.ContractTypeName
+                    </td>
+
+
+                    <td>
+                        @if (c.StartDate.HasValue)
+                        {
+                            var pc = new PersianCalendar();
+                            var date = c.StartDate.Value;
+
+                            @($"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}")
+                        }
+                    </td>
+
+
+                    <td>
+                        @if (c.EndDate.HasValue)
+                        {
+                            var pc = new PersianCalendar();
+                            var date = c.EndDate.Value;
+
+                            @($"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}")
+                        }
+                    </td>
+
+
+                    <td>
+
+                        @switch (c.ContractStatusId)
+                        {
+                            case 1:
+
+                                <span class="badge bg-success">
+                                    فعال
+                                </span>
+
+                                break;
+
+                            case 2:
+
+                                <span class="badge bg-danger">
+                                    خاتمه یافته
+                                </span>
+
+                                break;
+
+                            case 3:
+
+                                <span class="badge bg-secondary">
+                                    لغو شده
+                                </span>
+
+                                break;
+
+                            default:
+
+                                <span class="badge bg-warning text-dark">
+                                    @c.ContractStatusId
+                                </span>
+
+                                break;
+                        }
+
+                    </td>
+
+
+                    
+
+
+                    <td>
+
+                        <button type="button"
+                                class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="editContract(@c.Id)">
+
+                            <i class="fa fa-edit"></i>
+
+                            <span class="tooltip-text">
+                                ویرایش
+                            </span>
+
+                        </button>
+
+
+                        <button type="button"
+                                class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deleteContract(@c.Id)">
+
+                            <i class="fa fa-trash"></i>
+
+                            <span class="tooltip-text">
+                                حذف
+                            </span>
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                rowNumber++;
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- =========================================================
+     Pager
+========================================================= -->
+
+<div id="pagerArea"
+     class="mt-3 d-flex justify-content-between">
+
+
+    <div>
+
+        <select asp-for="PageSize"
+                asp-items="Model.PageSizes"
+                class="form-select"
+                onchange="changePageSize(this.value)">
+        </select>
+
+    </div>
+
+
+    <div>
+
+        <button class="btn btn-secondary"
+                onclick="goPage(1)">
+
+            اول
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber - 1))">
+
+            قبلی
+
+        </button>
+
+
+        <span class="mx-2">
+
+            @Model.PageNumber
+            /
+            @Model.TotalPages
+
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber + 1))">
+
+            بعدی
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@Model.TotalPages)">
+
+            آخر
+
+        </button>
+
+    </div>
+
+</div>

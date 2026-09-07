@@ -1,0 +1,431 @@
+﻿@model givPayroll.Models.SalaryItemRule
+
+<link rel="stylesheet"
+      href="~/pages/css/modal.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/validation.css" />
+
+
+<form id="salaryItemRuleForm"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+
+    <input type="hidden"
+           asp-for="Id" />
+
+
+    <input type="hidden"
+           asp-for="SalaryItemId" />
+
+
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5 class="modal-title">
+
+            قوانین قلم حقوق
+
+            @if (ViewBag.SalaryItemName != null)
+            {
+                <span>
+                    -
+                    @ViewBag.SalaryItemName
+                </span>
+            }
+
+        </h5>
+
+    </div>
+
+
+    <!-- =========================================================
+         LOADING
+         ========================================================= -->
+
+    <div id="salaryItemRuleLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"
+             alt="ذخیره ..." />
+
+    </div>
+
+
+    <!-- =========================================================
+         BODY
+         ========================================================= -->
+
+    <div class="modal-body position-relative">
+
+        <div class="row">
+
+
+            <!-- =================================================
+                 EFFECTIVE DATE
+                 ================================================= -->
+
+            <div class="col-md-6">
+
+                <div id="EffectiveDateApp">
+                    <label class="form-label">
+                        تاریخ اجرا
+                    </label>
+                    <date-picker v-model="persianDate"
+                                 format="jYYYY/jMM/jDD"
+                                 display-format="jYYYY/jMM/jDD"
+                                 color="#0d6efd"
+                                 :editable="true"
+                                 placeholder="تاریخ اجرا">
+                    </date-picker>
+
+                    <input type="hidden"
+                           name="EffectiveDate"
+                           :value="gregorianDate">
+
+                </div>
+
+            </div> 
+            <!-- close first .col-md-6 -->
+            <!-- =================================================
+             TAX
+             ================================================= -->
+
+            <div class="col-md-6">
+
+                <div class="mb-3">
+
+                    <div class="form-check">
+
+                        <input asp-for="IsTaxBase"
+                               class="form-check-input"
+                               type="checkbox" />
+
+                        <label asp-for="IsTaxBase"
+                               class="form-check-label">
+
+                            مشمول مالیات
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     INSURANCE
+                     ============================================= -->
+
+                <div class="mb-3">
+
+                    <div class="form-check">
+
+                        <input asp-for="IsInsuranceBase"
+                               class="form-check-input"
+                               type="checkbox" />
+
+                        <label asp-for="IsInsuranceBase"
+                               class="form-check-label">
+
+                            مشمول بیمه
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <!-- =============================================
+                     Amount
+                     ============================================= -->
+
+                <div class="col-md-6">
+
+                    <label asp-for="Amount"
+                           class="form-label">
+                        مبلغ
+                    </label>
+
+                    <input type="text"
+                           id="salaryItemRuleAmount"
+                           class="form-control text-end"
+                           value="@Model.Amount.ToString("N0")"
+                           inputmode="numeric"
+                           autocomplete="off" />
+
+                    <input asp-for="Amount"
+                           type="hidden"
+                           id="salaryItemRuleAmountValue" />
+
+                    <span asp-validation-for="Amount"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button id="btnSaveSalaryItemRule"
+                type="button"
+                class="btn btn-primary"
+                onclick="saveSalaryItemRule()">
+
+            ثبت
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    // ============================================================
+    // DATE PICKER
+    // ============================================================
+
+    var personnelDatePicker = null;
+
+    function initPersonnelDatePicker(initialGregorianDate, elmnt) {
+
+        const element = $(elmnt); // document.getElementById(elmnt);
+
+        if (!element) {
+            return;
+        }
+
+        // Destroy previous Vue instance if the modal was loaded again
+        if (personnelDatePicker) {
+            personnelDatePicker.$destroy();
+            personnelDatePicker = null;
+        }
+
+        let initialPersianDate = "";
+
+        if (initialGregorianDate) {
+            initialPersianDate =
+                moment(initialGregorianDate, "M/D/YYYY h:mm:ss A")
+                    .format("jYYYY/jMM/jDD");
+        }
+
+        personnelDatePicker = new Vue({
+
+            el: elmnt,
+
+            data: {
+                persianDate: initialPersianDate
+            },
+
+            components: {
+                DatePicker: VuePersianDatetimePicker
+            },
+
+            computed: {
+
+                gregorianDate() {
+
+                    if (!this.persianDate) {
+                        return "";
+                    }
+
+                    return moment(
+                        this.persianDate,
+                        "jYYYY/jMM/jDD",
+                        true
+                    ).format("YYYY-MM-DD");
+                }
+
+            }
+
+        });
+    }
+
+
+    $(document).on("input", "#salaryItemRuleAmount", function() {
+
+        let value = $(this).val()
+            .replace(/,/g, '')
+            .replace(/[^\d]/g, '');
+
+        if (value === '') {
+            $("#salaryItemRuleAmountValue").val('');
+            $(this).val('');
+            return;
+        }
+
+        $("#salaryItemRuleAmountValue").val(value);
+
+        $(this).val(
+            Number(value).toLocaleString('en-US')
+        );
+    });
+
+    // ============================================================
+    // INITIALIZE
+    // ============================================================
+
+    
+    $(document).ready(function() {
+
+        var effectiveDate = '@Model.EffectiveDate';
+
+        initPersonnelDatePicker(effectiveDate, "#EffectiveDateApp");
+
+
+        $.validator.unobtrusive.parse(
+            "#salaryItemRuleForm"
+        );
+
+    });
+
+
+    // ============================================================
+    // SAVE
+    // ============================================================
+
+    function saveSalaryItemRule() {
+
+        var form =
+            $("#salaryItemRuleForm");
+
+
+        if (!form.valid()) {
+
+            return false;
+        }
+
+
+        $("#btnSaveSalaryItemRule")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> ' +
+                'در حال ذخیره...'
+            );
+
+        //alert($("#salaryItemRuleAmount").val());
+
+        $("#salaryItemRuleLoading")
+            .show();
+
+
+        $.ajax({
+
+            url:
+                "/SalaryItemRule/Save",
+
+            type:
+                "POST",
+
+            data:
+                form.serialize(),
+
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#salaryItemRuleModal")
+                        .modal("hide");
+
+
+                    Swal.fire({
+
+                        icon:
+                            "success",
+
+                        title:
+                            "قوانین با موفقیت ذخیره شد",
+
+                        timer:
+                            1200,
+
+                        showConfirmButton:
+                            false
+
+                    });
+
+                }
+                else {
+
+                    $("#salaryItemRuleModalContent")
+                        .html(result);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#salaryItemRuleForm"
+                    );
+
+                }
+
+            },
+
+
+            error: function(xhr) {
+
+                console.error(xhr);
+
+
+                Swal.fire({
+
+                    icon:
+                        "error",
+
+                    title:
+                        "ذخیره انجام نشد",
+
+                    text:
+                        "خطایی هنگام ذخیره قوانین رخ داد."
+
+                });
+
+            },
+
+
+            complete: function() {
+
+                $("#salaryItemRuleLoading")
+                    .hide();
+
+
+                $("#btnSaveSalaryItemRule")
+                    .prop("disabled", false)
+                    .html("ثبت");
+
+            }
+
+        });
+
+
+        return false;
+    }
+
+</script>

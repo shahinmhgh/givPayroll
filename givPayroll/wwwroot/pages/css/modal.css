@@ -1,0 +1,24 @@
+﻿.modal-body {
+    position: relative;
+}
+
+.modal-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1055;
+}
+
+    .modal-loading img {
+        width: 60px;
+        height: 60px;
+    }
+
+
+.modal-drag-handle {
+    cursor: move;
+    user-select: none;
+}

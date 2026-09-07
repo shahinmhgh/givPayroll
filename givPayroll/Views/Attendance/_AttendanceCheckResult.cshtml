@@ -1,0 +1,133 @@
+﻿@model List<AttendanceCheckViewModel>
+
+<div class="table-responsive">
+
+    <table class="table table-bordered table-hover align-middle">
+
+        <thead class="table-light">
+
+            <tr>
+
+                <th>وضعیت</th>
+
+                 
+
+                <th>پرسنل</th>
+
+                <th>موظفی</th>
+
+                <th>کارکرد</th>
+
+                <th>مرخصی</th>
+
+                <th>استعلاجی</th>
+
+                <th>غیبت</th>
+
+                <th>ماموریت</th>
+
+                <th>جمع</th>
+
+                <th>کسری</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var row in Model)
+            {
+                var total = row.Work
+                           + row.Leave
+                           + row.SickLeave
+                           + row.Absence
+                           + row.Mission;
+
+                var shortage = Math.Max(
+                    row.Required - total,
+                    0
+                );
+
+                <tr class="@(row.IsCorrect ? "" : "table-danger")">
+
+                    <td class="text-center">
+
+                        @if (row.IsCorrect)
+                        {
+                            <span class="text-success"
+                                  title="کارکرد صحیح است">
+
+                                <i class="fa fa-check-circle"></i>
+
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-danger"
+                                  title="کارکرد صحیح نیست">
+
+                                <i class="fa fa-exclamation-triangle"></i>
+
+                            </span>
+                        }
+
+                    </td>
+
+                  
+
+                    <td>
+                        @row.PersonnelName
+                    </td>
+
+                    <td>
+                        @row.Required
+                    </td>
+
+                    <td>
+                        @row.Work
+                    </td>
+
+                    <td>
+                        @row.Leave
+                    </td>
+
+                    <td>
+                        @row.SickLeave
+                    </td>
+
+                    <td>
+                        @row.Absence
+                    </td>
+
+                    <td>
+                        @row.Mission
+                    </td>
+
+                    <td class="fw-bold">
+                        @total
+                    </td>
+
+                    <td>
+                        @if (shortage > 0)
+                        {
+                            <span class="text-danger fw-bold">
+                                @shortage
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-success">
+                                0
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

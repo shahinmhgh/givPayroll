@@ -1,0 +1,37 @@
+﻿#tableContainer {
+    height: 550px; /* fixed height */
+    overflow-y: auto; /* vertical scrollbar */
+    overflow-x: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+#tableContainer thead th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+.colorWhitesmoke {
+    background-color: whitesmoke !important;
+    color: green !important;
+}
+
+.fixed-column {
+    width: 45px;
+    min-width: 45px;
+    max-width: 45px;
+    text-align: center;
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 5;
+}
+
+thead .fixed-column {
+    background-color: navajowhite;
+    z-index: 10;
+}

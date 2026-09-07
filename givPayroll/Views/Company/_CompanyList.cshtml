@@ -1,0 +1,332 @@
+﻿@model PagedResult<Company>
+
+<link rel="stylesheet"
+      href="~/pages/css/table.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
+
+
+<div id="tableContainer"
+     style="border: 1px solid lightgray">
+
+    <table class="table table-bordered">
+
+        <thead class="colorWhitesmoke">
+
+            <tr>
+
+                <!-- # -->
+
+                <th class="colorWhitesmoke fixed-column">
+                    #
+                </th>
+
+
+                <!-- Id -->
+                <!--     <th class="colorWhitesmoke"
+                    onclick="sortCompanyTable('Id')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Id)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Id")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+ -->
+
+                <!-- Name -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortCompanyTable('Name')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().CompanyName)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "CompanyName")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Insurance Code -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortCompanyTable('InsuranceCode')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().InsuranceCode)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "InsuranceCode")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Address -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortCompanyTable('Address')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Address)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Address")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Operations -->
+
+                <th class="colorWhitesmoke"
+                    style="width:70px;">
+
+                    عملیات
+
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @{
+
+                int rowNumber =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize + 1;
+
+            }
+
+
+            @foreach (var p in Model.Items)
+            {
+
+                <tr>
+
+                    <td class="colorWhitesmoke fixed-column">
+                        @rowNumber
+                    </td>
+
+
+                    <!-- <td>
+                        @p.Id
+                    </td>-->
+
+
+                    <td>
+                        @p.CompanyName
+                    </td>
+
+
+                    <td>
+                        @p.InsuranceCode
+                    </td>
+
+
+                    <td>
+                        @p.Address
+                    </td>
+
+
+                    <td>
+
+                        <button class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="editCompany(@p.Id)">
+
+                            <i class="fa fa-edit"></i>
+
+                            <span class="tooltip-text">
+                                ویرایش
+                            </span>
+
+                        </button>
+
+
+                        <!--
+                            <button class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deleteCompany(@p.Id)">
+
+                            <i class="fa fa-trash"></i>
+
+                            <span class="tooltip-text">
+                                حذف
+                            </span>
+
+                        </button>
+                        -->
+
+                    </td>
+
+                </tr>
+
+
+                rowNumber++;
+
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Pager -->
+<!-- ========================================================= -->
+
+<div id="pagerArea"
+     class="mt-3 d-flex justify-content-between">
+
+
+    <div>
+
+        <select asp-for="PageSize"
+                asp-items="Model.PageSizes"
+                class="form-select"
+                onchange="changeCompanyPageSize(this.value)">
+        </select>
+
+    </div>
+
+
+    <div>
+
+        <button class="btn btn-secondary"
+                onclick="goCompanyPage(1)">
+
+            اول
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goCompanyPage(
+            @(Model.PageNumber - 1))">
+
+            قبلی
+
+        </button>
+
+
+        <span class="mx-2">
+
+            @Model.PageNumber /
+            @Model.TotalPages
+
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goCompanyPage(
+            @(Model.PageNumber + 1))">
+
+            بعدی
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goCompanyPage(
+            @Model.TotalPages)">
+
+            آخر
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function goCompanyPage(page) {
+
+        if (
+            page < 1 ||
+            page > @Model.TotalPages
+            ) {
+            return;
+        }
+
+
+        companyCurrentPage = page;
+
+
+        loadCompanyData();
+
+    }
+
+
+    function changeCompanyPageSize(size) {
+
+        companyPageSize =
+            parseInt(size);
+
+
+        companyCurrentPage = 1;
+
+
+        loadCompanyData();
+
+    }
+
+</script>

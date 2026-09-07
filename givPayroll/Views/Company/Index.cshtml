@@ -1,0 +1,494 @@
+﻿@{
+    ViewData["Title"] = "اطلاعات شرکت";
+}
+
+
+<h2>
+    اطلاعات شرکت
+</h2>
+
+
+<!-- ========================================================= -->
+<!-- Search -->
+<!-- ========================================================= -->
+<!--
+
+<div class="row mb-3">
+
+
+    <div class="col">
+
+        <input id="companyName"
+               class="form-control"
+               placeholder="نام شرکت">
+
+    </div>
+
+
+    <div class="col">
+
+        <input id="companyInsuranceCode"
+               class="form-control"
+               placeholder="کد بیمه">
+
+    </div>
+
+
+    <div class="col">
+
+        <button id="btnCompanySearch"
+                class="btn btn-primary">
+
+            جستجو
+
+        </button>
+
+
+        <button id="btnCompanyNew"
+                class="btn btn-success">
+
+            جدید
+
+        </button>
+
+    </div>
+
+</div>-->
+
+
+<!-- ========================================================= -->
+<!-- Table -->
+<!-- ========================================================= -->
+
+<div id="companyTable">
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Modal -->
+<!-- ========================================================= -->
+
+<div class="modal fade"
+     id="companyModal">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="companyModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+        let companyCurrentPage = 1;
+
+        let companyPageSize = 10;
+
+
+        let companySortColumn =
+            "Name";
+
+
+        let companySortDirection =
+            "asc";
+
+
+        // =====================================================
+        // Load Data
+        // =====================================================
+
+        function loadCompanyData() {
+
+            $("#tableLoading").show();
+
+
+            $.ajax({
+
+                url: "/Company/List",
+
+
+                data: {
+
+                    name:
+                        $("#companyName").val(),
+
+                    insuranceCode:
+                        $("#companyInsuranceCode").val(),
+
+                    page:
+                        companyCurrentPage,
+
+                    pageSize:
+                        companyPageSize,
+
+                    sortColumn:
+                        companySortColumn,
+
+                    sortDirection:
+                        companySortDirection
+
+                },
+
+
+                success: function(data) {
+
+                    $("#companyTable")
+                        .html(data);
+
+                },
+
+
+                error: function(xhr) {
+
+                    console.log(
+                        xhr.responseText
+                    );
+
+                },
+
+
+                complete: function() {
+
+                    $("#tableLoading").hide();
+
+                }
+
+            });
+
+        }
+
+
+        // =====================================================
+        // Sorting
+        // =====================================================
+
+        function sortCompanyTable(column) {
+
+            if (
+                companySortColumn === column
+            ) {
+
+                companySortDirection =
+                    companySortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+
+            }
+            else {
+
+                companySortColumn =
+                    column;
+
+                companySortDirection =
+                    "asc";
+
+            }
+
+
+            companyCurrentPage = 1;
+
+
+            loadCompanyData();
+
+        }
+
+
+        // =====================================================
+        // Document Ready
+        // =====================================================
+
+        $(document).ready(function() {
+
+
+            loadCompanyData();
+
+
+            // -------------------------------------------------
+            // Search
+            // -------------------------------------------------
+
+            $("#btnCompanySearch")
+                .click(function() {
+
+                    companyCurrentPage = 1;
+
+                    loadCompanyData();
+
+                });
+
+
+            // -------------------------------------------------
+            // New
+            // -------------------------------------------------
+
+            $("#btnCompanyNew")
+                .click(function() {
+
+                    $.get(
+                        "/Company/Create",
+
+                        function(data) {
+
+                            $("#companyModalContent")
+                                .html(data);
+
+
+                            $.validator.unobtrusive
+                                .parse("#companyForm");
+
+
+                            $("#companyModal")
+                                .modal("show");
+
+                        });
+
+                });
+
+        });
+
+
+        // =====================================================
+        // Edit
+        // =====================================================
+
+        function editCompany(id) {
+
+            $.get(
+                "/Company/Edit/" + id,
+
+                function(data) {
+
+                    $("#companyModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive
+                        .parse("#companyForm");
+
+
+                    $("#companyModal")
+                        .modal("show");
+
+                });
+
+        }
+
+
+        // =====================================================
+        // Delete
+        // =====================================================
+
+        function deleteCompany(id) {
+
+
+            Swal.fire({
+
+                title: "حذف شود؟",
+
+                text: "مطمئنید؟",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف",
+
+                confirmButtonColor:
+                    "#d33",
+
+                cancelButtonColor:
+                    "#6c757d"
+
+            })
+
+
+                .then((result) => {
+
+
+                    if (
+                        result.isConfirmed
+                    ) {
+
+
+                        $.ajax({
+
+                            url:
+                                "/Company/Delete/"
+                                + id,
+
+                            type:
+                                "DELETE",
+
+
+                            success:
+                                function(result) {
+
+
+                                    if (
+                                        result.success
+                                    ) {
+
+
+                                        Swal.fire({
+
+                                            icon:
+                                                "success",
+
+                                            title:
+                                                "حذف شد",
+
+                                            timer:
+                                                1200,
+
+                                            showConfirmButton:
+                                                false
+
+                                        });
+
+
+                                        loadCompanyData();
+
+                                    }
+
+                                },
+
+
+                            error:
+                                function() {
+
+
+                                    Swal.fire({
+
+                                        icon:
+                                            "error",
+
+                                        title:
+                                            "حذف انجام نشد"
+
+                                    });
+
+                                }
+
+                        });
+
+                    }
+
+                });
+
+        }
+
+    </script>
+
+
+    <!-- ===================================================== -->
+    <!-- Modal Drag -->
+    <!-- ===================================================== -->
+
+    <script>
+
+        $(document).on(
+            "mousedown",
+            ".modal-drag-handle",
+            function(e) {
+
+
+                let dialog =
+                    $(this)
+                        .closest(".modal-dialog");
+
+
+                let startX =
+                    e.clientX;
+
+
+                let startY =
+                    e.clientY;
+
+
+                let currentTransform =
+                    dialog.data("transform")
+                    ||
+                    {
+                        x: 0,
+                        y: 0
+                    };
+
+
+                $(document).on(
+                    "mousemove.companyModalDrag",
+                    function(e) {
+
+
+                        let x =
+                            currentTransform.x
+                            +
+                            (
+                                e.clientX
+                                -
+                                startX
+                            );
+
+
+                        let y =
+                            currentTransform.y
+                            +
+                            (
+                                e.clientY
+                                -
+                                startY
+                            );
+
+
+                        dialog.css({
+
+                            transform:
+                                `translate(${x}px, ${y}px)`
+
+                        });
+
+
+                        dialog.data(
+                            "transform",
+                            {
+                                x: x,
+                                y: y
+                            }
+                        );
+
+                    });
+
+
+                $(document).on(
+                    "mouseup.companyModalDrag",
+                    function() {
+
+
+                        $(document)
+                            .off(
+                                "mousemove.companyModalDrag"
+                            )
+                            .off(
+                                "mouseup.companyModalDrag"
+                            );
+
+                    });
+
+            });
+
+    </script>
+
+}

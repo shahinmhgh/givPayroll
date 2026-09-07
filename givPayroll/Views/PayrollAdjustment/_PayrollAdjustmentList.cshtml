@@ -1,0 +1,222 @@
+﻿@model givPayroll.Models.PagedResult<givPayroll.Models.PayrollAdjustment>
+
+<div class="table-responsive">
+
+    <table class="table table-bordered table-hover align-middle">
+
+        <thead>
+
+            <tr>
+
+                <th>#</th>
+
+                <th>
+                    نوع تعدیل
+                </th>
+
+                <th>
+                    توضیحات
+                </th>
+
+                <th>
+                    شروع
+                </th>
+
+                <th>
+                    پایان
+                </th>
+
+                <th>
+                    ماه
+                </th>
+
+                <th>
+                    مبلغ کل
+                </th>
+
+                <th>
+                    عملیات
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @{
+                int row =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize + 1;
+            }
+
+
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+
+                    <td>
+                        @row
+                    </td>
+
+
+                    <td>
+                        @item.SalaryItem?.SalaryItemName
+                    </td>
+
+
+                    <td>
+                        @item.Description
+                    </td>
+
+
+                    <td>
+                        @item.StartDate.ToString("yyyy/MM/dd")
+                    </td>
+
+
+                    <td>
+                        @item.EndDate.ToString("yyyy/MM/dd")
+                    </td>
+
+
+                    <td class="text-center">
+                        @item.AdjustmentCount
+                    </td>
+
+
+                    <td class="text-end">
+                        @item.TotalAmount.ToString("N0")
+                    </td>
+
+
+                    <td>
+                        <div class="d-flex gap-1">
+
+                            <button type="button"
+                                    class="btn btn-sm btn-primary tooltip-btn"
+                                    onclick="editPayrollAdjustment(@item.Id)">
+
+                                <i class="fa fa-edit"></i>
+
+                                <span class="tooltip-text">
+                                    ویرایش
+                                </span>
+
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-danger tooltip-btn"
+                                    onclick="deletePayrollAdjustment(@item.Id)">
+
+                                <i class="fa fa-trash"></i>
+
+                                <span class="tooltip-text">
+                                    حذف
+                                </span>
+
+                            </button>
+
+                        </div>
+                    </td>
+
+                </tr>
+
+                row++;
+            }
+
+
+            @if (!Model.Items.Any())
+            {
+                <tr>
+
+                    <td colspan="8"
+                        class="text-center text-muted">
+
+                        رکوردی یافت نشد.
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="d-flex justify-content-between">
+
+    <span>
+        تعداد رکورد:
+        <strong>@Model.TotalRecords</strong>
+    </span>
+
+
+    <div>
+
+        @for (int i = 1;
+              i <= Model.TotalPages;
+              i++)
+        {
+            <button type="button"
+                    class="btn btn-sm
+                @(i == Model.PageNumber
+                    ? "btn-primary"
+                    : "btn-outline-primary")"
+                    onclick="goPage(@i)">
+
+                @i
+
+            </button>
+        }
+
+    </div>
+
+</div>
+
+        <script>
+            function editPayrollAdjustment(id) {
+
+    $.ajax({
+
+        url: "/PayrollAdjustment/Edit",
+
+        type: "GET",
+
+        data: {
+            id: id
+        },
+
+        success: function (data) {
+
+            $("#payrollAdjustmentModalContent")
+                .html(data);
+
+
+            $.validator.unobtrusive.parse(
+                "#payrollAdjustmentForm"
+            );
+
+                initContractDatePickers();
+            $("#payrollAdjustmentModal")
+                .modal("show");
+
+        },
+
+        error: function () {
+
+            Swal.fire({
+                icon: "error",
+                title: "خطا",
+                text: "خطا در دریافت اطلاعات تعدیل."
+            });
+
+        }
+
+    });
+}
+        </script>

@@ -1,0 +1,322 @@
+﻿@model int
+
+@{
+    var personnel = ViewBag.Personnel as Personnel;
+}
+
+<link rel="stylesheet" href="~/pages/css/table.css" />
+<link href="~/pages/css/tooltip.css" rel="stylesheet" />
+<style>
+    #personnelFamilyTable {
+        position: relative;
+        min-height: 300px;
+    }
+</style>
+
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2>وابستگان پرسنل</h2>
+
+            @if (personnel != null)
+            {
+                <div class="text-muted">
+                    پرسنل:
+                    <strong>
+                        @personnel.FirstName @personnel.LastName
+                    </strong>
+
+                    <span class="ms-2">
+                        کد:
+                        <strong>@personnel.Id</strong>
+                    </span>
+                </div>
+            }
+        </div>
+
+        <button id="btnNewFamily"
+                class="btn btn-success">
+            <i class="fa fa-plus"></i>
+            جدید
+        </button>
+
+    </div>
+
+
+    <div class="row mb-3">
+
+        <div class="col-md-4">
+            <input id="familyFirstName"
+                   class="form-control"
+                   placeholder="نام" />
+        </div>
+
+        <div class="col-md-4">
+            <input id="familyLastName"
+                   class="form-control"
+                   placeholder="نام خانوادگی" />
+        </div>
+
+        <div class="col-md-4">
+
+            <button id="btnFamilySearch"
+                    class="btn btn-primary">
+
+                <i class="fa fa-search"></i>
+                جستجو
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="personnelFamilyTable"></div>
+
+</div>
+
+
+<!-- Modal -->
+
+<div class="modal fade"
+     id="personnelFamilyModal">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="personnelFamilyModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+        const personnelId = @Model;
+
+        let currentPage = 1;
+        let pageSize = 10;
+
+        let sortColumn = "LastName";
+        let sortDirection = "asc";
+
+
+        // ============================================================
+        // LOAD
+        // ============================================================
+
+        function loadFamilyData() {
+            $.ajax({
+
+                url: "/PersonnelFamily/List",
+
+                data:
+                {
+                    personnelId: personnelId,
+
+                    firstName:
+                        $("#familyFirstName").val(),
+
+                    lastName:
+                        $("#familyLastName").val(),
+
+                    page: currentPage,
+
+                    pageSize: pageSize,
+
+                    sortColumn: sortColumn,
+
+                    sortDirection: sortDirection
+                },
+
+                success: function(data) {
+                    $("#personnelFamilyTable").html(data);
+                },
+
+                error: function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "خطا",
+                        text: "دریافت اطلاعات وابستگان انجام نشد."
+                    });
+                }
+
+            });
+        }
+
+
+        // ============================================================
+        // SORT
+        // ============================================================
+
+        function sortFamilyTable(column) {
+            if (sortColumn === column) {
+                sortDirection =
+                    sortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+            }
+            else {
+                sortColumn = column;
+                sortDirection = "asc";
+            }
+
+            currentPage = 1;
+
+            loadFamilyData();
+        }
+
+
+        // ============================================================
+        // NEW
+        // ============================================================
+
+        $("#btnNewFamily").click(function() {
+            $.get(
+                "/PersonnelFamily/Create",
+                {
+                    personnelId: personnelId
+                },
+                function(data) {
+                    $("#personnelFamilyModalContent")
+                        .html(data);
+
+                    $.validator.unobtrusive.parse(
+                        "#personnelFamilyForm"
+                    );
+
+                    $("#personnelFamilyModal")
+                        .modal("show");
+                }
+            );
+        });
+
+
+        // ============================================================
+        // EDIT
+        // ============================================================
+
+        function editPersonnelFamily(id) {
+            $.get(
+                "/PersonnelFamily/Edit/" + id,
+                function(data) {
+                    $("#personnelFamilyModalContent")
+                        .html(data);
+
+                    $.validator.unobtrusive.parse(
+                        "#personnelFamilyForm"
+                    );
+
+                    $("#personnelFamilyModal")
+                        .modal("show");
+                }
+            );
+        }
+
+
+        // ============================================================
+        // DELETE
+        // ============================================================
+
+        function deletePersonnelFamily(id) {
+            Swal.fire({
+
+                title: "حذف شود؟",
+
+                text: "آیا از حذف این وابسته مطمئن هستید؟",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف",
+
+                confirmButtonColor:
+                    "#d33",
+
+                cancelButtonColor:
+                    "#6c757d"
+
+            }).then(function(result) {
+                if (!result.isConfirmed)
+                    return;
+
+
+                $.ajax({
+
+                    url:
+                        "/PersonnelFamily/Delete/" + id,
+
+                    type:
+                        "DELETE",
+
+                    success:
+                        function() {
+                            Swal.fire({
+
+                                icon: "success",
+
+                                title:
+                                    "وابسته حذف شد",
+
+                                timer: 1200,
+
+                                showConfirmButton: false
+                            });
+
+                            loadFamilyData();
+                        },
+
+                    error:
+                        function() {
+                            Swal.fire({
+
+                                icon: "error",
+
+                                title:
+                                    "خطا در حذف"
+                            });
+                        }
+
+                });
+
+            });
+        }
+
+
+        // ============================================================
+        // SEARCH
+        // ============================================================
+
+        $("#btnFamilySearch").click(function() {
+            currentPage = 1;
+
+            loadFamilyData();
+        });
+
+
+        // ============================================================
+        // INITIAL LOAD
+        // ============================================================
+
+        $(document).ready(function() {
+            loadFamilyData();
+        });
+
+    </script>
+}

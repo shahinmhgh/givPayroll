@@ -1,0 +1,369 @@
+﻿@model List<SalaryItem>
+
+@{
+    ViewData["Title"] = "اقلام حقوق و دستمزد";
+
+    int page = ViewBag.Page;
+    int pageSize = ViewBag.PageSize;
+    int totalPages = ViewBag.TotalPages;
+    int totalCount = ViewBag.TotalCount;
+
+    string search = ViewBag.Search ?? "";
+    string sortColumn = ViewBag.SortColumn ?? "Priority";
+    string sortDirection = ViewBag.SortDirection ?? "asc";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h4>
+            اقلام حقوق و دستمزد
+        </h4>
+
+        <button type="button"
+                class="btn btn-primary"
+                onclick="openSalaryItemCreate()">
+            <i class="bi bi-plus-lg"></i>
+            قلم جدید
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-5">
+
+                    <div class="input-group">
+
+                        <input type="text"
+                               id="salaryItemSearch"
+                               class="form-control"
+                               placeholder="جستجو..."
+                               value="@search" />
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                onclick="loadSalaryItems()">
+                            جستجو
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <select id="salaryItemPageSize"
+                            class="form-select"
+                            onchange="loadSalaryItems(1)">
+
+                        <option value="10"
+                                selected="@(pageSize == 10)">
+                            10
+                        </option>
+
+                        <option value="20"
+                                selected="@(pageSize == 20)">
+                            20
+                        </option>
+
+                        <option value="50"
+                                selected="@(pageSize == 50)">
+                            50
+                        </option>
+
+                        <option value="100"
+                                selected="@(pageSize == 100)">
+                            100
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div id="salaryItemListContainer">
+
+                @await Html.PartialAsync(
+                    "_SalaryItemList",
+                    Model)
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Modal -->
+
+<div class="modal fade"
+     id="salaryItemModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <div id="salaryItemModalContent">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade"
+     id="salaryItemRuleModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content"
+             id="salaryItemRuleModalContent">
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+<script>
+
+    
+    function salaryItemRule(salaryItemId) {
+
+        $.get(
+            '/SalaryItemRule/Edit?salaryItemId=' + salaryItemId,
+            function (data) {
+
+                $("#salaryItemRuleModalContent")
+                    .html(data);
+
+                $.validator.unobtrusive.parse(
+                    "#salaryItemRuleForm"
+                );
+
+                $("#salaryItemRuleModal")
+                    .modal("show");
+            }
+        );
+
+    }
+
+    function loadSalaryItems(page = 1) {
+
+        const search =
+            $('#salaryItemSearch').val();
+
+        const pageSize =
+            $('#salaryItemPageSize').val();
+
+        $.get('@Url.Action("Index", "SalaryItem")',
+        {
+            search: search,
+            page: page,
+            pageSize: pageSize,
+            sortColumn: '@sortColumn',
+            sortDirection: '@sortDirection'
+        }, function (result) {
+
+            const html =
+                $(result)
+                    .find('#salaryItemListContainer')
+                    .html();
+
+            $('#salaryItemListContainer').html(html);
+        });
+    }
+
+
+    function openSalaryItemCreate() {
+
+        $.get('@Url.Action("Create", "SalaryItem")',
+            function (html) {
+
+                $('#salaryItemModalContent').html(html);
+
+                const modal =
+                    new bootstrap.Modal(
+                        document.getElementById('salaryItemModal')
+                    );
+
+                modal.show();
+            });
+    }
+
+
+    function openSalaryItemEdit(id) {
+
+        $.get('@Url.Action("Edit", "SalaryItem")/' + id,
+            function (html) {
+
+                $('#salaryItemModalContent').html(html);
+
+                const modal =
+                    new bootstrap.Modal(
+                        document.getElementById('salaryItemModal')
+                    );
+
+                modal.show();
+            });
+    }
+
+
+    function deleteSalaryItem(id) {
+
+        Swal.fire({
+            title: 'حذف قلم حقوق',
+            text: 'آیا از حذف این قلم اطمینان دارید؟',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بله، حذف شود',
+            cancelButtonText: 'انصراف'
+        }).then((result) => {
+
+            if (!result.isConfirmed)
+                return;
+
+            const token =
+                $('input[name="__RequestVerificationToken"]')
+                .first()
+                .val();
+
+            $.ajax({
+                url: '@Url.Action("Delete", "SalaryItem")',
+                type: 'POST',
+                data: {
+                    id: id,
+                    __RequestVerificationToken: token
+                },
+                success: function (response) {
+
+                    if (response.success) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'انجام شد',
+                            text: response.message,
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+
+                        loadSalaryItems();
+                    }
+                    else {
+
+                        Swal.fire(
+                            'خطا',
+                            response.message,
+                            'error'
+                        );
+                    }
+                }
+            });
+
+        });
+    }
+
+
+    function submitSalaryItemForm(form) {
+
+        const $form = $(form);
+
+        if (!$form.valid())
+            return false;
+
+        const submitButton =
+            $form.find('button[type="submit"]');
+
+        submitButton.prop('disabled', true);
+
+        $.ajax({
+
+            url: $form.attr('action'),
+
+            type: 'POST',
+
+            data: $form.serialize(),
+
+            success: function (response) {
+
+                if (typeof response === 'object' &&
+                    response.success) {
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            document.getElementById(
+                                'salaryItemModal'
+                            )
+                        );
+
+                    modal.hide();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'انجام شد',
+                        text: response.message,
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+
+                    loadSalaryItems();
+                }
+                else {
+
+                    $('#salaryItemModalContent')
+                        .html(response);
+
+                    $.validator.unobtrusive.parse(
+                        '#salaryItemForm'
+                    );
+                }
+            },
+
+            error: function () {
+
+                Swal.fire(
+                    'خطا',
+                    'خطایی در انجام عملیات رخ داد.',
+                    'error'
+                );
+
+                submitButton.prop('disabled', false);
+            }
+
+        });
+
+        return false;
+    }
+
+
+    $(document).on(
+        'keyup',
+        '#salaryItemSearch',
+        function (e) {
+
+            if (e.key === 'Enter') {
+                loadSalaryItems(1);
+            }
+
+        });
+
+</script>
+
+}

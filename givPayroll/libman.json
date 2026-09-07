@@ -1,0 +1,18 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "sweetalert2@11.26.25",
+      "destination": "wwwroot/lib/sweetalert2/"
+    },
+    {
+      "library": "vue@3.5.41",
+      "destination": "wwwroot/lib/vue/"
+    },
+    {
+      "library": "select2@4.1.0",
+      "destination": "wwwroot/lib/select2/"
+    }
+  ]
+}

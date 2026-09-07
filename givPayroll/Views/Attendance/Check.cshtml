@@ -1,0 +1,155 @@
+﻿@model List<AttendanceCheckViewModel>
+
+@{
+    ViewData["Title"] = "بررسی صحیح بودن کارکرد";
+}
+
+<div class="container-fluid">
+
+    <div class="card">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                بررسی صحیح بودن کارکرد پرسنل
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="get"
+                  class="row g-3 mb-4">
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        سال
+                    </label>
+
+                    <select name="year"
+                            class="form-select">
+
+                        @for (int year = 1400; year <= 1410; year++)
+                        {
+                            <option value="@year"
+                                    selected="@(ViewBag.Year == year)">
+                                @year
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        ماه
+                    </label>
+
+                    <select name="month"
+                            class="form-select">
+
+                        @for (int month = 1; month <= 12; month++)
+                        {
+                            <option value="@month"
+                                    selected="@(ViewBag.Month == month)">
+                                @month.ToString("00")
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+               @*  <div class="col-md-2 d-flex align-items-end">
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+
+                        <i class="fa fa-search"></i>
+
+                        بررسی
+
+                    </button>
+
+                </div> *@
+                <button type="button"
+                        class="btn btn-primary w-100"
+                        onclick="checkAttendance()">
+
+                    <i class="fa fa-search"></i>
+                    بررسی
+
+                </button>
+            </form>
+
+
+             <div id="attendanceResult">
+                @if (Model != null && Model.Any())
+                {
+                    <partial name="_AttendanceCheckResult" model="Model" />
+                }
+                else if (ViewBag.Searched == true)
+                {
+                    <div class="alert alert-warning">
+                        پرسنلی با حکم فعال در این ماه یافت نشد.
+                    </div>
+                }
+            </div>
+
+       
+
+        </div>
+
+    </div>
+
+   
+
+</div>
+
+<script>
+    function checkAttendance() {
+
+        const year = $('select[name="year"]').val();
+        const month = $('select[name="month"]').val();
+
+        const button = $('button[onclick="checkAttendance()"]');
+
+        button.prop('disabled', true);
+
+        button.html(
+            '<i class="fa fa-spinner fa-spin"></i> در حال بررسی...'
+        );
+
+        $.ajax({
+            url: '@Url.Action("Check", "Attendance")',
+            type: 'GET',
+            data: {
+                year: year,
+                month: month
+            },
+            success: function(result) {
+
+                $('#attendanceResult').html(result);
+            },
+            error: function(xhr) {
+
+                console.error(xhr);
+
+                $('#attendanceResult').html(`
+                        <div class="alert alert-danger">
+                            خطا در بررسی کارکرد پرسنل.
+                        </div>
+                    `);
+            },
+            complete: function() {
+
+                button.prop('disabled', false);
+
+                button.html(
+                    '<i class="fa fa-search"></i> بررسی'
+                );
+            }
+        });
+    }
+</script>

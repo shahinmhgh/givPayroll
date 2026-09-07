@@ -1,0 +1,355 @@
+﻿@using System.Globalization
+@model givPayroll.Models.PagedResult<givPayroll.Models.RuleTax>
+
+<link rel="stylesheet"
+      href="~/pages/css/table.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
+
+
+<div id="tableContainer"
+     style="border:1px solid lightgray">
+
+    <table class="table table-bordered">
+
+        <thead class="colorWhitesmoke">
+
+            <tr>
+
+                <!-- ================================================= -->
+                <!-- # -->
+                <!-- ================================================= -->
+
+                <th class="colorWhitesmoke fixed-column">
+
+                    #
+
+                </th>
+
+
+              
+
+
+                <!-- ================================================= -->
+                <!-- EFFECTIVE DATE -->
+                <!-- ================================================= -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortTable('EffectiveDate')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().EffectiveDate)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "EffectiveDate")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- ================================================= -->
+                <!-- AMOUNT -->
+                <!-- ================================================= -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortTable('Amount')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Amount)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Amount")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- ================================================= -->
+                <!-- RATE -->
+                <!-- ================================================= -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortTable('Rate')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Rate)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Rate")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                
+
+                <!-- ================================================= -->
+                <!-- OPERATIONS -->
+                <!-- ================================================= -->
+
+                <th class="colorWhitesmoke"
+                    style="width:150px">
+
+                    عملیات
+
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @{
+                int rowNumber =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize + 1;
+            }
+
+
+            @foreach (var item in Model.Items)
+            {
+
+                <tr>
+
+                    <!-- ================================================= -->
+                    <!-- ROW NUMBER -->
+                    <!-- ================================================= -->
+
+                    <td class="colorWhitesmoke fixed-column">
+
+                        @rowNumber
+
+                    </td>
+
+
+                   
+
+                    <!-- ================================================= -->
+                    <!-- EFFECTIVE DATE -->
+                    <!-- ================================================= -->
+
+                    <td>
+                        @if (item.EffectiveDate!=null)
+                        {
+                            var pc = new PersianCalendar();
+                            var date = item.EffectiveDate;
+
+                            @($"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}")
+                        }
+                    </td>
+
+
+                    <!-- ================================================= -->
+                    <!-- AMOUNT -->
+                    <!-- ================================================= -->
+
+                    <td>
+
+                        @item.Amount 
+
+                    </td>
+
+
+                    <!-- ================================================= -->
+                    <!-- RATE -->
+                    <!-- ================================================= -->
+
+                    <td>
+
+                        @item.Rate 
+
+                    </td>
+
+
+                 
+
+
+                    <!-- ================================================= -->
+                    <!-- OPERATIONS -->
+                    <!-- ================================================= -->
+
+                    <td>
+
+                        <button class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="editRuleTax(@item.Id)">
+
+                            <i class="fa fa-edit"></i>
+
+                            <span class="tooltip-text">
+                                ویرایش
+                            </span>
+
+                        </button>
+
+
+                        <button class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deleteRuleTax(@item.Id)">
+
+                            <i class="fa fa-trash"></i>
+
+                            <span class="tooltip-text">
+                                حذف
+                            </span>
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+
+                rowNumber++;
+
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- ============================================================= -->
+<!-- PAGER -->
+<!-- ============================================================= -->
+
+<div id="pagerArea"
+     class="mt-3 d-flex justify-content-between">
+
+
+    <!-- ========================================================= -->
+    <!-- PAGE SIZE -->
+    <!-- ========================================================= -->
+
+    <div>
+
+        <select asp-for="PageSize"
+                asp-items="Model.PageSizes"
+                class="form-select"
+                onchange="changePageSize(this.value)">
+        </select>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- PAGINATION -->
+    <!-- ========================================================= -->
+
+    <div>
+
+        <button class="btn btn-secondary"
+                onclick="goPage(1)">
+
+            اول
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber - 1))">
+
+            قبلی
+
+        </button>
+
+
+        <span class="mx-2">
+
+            @Model.PageNumber /
+            @Model.TotalPages
+
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber + 1))">
+
+            بعدی
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@Model.TotalPages)">
+
+            آخر
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function goPage(page) {
+
+        if (
+            page < 1 ||
+            page > @Model.TotalPages
+            ) {
+            return;
+        }
+
+
+        currentRuleTaxPage = page;
+
+        loadData();
+
+    }
+
+
+    function changePageSize(size) {
+
+        ruleTaxPageSize =
+            parseInt(size);
+
+
+        currentRuleTaxPage = 1;
+
+        loadData();
+
+    }
+
+</script>

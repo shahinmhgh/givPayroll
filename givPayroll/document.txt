@@ -1,0 +1,8 @@
+﻿dotnet core web application :
+.net 10
+codefirst
+menu notification
+identity system (razor page)
+personnel form with capabilities : (search, add/edit, delete, row column,  pagination, column sort)
+using sweetalert messagebox to beatify the messaging
+using houseglass for processing with delay like filling the page and saving data, or counting for notifications

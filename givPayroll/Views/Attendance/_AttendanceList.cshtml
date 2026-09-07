@@ -1,0 +1,272 @@
+﻿@model List<AttendanceListViewModel>
+@using System.Globalization
+@using givPayroll.ViewModels
+
+@{
+    var persianDays = new Dictionary<DayOfWeek, string>
+    {
+        { DayOfWeek.Saturday, "شنبه" },
+        { DayOfWeek.Sunday, "یکشنبه" },
+        { DayOfWeek.Monday, "دوشنبه" },
+        { DayOfWeek.Tuesday, "سه‌شنبه" },
+        { DayOfWeek.Wednesday, "چهارشنبه" },
+        { DayOfWeek.Thursday, "پنجشنبه" },
+        { DayOfWeek.Friday, "جمعه" }
+    };
+}
+<style>
+    .friday-row td {
+        background-color: #ffe4e9 !important;
+    }
+
+    .holiday-row td {
+        background-color: lightcoral !important;
+    }
+</style>
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="d-flex justify-content-between">
+
+            <strong>
+                @ViewBag.PersonnelName
+            </strong>
+
+            <span>
+                @ViewBag.Year /
+                @ViewBag.Month
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        تاریخ
+                    </th>
+
+                     <th>
+                        روز
+
+                    </th>
+                    <th>
+                        موظفی
+                    </th>
+
+                    <th>
+                        کارکرد
+                    </th>
+
+                    <th>
+                        اضافه کار
+                    </th>
+
+                    <th>
+                        تعطیل کاری
+                    </th>
+
+                    <th>
+                        تاخیر
+                    </th>
+
+                    <th>
+                        تعجیل
+                    </th>
+
+                    <th>
+                        مرخصی
+                    </th>
+
+                    <th>
+                        استعلاجی
+                    </th>
+
+                    <th>
+                        غیبت
+                    </th>
+
+                    <th>
+                        ماموریت
+                    </th>
+
+                    <th>
+                        وضعیت
+                    </th>
+
+                    <th>
+                        عملیات
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @if (Model.Any())
+                {
+                    int row = 1;
+
+                    foreach (var item in Model)
+                    {
+                         
+                        var pc = new PersianCalendar();
+
+                        var parts = item.AttendanceDate.Split('/');
+
+                        var year = int.Parse(parts[0]);
+                        var month = int.Parse(parts[1]);
+                        var day = int.Parse(parts[2]);
+
+                        var gregorianDate = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
+                        var tday = gregorianDate.DayOfWeek;
+                       var isHoliday = item.Holiday;
+                        var mark = isHoliday ? "*" : "";
+                        var markHoliday = item.HolidayDescriptrion;
+
+                        @* <tr class="@(@tday == DayOfWeek.Friday ? "friday-row" : "")"> *@
+                        <tr class="@(item.Holiday
+                                ? "holiday-row"
+                                : tday == DayOfWeek.Friday
+                                    ? "friday-row"
+                                    : "")">
+                            <td>
+                                @if (@mark=="*")
+                                {
+                                    <label style="background-color:white;border-radius:5px; padding-right:5px;width:20px;height:20px;border:1px solid black;color:black" title="@markHoliday">
+                                        @mark
+                                    </label>
+                                }
+                              
+                                @row  
+                            </td>
+
+                            <td>
+                                @item.AttendanceDate
+                            </td>
+
+                             <td>
+                               
+
+                                @persianDays[@tday]
+                            </td>
+
+                            <td>
+                                @item.WorkingExpectedMinute
+                            </td>
+
+                            <td>
+                                @item.WorkingMinute
+                            </td>
+
+                            <td>
+                                @item.ExtraMinute
+                            </td>
+
+                            <td>
+                                @item.HolidayMinute
+                            </td>
+
+                            <td>
+                                @item.DelayMinute
+                            </td>
+
+                            <td>
+                                @item.EarlyArrivalMinute
+                            </td>
+
+                            <td>
+                                @item.LeaveNormalMinute
+                            </td>
+
+                            <td>
+                                @item.LeaveSickMinute
+                            </td>
+
+                            <td>
+                                @item.AbsenceMinute
+                            </td>
+
+                            <td>
+                                @item.MissionMinute
+                            </td>
+
+                            <td>
+
+                                @if (item.HasWorked)
+                                {
+                                    <span class="badge bg-success">
+                                        کارکرده
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        بدون کارکرد
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                <button class="btn btn-sm btn-warning"
+                                        onclick="editAttendance(@item.Id)">
+
+                                    <i class="fa fa-edit"></i>
+
+                                </button>
+
+
+                                <button class="btn btn-sm btn-danger"
+                                        onclick="deleteAttendance(@item.Id)">
+
+                                    <i class="fa fa-trash"></i>
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                        row++;
+                    }
+                }
+                else
+                {
+                    <tr>
+
+                        <td colspan="14"
+                            class="text-center text-muted p-4">
+
+                            برای این پرسنل و ماه
+                            اطلاعات حضور و غیاب ثبت نشده است.
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

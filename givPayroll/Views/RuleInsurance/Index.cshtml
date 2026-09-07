@@ -1,0 +1,511 @@
+﻿<style>
+    #ruleInsuranceTable {
+        position: relative;
+        min-height: 300px;
+    }
+</style>
+
+@{
+    ViewData["Title"] = "قوانین بیمه";
+}
+
+<h2>قوانین بیمه</h2>
+
+
+<div class="row mb-3">
+
+    <!-- Search -->
+
+    <div class="col">
+
+        <input id="search"
+               class="form-control"
+               placeholder="گروه بیمه یا تاریخ اجرا">
+
+    </div>
+
+
+    <!-- Search -->
+
+    <div class="col">
+
+        <button id="btnSearch"
+                class="btn btn-primary">
+
+            جستجو
+
+        </button>
+
+
+        <button id="btnNew"
+                class="btn btn-success">
+
+            جدید
+
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- TABLE -->
+<!-- ========================================================= -->
+
+<div id="ruleInsuranceTable"></div>
+
+
+
+<!-- ========================================================= -->
+<!-- MODAL -->
+<!-- ========================================================= -->
+
+<div class="modal fade"
+     id="ruleInsuranceModal">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="modalContent">
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+        // =========================================================
+        // VARIABLES
+        // =========================================================
+
+        let currentPage = 1;
+
+        let pageSize = 10;
+
+        let sortColumn = "Id";
+
+        let sortDirection = "desc";
+
+
+        // =========================================================
+        // LOAD DATA
+        // =========================================================
+
+        function loadData() {
+
+            $("#tableLoading").show();
+
+
+            $.ajax({
+
+                url: "/RuleInsurance/List",
+
+                data: {
+
+                    search:
+                        $("#search").val(),
+
+                    page:
+                        currentPage,
+
+                    pageSize:
+                        pageSize,
+
+                    sortColumn:
+                        sortColumn,
+
+                    sortDirection:
+                        sortDirection
+                },
+
+
+                success: function (data) {
+
+                    $("#ruleInsuranceTable")
+                        .html(data);
+
+                },
+
+
+                error: function () {
+
+                    Swal.fire({
+
+                        icon: "error",
+
+                        title: "خطا",
+
+                        text:
+                            "دریافت اطلاعات قوانین بیمه انجام نشد."
+
+                    });
+
+                },
+
+
+                complete: function () {
+
+                    $("#tableLoading").hide();
+
+                }
+
+            });
+
+        }
+
+
+        // =========================================================
+        // SORT
+        // =========================================================
+
+        function sortTable(column) {
+
+            if (sortColumn === column) {
+
+                sortDirection =
+                    sortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+
+            }
+            else {
+
+                sortColumn = column;
+
+                sortDirection = "asc";
+
+            }
+
+
+            currentPage = 1;
+
+            loadData();
+
+        }
+
+
+        // =========================================================
+        // DOCUMENT READY
+        // =========================================================
+
+        $(document).ready(function () {
+
+
+            // Initial load
+
+            loadData();
+
+
+            // Search
+
+            $("#btnSearch").click(function () {
+
+                currentPage = 1;
+
+                loadData();
+
+            });
+
+
+            // New
+
+            $("#btnNew").click(function () {
+
+
+                $.get(
+                    '/RuleInsurance/Create',
+
+                    function (data) {
+
+                        $("#modalContent")
+                            .html(data);
+
+
+                        $.validator.unobtrusive.parse(
+                            "#ruleInsuranceForm"
+                        );
+
+
+                        $("#ruleInsuranceModal")
+                            .modal('show');
+
+                    }
+                );
+
+            });
+
+        });
+
+
+        // =========================================================
+        // EDIT
+        // =========================================================
+
+        function editRuleInsurance(id) {
+
+            $.get(
+                '/RuleInsurance/Edit/' + id,
+
+                function (data) {
+
+                    $("#modalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#ruleInsuranceForm"
+                    );
+
+
+                    $("#ruleInsuranceModal")
+                        .modal('show');
+
+                }
+            );
+
+        }
+
+
+        // =========================================================
+        // DELETE
+        // =========================================================
+
+        function deleteRuleInsurance(id) {
+
+            Swal.fire({
+
+                title: 'حذف شود؟',
+
+                text:
+                    'آیا از حذف این قانون بیمه مطمئن هستید؟',
+
+                icon: 'warning',
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    'بله، حذف شود',
+
+                cancelButtonText:
+                    'انصراف',
+
+                confirmButtonColor:
+                    '#d33',
+
+                cancelButtonColor:
+                    '#6c757d'
+
+            }).then((result) => {
+
+
+                if (result.isConfirmed) {
+
+
+                    $.ajax({
+
+                        url:
+                            '/RuleInsurance/Delete/' + id,
+
+                        type:
+                            'POST',
+
+
+                        headers: {
+
+                            'RequestVerificationToken':
+                                $('input[name="__RequestVerificationToken"]')
+                                    .first()
+                                    .val()
+
+                        },
+
+
+                        success: function (response) {
+
+
+                            if (response.success) {
+
+
+                                Swal.fire({
+
+                                    icon: 'success',
+
+                                    title:
+                                        response.message,
+
+                                    timer: 1200,
+
+                                    showConfirmButton:
+                                        false
+
+                                });
+
+
+                                loadData();
+
+                            }
+                            else {
+
+                                Swal.fire({
+
+                                    icon: 'error',
+
+                                    title:
+                                        response.message
+
+                                });
+
+                            }
+
+                        },
+
+
+                        error: function () {
+
+                            Swal.fire({
+
+                                icon: 'error',
+
+                                title:
+                                    'حذف انجام نشد',
+
+                                text:
+                                    'خطایی در حذف قانون بیمه رخ داد.'
+
+                            });
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        }
+
+
+        // =========================================================
+        // ENTER = SEARCH
+        // =========================================================
+
+        $("#search").on(
+            "keypress",
+
+            function (e) {
+
+                if (e.which === 13) {
+
+                    currentPage = 1;
+
+                    loadData();
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+
+    <!-- ========================================================= -->
+    <!-- DRAGGABLE MODAL -->
+    <!-- ========================================================= -->
+
+    <script>
+
+        $(document).on(
+            "mousedown",
+            ".modal-drag-handle",
+
+            function (e) {
+
+
+                let dialog =
+                    $(this)
+                        .closest(".modal-dialog");
+
+
+                let startX =
+                    e.clientX;
+
+                let startY =
+                    e.clientY;
+
+
+                let currentTransform =
+                    dialog.data("transform") ||
+                    {
+                        x: 0,
+                        y: 0
+                    };
+
+
+                $(document).on(
+                    "mousemove.modalDrag",
+
+                    function (e) {
+
+
+                        let x =
+                            currentTransform.x +
+                            (e.clientX - startX);
+
+
+                        let y =
+                            currentTransform.y +
+                            (e.clientY - startY);
+
+
+                        dialog.css({
+
+                            transform:
+                                `translate(${x}px, ${y}px)`
+
+                        });
+
+
+                        dialog.data(
+                            "transform",
+
+                            {
+                                x: x,
+                                y: y
+                            }
+                        );
+
+                    }
+                );
+
+
+                $(document).on(
+                    "mouseup.modalDrag",
+
+                    function () {
+
+                        $(document)
+                            .off("mousemove.modalDrag")
+                            .off("mouseup.modalDrag");
+
+                    }
+                );
+
+            }
+        );
+
+    </script>
+
+}

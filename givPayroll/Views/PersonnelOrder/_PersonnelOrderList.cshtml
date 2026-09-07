@@ -1,0 +1,466 @@
+﻿@using System.Globalization
+@model PagedResult<PersonnelOrder>
+
+<link rel="stylesheet"
+      href="~/pages/css/table.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
+
+
+<div id="tableContainer"
+     style="border:1px solid lightgray">
+
+
+    <table class="table table-bordered">
+
+
+        <!-- =====================================================
+             HEADER
+             ===================================================== -->
+
+        <thead class="colorWhitesmoke">
+
+            <tr>
+
+                <th class="colorWhitesmoke fixed-column">
+                    #
+                </th>
+
+
+                <!-- ID -->
+
+               @*  <th class="colorWhitesmoke"
+                    onclick="sortTable('Id')"
+                    style="cursor:pointer">
+
+                    شناسه
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Id")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th> *@
+
+
+                <!-- NO -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortTable('No')"
+                    style="cursor:pointer">
+
+                    شماره حکم
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "No")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- PERSONNEL -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortTable('Personnel')"
+                    style="cursor:pointer">
+
+                    پرسنل
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Personnel")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- CONTRACT -->
+
+                <th class="colorWhitesmoke">
+
+                    قرارداد
+
+                </th>
+
+
+                <!-- INSURANCE -->
+
+                <th class="colorWhitesmoke">
+
+                    گروه بیمه
+
+                </th>
+
+
+                <!-- DATE -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortTable('Date')"
+                    style="cursor:pointer">
+
+                    تاریخ
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Date")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- ACTIVE -->
+
+                <th class="colorWhitesmoke">
+
+                    وضعیت
+
+                </th>
+
+
+                <!-- OPERATIONS -->
+
+                <th class="colorWhitesmoke"
+                    style="width:150px">
+
+                    عملیات
+
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <!-- =====================================================
+             BODY
+             ===================================================== -->
+
+        <tbody>
+
+            @{
+                int rowNumber =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize
+                    + 1;
+            }
+
+
+            @foreach (var item in Model.Items)
+            {
+
+                <tr>
+
+
+                    <!-- ROW -->
+
+                    <td class="colorWhitesmoke fixed-column">
+
+                        @rowNumber
+
+                    </td>
+
+
+                    <!-- ID -->
+
+                   @*  <td>
+
+                        @item.Id
+
+                    </td> *@
+
+
+                    <!-- NO -->
+
+                    <td>
+
+                        @item.No
+
+                    </td>
+
+
+                    <!-- PERSONNEL -->
+
+                    <td>
+
+                        @item.Personnel?.FirstName
+                        @item.Personnel?.LastName
+
+                    </td>
+
+
+                    <!-- CONTRACT -->
+
+                    <td>
+
+                        @item.ContractId
+
+                    </td>
+
+
+                    <!-- INSURANCE -->
+
+                    <td>
+                        @item.RuleInsuranceGroup.GroupName
+                    </td>
+
+
+                    <!-- DATE -->
+
+                    <td>
+
+                        @{
+                            var pc =
+                                new PersianCalendar();
+
+                            var date =
+                                item.IssueDate;
+
+                            @($"{pc.GetYear(date):0000}/" +
+                              $"{pc.GetMonth(date):00}/" +
+                              $"{pc.GetDayOfMonth(date):00}")
+                        }
+
+                    </td>
+
+
+                    <!-- ACTIVE -->
+
+                    <td>
+
+                        @if (item.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                فعال
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                غیرفعال
+                            </span>
+                        }
+
+                    </td>
+
+
+                    <!-- OPERATIONS -->
+
+                    <td>
+
+
+                        <!-- EDIT -->
+
+                        <button class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="editPersonnelOrder(@item.Id)">
+
+                            <i class="fa fa-edit"></i>
+
+                            <span class="tooltip-text">
+                                ویرایش
+                            </span>
+
+                        </button>
+
+
+                        <!-- DELETE -->
+
+                        <button class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deletePersonnelOrder(@item.Id)">
+
+                            <i class="fa fa-trash"></i>
+
+                            <span class="tooltip-text">
+                                حذف
+                            </span>
+
+                        </button>
+
+
+                  
+
+
+                    </td>
+
+                </tr>
+
+
+                rowNumber++;
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- =============================================================
+     PAGER
+     ============================================================= -->
+
+<div id="pagerArea"
+     class="mt-3 d-flex justify-content-between">
+
+
+    <!-- PAGE SIZE -->
+
+    <div>
+
+        <select class="form-select"
+                onchange="changePageSize(this.value)">
+
+            @foreach (var size in Model.PageSizes)
+            {
+                <option value="@size.Value"
+                        selected="@(size.Value == Model.PageSize.ToString())">
+
+                    @size.Text
+
+                </option>
+            }
+
+        </select>
+
+    </div>
+
+
+    <!-- PAGINATION -->
+
+    <div>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(1)"
+            @(Model.PageNumber <= 1 ? "disabled" : "")>
+
+            اول
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber - 1))"
+            @(Model.PageNumber <= 1 ? "disabled" : "")>
+
+            قبلی
+
+        </button>
+
+
+        <span class="mx-2">
+
+            @Model.PageNumber
+            /
+            @Model.TotalPages
+
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@(Model.PageNumber + 1))"
+            @(Model.PageNumber >= Model.TotalPages
+                ? "disabled"
+                : "")>
+
+            بعدی
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goPage(@Model.TotalPages)"
+            @(Model.PageNumber >= Model.TotalPages
+                ? "disabled"
+                : "")>
+
+            آخر
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+    // ============================================================
+    // PAGINATION
+    // ============================================================
+
+    function goPage(page) {
+
+        if (page < 1 ||
+            page > @Model.TotalPages) {
+
+            return;
+        }
+
+
+        currentPage = page;
+
+        loadData();
+    }
+
+
+    // ============================================================
+    // PAGE SIZE
+    // ============================================================
+
+    function changePageSize(size) {
+
+        pageSize =
+            parseInt(size);
+
+
+        currentPage = 1;
+
+        loadData();
+    }
+
+
+</script>

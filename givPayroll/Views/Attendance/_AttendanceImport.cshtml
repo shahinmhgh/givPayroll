@@ -1,0 +1,223 @@
+﻿@model AttendanceImportViewModel
+
+
+<link rel="stylesheet"
+      href="~/pages/css/modal.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/validation.css" />
+
+
+<form id="attendanceImportForm"  enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+            ورود اطلاعات حضور و غیاب از Excel
+        </h5>
+
+    </div>
+
+
+    <div id="importLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"
+             alt="در حال ورود اطلاعات..." />
+
+    </div>
+
+
+    <div class="modal-body">
+
+        <div class="row">
+
+
+            <!-- Year -->
+
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+                    سال
+                </label>
+
+                <select asp-for="Year"
+                        asp-items="Model.Years"
+                        class="form-select">
+                </select>
+
+            </div>
+
+
+            <!-- Month -->
+
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+                    ماه
+                </label>
+
+                <select asp-for="Month"
+                        asp-items="Model.Months"
+                        class="form-select">
+                </select>
+
+            </div>
+
+
+            <!-- File -->
+
+            <div class="col-md-12 mb-3">
+
+                <label asp-for="File"
+                       class="form-label">
+
+                    فایل Excel
+
+                </label>
+
+
+                <input asp-for="File"
+                       type="file"
+                       accept=".xlsx"
+                       class="form-control" />
+
+
+                <span asp-validation-for="File"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Excel structure -->
+
+            <div class="col-md-12">
+
+                <div class="alert alert-info">
+
+                    <strong>
+                        ساختار فایل Excel
+                    </strong>
+
+                    <br />
+
+                    ترتیب ستون‌ها باید به شکل زیر باشد:
+
+                    <br /><br />
+
+                    <code>
+                        AttendanceDate |
+                        PersonnelId |
+                        WorkingExpectedMinute |
+                        WorkingMinute |
+                        ExtraMinute |
+                        HolidayMinute |
+                        DelayMinute |
+                        EarlyArrivalMinute |
+                        LeaveNormalMinute |
+                        LeaveWithoutSalaryMinute |
+                        LeaveSickMinute |
+                        AbsenceMinute |
+                        MissionMinute |
+                        Status |
+                        HasWorked
+                    </code>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button type="button"
+                id="btnImport"
+                class="btn btn-success"
+                onclick="importAttendance()">
+
+            <i class="fa fa-file-excel"></i>
+
+            ورود اطلاعات
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    function importAttendance() {
+        alert('311');
+        let form =
+            document.getElementById(
+                "attendanceImportForm"
+            );
+            alert('1');
+        let formData =new FormData(form);
+        alert('2');
+        $("#btnImport").prop("disabled", true);
+        $("#importLoading").show();
+        alert('3');
+        $.ajax({
+            url:"/Attendance/Import",
+            type:"POST",
+            data:formData,
+            processData:false,
+            contentType:false,
+            success:
+                function(result) {
+                    if (result.success) {
+                        $("#attendanceModal").modal("hide");
+                        Swal.fire({
+                            icon: "success",
+                            title: "ورود اطلاعات انجام شد",
+                            text:result.count +" رکورد جدید ثبت شد.",
+                            timer: 1800,
+                            showConfirmButton:false
+                        });
+                        loadAttendance();
+                    }
+                    else {
+                        Swal.fire({
+                            icon: "error",
+                            title:"ورود اطلاعات انجام نشد",
+                            text:result.message
+                        });
+                    }
+                },
+            error:
+                function(xhr) {
+                    console.log(xhr.responseText);
+                    Swal.fire({
+                        icon: "error",
+                        title:"خطا در ورود Excel"
+                    });
+                },
+            complete:
+                function() {
+                    $("#importLoading").hide();
+                    $("#btnImport").prop("disabled", false);
+                }
+        });
+
+    }
+
+</script>

@@ -1,0 +1,277 @@
+﻿@model Parameter
+
+<link rel="stylesheet" href="~/pages/css/modal.css" />
+<link rel="stylesheet" href="~/pages/css/validation.css" />
+
+
+<form id="parameterForm" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden"
+           name="Id"
+           value="@Model.Id" />
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+            @(Model.Id == 0
+                ? "پارامتر جدید"
+                : "ویرایش پارامتر")
+        </h5>
+
+    </div>
+
+
+    <div id="saveLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"
+             alt="ذخیره ..." />
+
+    </div>
+
+
+    <div class="row col-md-12">
+
+        <div class="col-md-6">
+
+            <div class="modal-body position-relative">
+
+                <!-- Subject -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(m => m.Subject)
+                    </label>
+
+                    <input asp-for="Subject"
+                           class="form-control" />
+
+                    <span asp-validation-for="Subject"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- OptionKey -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(m => m.OptionKey)
+                    </label>
+
+                    <input asp-for="OptionKey"
+                           class="form-control" />
+
+                    <span asp-validation-for="OptionKey"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- OptionName -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(m => m.OptionName)
+                    </label>
+
+                    <input asp-for="OptionName"
+                           class="form-control" />
+
+                    <span asp-validation-for="OptionName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- OptionValue -->
+
+                <div class="mb-3">
+
+                    <label>
+                        @Html.DisplayNameFor(m => m.OptionValue)
+                    </label>
+
+                    <input asp-for="OptionValue"
+                           class="form-control" />
+
+                    <span asp-validation-for="OptionValue"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+
+            <div class="modal-body">
+
+                <div class="alert alert-info">
+
+                    <strong>راهنما</strong>
+
+                    <br />
+
+                    موضوع، کلید و نام گزینه را وارد کنید.
+
+                    <br />
+
+                    مقدار گزینه در قسمت
+                    <strong>مقدار</strong>
+                    ثبت می‌شود.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button id="btnSave"
+                type="button"
+                class="btn btn-primary"
+                onclick="saveParameter()">
+
+            ثبت
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    function saveParameter() {
+
+        var form = $("#parameterForm");
+
+
+        console.log(
+            "Valid:",
+            form.valid()
+        );
+
+
+        if (!form.valid()) {
+            return false;
+        }
+
+
+        $("#btnSave")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> Saving...'
+            );
+
+
+        $("#saveLoading").show();
+
+
+        let id = $("[name=Id]").val();
+
+
+        let url = id == 0
+            ? "/Parameter/Create"
+            : "/Parameter/Edit";
+
+
+        $.ajax({
+
+            url: url,
+
+            type: "POST",
+
+            data: form.serialize(),
+
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#parameterModal")
+                        .modal("hide");
+
+
+                    loadParameterData();
+
+
+                    Swal.fire({
+
+                        icon: "success",
+
+                        title:
+                            "ثبت با موفقیت انجام شد",
+
+                        timer: 1200,
+
+                        showConfirmButton: false
+
+                    });
+                }
+
+            },
+
+
+            error: function(xhr) {
+
+                console.log(xhr.responseText);
+
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "ثبت انجام نشد",
+
+                    text:
+                        "خطایی در ذخیره اطلاعات رخ داد."
+
+                });
+
+            },
+
+
+            complete: function() {
+
+                $("#saveLoading").hide();
+
+
+                $("#btnSave")
+                    .prop("disabled", false)
+                    .html("ثبت");
+
+            }
+
+        });
+
+    }
+
+</script>

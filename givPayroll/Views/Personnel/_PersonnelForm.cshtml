@@ -1,0 +1,252 @@
+﻿@model Personnel
+
+<link rel="stylesheet" href="~/pages/css/modal.css" />
+<link rel="stylesheet" href="~/pages/css/validation.css" />
+
+
+ 
+<form id="personnelForm" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden"
+           name="Id"
+           value="@Model.Id" />
+
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+            @(Model.Id == 0 ? "پرسنل جدید" : "ویرایش پرسنل")
+        </h5>
+
+    </div>
+    <div id="saveLoading" class="modal-loading" style="display:none;">
+        <img src="~/images/hourglass.gif" alt="ذخیره ..." />
+    </div>
+
+
+    <div class="row col-md-12">
+        <div class="col-md-6">
+            <div class="modal-body position-relative">
+
+                <div class="mb-3">
+                    <label>@Html.DisplayNameFor(m => m.FirstName)</label>
+                    <input asp-for="FirstName" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label>@Html.DisplayNameFor(m => m.LastName)</label>
+                    <input asp-for="LastName" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label> @Html.DisplayNameFor(m => m.MaritalStatusId) </label>
+                    <select asp-for="MaritalStatusId" asp-items="ViewBag.MaritalStatus" class="form-select">
+                        <option value=""> -- وضعیت تاهل را انتخاب کنید -- </option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label> @Html.DisplayNameFor(m => m.EducationID) </label>
+                    <select asp-for="EducationID" asp-items="ViewBag.Education" class="form-select">
+                        <option value=""> -- تحصیلات را انتخاب کنید -- </option>
+                    </select>
+                </div>
+                @*  <div class="mb-3">
+
+                    <input asp-for="ContractFinished"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label asp-for="ContractFinished"
+                           class="form-check-label">
+                    </label>
+
+                </div> *@
+
+                
+
+                <div id="BirthDateApp">
+                    <label class="form-label">
+                        تاریخ تولد
+                    </label>
+                    <date-picker v-model="persianDate"
+                                 format="jYYYY/jMM/jDD"
+                                 display-format="jYYYY/jMM/jDD"
+                                 color="#0d6efd"
+                                 :editable="true"
+                                 placeholder="تاریخ تولد">
+                    </date-picker>
+
+                    <input type="hidden"
+                           name="BirthDate"
+                           :value="gregorianDate">
+
+                </div>
+
+
+
+                
+            </div>
+        </div>
+        <div class="col-md-6">
+        </div>
+    </div>
+    <div class="modal-footer">
+
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+            بستن
+        </button>
+
+        <button id="btnSave" type="button"
+                class="btn btn-primary"
+                onclick="savePersonnel()">
+            ثبت
+        </button>
+
+
+    </div>
+
+   
+</form>
+
+
+
+<script>
+    var personnelDatePicker = null;
+
+    function initPersonnelDatePicker(initialGregorianDate, elmnt) {
+
+        const element = $(elmnt); // document.getElementById(elmnt);
+
+        if (!element) {
+            return;
+        }
+
+        // Destroy previous Vue instance if the modal was loaded again
+        if (personnelDatePicker) {
+            personnelDatePicker.$destroy();
+            personnelDatePicker = null;
+        }
+
+        let initialPersianDate = "";
+
+        if (initialGregorianDate) {
+            initialPersianDate =
+                moment(initialGregorianDate, "M/D/YYYY h:mm:ss A")
+                    .format("jYYYY/jMM/jDD");
+        }
+
+        personnelDatePicker = new Vue({
+
+            el: elmnt,
+
+            data: {
+                persianDate: initialPersianDate
+            },
+
+            components: {
+                DatePicker: VuePersianDatetimePicker
+            },
+
+            computed: {
+
+                gregorianDate() {
+
+                    if (!this.persianDate) {
+                        return "";
+                    }
+
+                    return moment(
+                        this.persianDate,
+                        "jYYYY/jMM/jDD",
+                        true
+                    ).format("YYYY-MM-DD");
+                }
+
+            }
+
+        });
+    }
+
+
+    $(document).ready(function() {
+         
+        var BirthDate = '@Model.BirthDate';
+        
+        initPersonnelDatePicker(BirthDate, "#BirthDateApp")
+
+    });
+
+    function savePersonnel() {
+        var form = $("#personnelForm");
+
+        console.log("Valid:", form.valid());
+
+        if (!form.valid()) {
+            return false;   // IMPORTANT: do not continue
+        }
+
+        $("#btnSave")
+            .prop("disabled", true)
+            .html('<img src="/images/hourglass.gif" style="width:20px;height:20px;"> Saving...');
+
+        let id = $("[name=Id]").val();
+
+        let url = id == 0 ?
+            '/Personnel/Create' :
+            '/Personnel/Edit';
+
+        $.ajax({
+
+            url: url,
+            type: "POST",
+            data: form.serialize(),
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#personnelModal").modal("hide");
+
+                    loadData();
+
+                    Swal.fire({
+                        icon: "success",
+                        title: result.message,
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                }
+            },
+
+            error: function() {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "ثبت انجام نشد"
+                });
+
+            },
+
+            complete: function() {
+
+                $("#saveLoading").hide();
+                // $("#btnSave").prop("disabled", false);
+
+                $("#btnSave")
+                    .prop("disabled", false)
+                    .html("Save");
+            }
+
+        });
+
+
+
+    }
+
+
+</script>

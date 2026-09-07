@@ -1,0 +1,110 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+
+/*===========================================================*/
+.field-validation-error {
+    display: none;
+}
+
+.input-validation-error {
+    border: 2px solid red !important;
+    background-color: #fff5f5;
+}
+/*===========================================================*/
+/* submenu hover color */
+.navbar-nav .nav-link {
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 5px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: white !important;
+        background-color: #0d6efd;
+    }
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #0d6efd; /* your custom color */
+    color: white;
+}
+/*===========================================================*/
+/* Open Bootstrap dropdown on hover */
+.navbar .dropdown:hover > .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
+
+.navbar .dropdown > .dropdown-toggle:active {
+    pointer-events: none;
+}
+/*===========================================================*/
+/* Badge hide if zero */
+#contractBadge {
+    font-size: 0.75rem;
+}
+/*===========================================================*/
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+    .loading-overlay img {
+        width: 204px;
+        height: 153px;
+    }
+/*===========================================================*/
+@font-face {
+    font-family: Shabnam;
+    src: url('/fonts/Shabnam-FD.eot');
+    src: url('/fonts/Shabnam-FD.eot?#iefix') format('embedded-opentype'), url('/fonts/Shabnam-FD.woff') format('woff'), url('/fonts/Shabnam-FD.ttf') format('truetype');
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'Yekan';
+    src: url( 'Yekan.eot' );
+    src: url( '/fonts/Yekan.eot?#iefix' ) format( 'embedded-opentype' ), url( '/fonts/Yekan.woff2' ) format( 'woff2' ), url( '/fonts/Yekan.woff' ) format( 'woff' ), url( '/fonts/Yekan.ttf' ) format( 'truetype' ), url( '/fonts/Yekan.svg#Yekan' ) format( 'svg' );
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+    font-family: Shabnam;
+    direction: rtl;
+    text-align: right;
+}
+/*===========================================================*/

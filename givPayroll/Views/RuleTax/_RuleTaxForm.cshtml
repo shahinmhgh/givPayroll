@@ -1,0 +1,492 @@
+﻿@model givPayroll.Models.RuleTax
+
+<link rel="stylesheet"
+      href="~/pages/css/modal.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/validation.css" />
+
+
+<form id="ruleTaxForm"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+
+    <input type="hidden"
+           asp-for="Id" />
+
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div class="modal-header modal-drag-handle">
+
+        <h5>
+
+            @(Model.Id == 0
+                ? "قانون مالیات جدید"
+                : "ویرایش قانون مالیات")
+
+        </h5>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- LOADING -->
+    <!-- ========================================================= -->
+
+    <div id="saveLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"
+             alt="ذخیره ..." />
+
+    </div>
+
+
+    <div class="row">
+
+        <!-- ===================================================== -->
+        <!-- LEFT -->
+        <!-- ===================================================== -->
+
+        <div class="col-md-6">
+
+            <div class="modal-body position-relative">
+
+
+                <!-- ================================================= -->
+                <!-- EFFECTIVE DATE -->
+                <!-- ================================================= -->
+
+                <div id="RuleTaxDateApp"
+                     class="mb-3">
+
+                    <label class="form-label">
+                        تاریخ اجرا
+                    </label>
+
+
+                    <date-picker v-model="persianDate"
+                                 format="jYYYY/jMM/jDD"
+                                 display-format="jYYYY/jMM/jDD"
+                                 color="#0d6efd"
+                                 :editable="true"
+                                 placeholder="تاریخ اجرا">
+
+                    </date-picker>
+
+
+                    <input type="hidden"
+                           name="EffectiveDate"
+                           :value="gregorianDate">
+
+
+                    <span class="text-danger"
+                          id="effectiveDateValidation">
+                    </span>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- AMOUNT -->
+                <!-- ================================================= -->
+
+                <div class="mb-3">
+
+                    <label asp-for="Amount"
+                           class="form-label">
+                    </label>
+
+
+                    <input asp-for="Amount"
+                           class="form-control"
+                           type="number"
+                           step="0.001">
+
+
+                    <span asp-validation-for="Amount"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- RATE -->
+                <!-- ================================================= -->
+
+                <div class="mb-3">
+
+                    <label asp-for="Rate"
+                           class="form-label">
+                    </label>
+
+
+                    <input asp-for="Rate"
+                           class="form-control"
+                           type="number"
+                           step="0.01">
+
+
+                    <span asp-validation-for="Rate"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- RIGHT -->
+        <!-- ===================================================== -->
+
+        @* <div class="col-md-6">
+
+            <div class="modal-body">
+
+                @if (Model.Id != 0)
+                {
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            تاریخ ایجاد
+                        </label>
+
+
+                        <input type="text"
+                               class="form-control"
+                               value="@Model.DateCreated.ToString("yyyy/MM/dd HH:mm")"
+                               readonly>
+
+                    </div>
+
+                }
+
+            </div>
+
+        </div> *@
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- FOOTER -->
+    <!-- ========================================================= -->
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button id="btnSaveRuleTax"
+                type="button"
+                class="btn btn-primary"
+                onclick="saveRuleTax()">
+
+            ثبت
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    var ruleTaxDatePicker = null;
+
+
+    // =============================================================
+    // PERSIAN DATE PICKER
+    // =============================================================
+
+    function initRuleTaxDatePicker(
+        initialGregorianDate) {
+
+
+        const element =
+            "#RuleTaxDateApp";
+
+
+        // ---------------------------------------------------------
+        // Destroy previous Vue instance
+        // ---------------------------------------------------------
+
+        if (ruleTaxDatePicker) {
+
+            ruleTaxDatePicker.$destroy();
+
+            ruleTaxDatePicker = null;
+
+        }
+
+
+        // ---------------------------------------------------------
+        // Convert Gregorian -> Persian
+        // ---------------------------------------------------------
+
+        let initialPersianDate = "";
+
+
+        if (initialGregorianDate) {
+
+            initialPersianDate =
+                moment(
+                    initialGregorianDate
+                ).format(
+                    "jYYYY/jMM/jDD"
+                );
+
+        }
+
+
+        // ---------------------------------------------------------
+        // Vue
+        // ---------------------------------------------------------
+
+        ruleTaxDatePicker =
+            new Vue({
+
+                el: element,
+
+
+                data: {
+
+                    persianDate:
+                        initialPersianDate
+
+                },
+
+
+                components: {
+
+                    DatePicker:
+                        VuePersianDatetimePicker
+
+                },
+
+
+                computed: {
+
+                    gregorianDate() {
+
+                        if (!this.persianDate) {
+
+                            return "";
+
+                        }
+
+
+                        return moment(
+                            this.persianDate,
+                            "jYYYY/jMM/jDD",
+                            true
+                        ).format(
+                            "YYYY-MM-DD"
+                        );
+
+                    }
+
+                }
+
+            });
+
+    }
+
+
+    // =============================================================
+    // INITIALIZE
+    // =============================================================
+
+    $(document).ready(function() {
+
+        var effectiveDate =
+            '@Model.EffectiveDate.ToString("yyyy-MM-ddTHH:mm:ss")';
+
+
+        initRuleTaxDatePicker(
+            effectiveDate
+        );
+
+    });
+
+
+    // =============================================================
+    // SAVE
+    // =============================================================
+
+    function saveRuleTax() {
+
+        var form =
+            $("#ruleTaxForm");
+
+        console.log("Valid:", form.valid());
+        // ---------------------------------------------------------
+        // Validation
+        // ---------------------------------------------------------
+
+        if (!form.valid()) {
+
+            return false;
+
+        }
+
+
+        // ---------------------------------------------------------
+        // Date validation
+        // ---------------------------------------------------------
+
+        var effectiveDate =
+            $("input[name='EffectiveDate']")
+                .val();
+
+
+        if (!effectiveDate) {
+
+            Swal.fire({
+
+                icon: "warning",
+
+                title:
+                    "تاریخ اجرا را وارد کنید"
+
+            });
+
+            return false;
+
+        }
+
+
+        // ---------------------------------------------------------
+        // Disable button
+        // ---------------------------------------------------------
+
+        $("#btnSaveRuleTax")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> ' +
+                'در حال ذخیره...'
+            );
+
+
+        // ---------------------------------------------------------
+        // ID
+        // ---------------------------------------------------------
+
+        var id =
+            $("[name='Id']", form)
+                .val();
+
+
+        // ---------------------------------------------------------
+        // URL
+        // ---------------------------------------------------------
+
+        var url =
+            id == "0"
+                ? "/RuleTax/Create"
+                : "/RuleTax/Edit";
+
+
+        // ---------------------------------------------------------
+        // AJAX
+        // ---------------------------------------------------------
+
+        $.ajax({
+
+            url: url,
+
+            type: "POST",
+
+            data: form.serialize(),
+
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#ruleTaxModal")
+                        .modal("hide");
+
+
+                    loadData();
+
+
+                    Swal.fire({
+
+                        icon: "success",
+
+                        title:
+                            result.message,
+
+                        timer: 1200,
+
+                        showConfirmButton:
+                            false
+
+                    });
+
+                }
+                else {
+
+                    $("#ruleTaxModalContent")
+                        .html(result);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#ruleTaxForm"
+                    );
+
+                }
+
+            },
+
+
+            error: function() {
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title:
+                        "ثبت انجام نشد"
+
+                });
+
+            },
+
+
+            complete: function() {
+
+                $("#btnSaveRuleTax")
+                    .prop("disabled", false)
+                    .html("ثبت");
+
+            }
+
+        });
+
+
+        return false;
+
+    }
+
+</script>

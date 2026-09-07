@@ -1,0 +1,505 @@
+﻿@{
+    ViewData["Title"] = "پارامترها";
+}
+
+
+<h2>
+    پارامترها
+</h2>
+
+
+<!-- ========================================================= -->
+<!-- Search -->
+<!-- ========================================================= -->
+
+<div class="row mb-3">
+
+
+    <div class="col">
+
+        <input id="parameterSubject"
+               class="form-control"
+               placeholder="موضوع">
+
+    </div>
+
+
+    <div class="col">
+
+        <input id="parameterOptionKey"
+               class="form-control"
+               placeholder="کلید گزینه">
+
+    </div>
+
+
+    <div class="col">
+
+        <input id="parameterOptionName"
+               class="form-control"
+               placeholder="نام گزینه">
+
+    </div>
+
+
+    <div class="col">
+
+        <button id="btnParameterSearch"
+                class="btn btn-primary">
+
+            جستجو
+
+        </button>
+
+
+        <button id="btnParameterNew"
+                class="btn btn-success">
+
+            جدید
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Table -->
+<!-- ========================================================= -->
+
+<div id="parameterTable">
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Modal -->
+<!-- ========================================================= -->
+
+<div class="modal fade"
+     id="parameterModal">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="parameterModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+
+        let parameterCurrentPage = 1;
+
+        let parameterPageSize = 10;
+
+
+        let parameterSortColumn =
+            "Subject";
+
+
+        let parameterSortDirection =
+            "asc";
+
+
+        // =====================================================
+        // Load Data
+        // =====================================================
+
+        function loadParameterData() {
+
+            $("#tableLoading").show();
+
+
+            $.ajax({
+
+                url: "/Parameter/List",
+
+
+                data: {
+
+                    subject:
+                        $("#parameterSubject").val(),
+
+                    optionKey:
+                        $("#parameterOptionKey").val(),
+
+                    optionName:
+                        $("#parameterOptionName").val(),
+
+                    page:
+                        parameterCurrentPage,
+
+                    pageSize:
+                        parameterPageSize,
+
+                    sortColumn:
+                        parameterSortColumn,
+
+                    sortDirection:
+                        parameterSortDirection
+
+                },
+
+
+                success: function(data) {
+
+                    $("#parameterTable")
+                        .html(data);
+
+                },
+
+
+                error: function(xhr) {
+
+                    console.log(
+                        xhr.responseText
+                    );
+
+                },
+
+
+                complete: function() {
+
+                    $("#tableLoading").hide();
+
+                }
+
+            });
+
+        }
+
+
+        // =====================================================
+        // Sorting
+        // =====================================================
+
+        function sortParameterTable(column) {
+
+            if (
+                parameterSortColumn === column
+            ) {
+
+                parameterSortDirection =
+                    parameterSortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+
+            }
+            else {
+
+                parameterSortColumn =
+                    column;
+
+                parameterSortDirection =
+                    "asc";
+
+            }
+
+
+            parameterCurrentPage = 1;
+
+
+            loadParameterData();
+
+        }
+
+
+        // =====================================================
+        // Document Ready
+        // =====================================================
+
+        $(document).ready(function() {
+
+
+            loadParameterData();
+
+
+            // -------------------------------------------------
+            // Search
+            // -------------------------------------------------
+
+            $("#btnParameterSearch")
+                .click(function() {
+
+                    parameterCurrentPage = 1;
+
+                    loadParameterData();
+
+                });
+
+
+            // -------------------------------------------------
+            // New
+            // -------------------------------------------------
+
+            $("#btnParameterNew")
+                .click(function() {
+
+                    $.get(
+                        "/Parameter/Create",
+
+                        function(data) {
+
+                            $("#parameterModalContent")
+                                .html(data);
+
+
+                            $.validator.unobtrusive
+                                .parse("#parameterForm");
+
+
+                            $("#parameterModal")
+                                .modal("show");
+
+                        });
+
+                });
+
+        });
+
+
+        // =====================================================
+        // Edit
+        // =====================================================
+
+        function editParameter(id) {
+
+            $.get(
+                "/Parameter/Edit/" + id,
+
+                function(data) {
+
+                    $("#parameterModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive
+                        .parse("#parameterForm");
+
+
+                    $("#parameterModal")
+                        .modal("show");
+
+                });
+
+        }
+
+
+        // =====================================================
+        // Delete
+        // =====================================================
+
+        function deleteParameter(id) {
+
+
+            Swal.fire({
+
+                title: "حذف شود؟",
+
+                text: "مطمئنید؟",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف",
+
+                confirmButtonColor:
+                    "#d33",
+
+                cancelButtonColor:
+                    "#6c757d"
+
+            })
+
+
+                .then((result) => {
+
+
+                    if (
+                        result.isConfirmed
+                    ) {
+
+
+                        $.ajax({
+
+                            url:
+                                "/Parameter/Delete/"
+                                + id,
+
+                            type:
+                                "DELETE",
+
+
+                            success:
+                                function(result) {
+
+
+                                    if (
+                                        result.success
+                                    ) {
+
+
+                                        Swal.fire({
+
+                                            icon:
+                                                "success",
+
+                                            title:
+                                                "حذف شد",
+
+                                            timer:
+                                                1200,
+
+                                            showConfirmButton:
+                                                false
+
+                                        });
+
+
+                                        loadParameterData();
+
+                                    }
+
+                                },
+
+
+                            error:
+                                function() {
+
+
+                                    Swal.fire({
+
+                                        icon:
+                                            "error",
+
+                                        title:
+                                            "حذف انجام نشد"
+
+                                    });
+
+                                }
+
+                        });
+
+                    }
+
+                });
+
+        }
+
+    </script>
+
+
+    <!-- ===================================================== -->
+    <!-- Modal Drag -->
+    <!-- ===================================================== -->
+
+    <script>
+
+        $(document).on(
+            "mousedown",
+            ".modal-drag-handle",
+            function(e) {
+
+
+                let dialog =
+                    $(this)
+                        .closest(".modal-dialog");
+
+
+                let startX =
+                    e.clientX;
+
+
+                let startY =
+                    e.clientY;
+
+
+                let currentTransform =
+                    dialog.data("transform")
+                    ||
+                    {
+                        x: 0,
+                        y: 0
+                    };
+
+
+                $(document).on(
+                    "mousemove.parameterModalDrag",
+                    function(e) {
+
+
+                        let x =
+                            currentTransform.x
+                            +
+                            (
+                                e.clientX
+                                -
+                                startX
+                            );
+
+
+                        let y =
+                            currentTransform.y
+                            +
+                            (
+                                e.clientY
+                                -
+                                startY
+                            );
+
+
+                        dialog.css({
+
+                            transform:
+                                `translate(${x}px, ${y}px)`
+
+                        });
+
+
+                        dialog.data(
+                            "transform",
+                            {
+                                x: x,
+                                y: y
+                            }
+                        );
+
+                    });
+
+
+                $(document).on(
+                    "mouseup.parameterModalDrag",
+                    function() {
+
+
+                        $(document)
+                            .off(
+                                "mousemove.parameterModalDrag"
+                            )
+                            .off(
+                                "mouseup.parameterModalDrag"
+                            );
+
+                    });
+
+            });
+
+    </script>
+
+}

@@ -1,0 +1,364 @@
+﻿@model PagedResult<Parameter>
+
+<link rel="stylesheet"
+      href="~/pages/css/table.css" />
+
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
+
+
+<div id="tableContainer"
+     style="border: 1px solid lightgray">
+
+    <table class="table table-bordered">
+
+        <thead class="colorWhitesmoke">
+
+            <tr>
+
+                <!-- Row number -->
+
+                <th class="colorWhitesmoke fixed-column">
+                    #
+                </th>
+
+
+                <!-- Id -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortParameterTable('Id')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Id)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Id")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Subject -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortParameterTable('Subject')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().Subject)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "Subject")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- OptionKey -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortParameterTable('OptionKey')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().OptionKey)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "OptionKey")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- OptionName -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortParameterTable('OptionName')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().OptionName)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "OptionName")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- OptionValue -->
+
+                <th class="colorWhitesmoke"
+                    onclick="sortParameterTable('OptionValue')"
+                    style="cursor:pointer">
+
+                    @Html.DisplayNameFor(
+                        m => m.Items.First().OptionValue)
+
+                    <span>
+
+                        @if (ViewBag.SortColumn == "OptionValue")
+                        {
+                            @(ViewBag.SortDirection == "asc"
+                                ? "▲"
+                                : "▼")
+                        }
+                        else
+                        {
+                            @("↕")
+                        }
+
+                    </span>
+
+                </th>
+
+
+                <!-- Operations -->
+
+                <th class="colorWhitesmoke"
+                    style="width:130px;">
+
+                    عملیات
+
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            @{
+
+                int rowNumber =
+                    (Model.PageNumber - 1)
+                    * Model.PageSize + 1;
+
+            }
+
+
+            @foreach (var p in Model.Items)
+            {
+
+                <tr>
+
+                    <td class="colorWhitesmoke fixed-column">
+                        @rowNumber
+                    </td>
+
+
+                    <td>
+                        @p.Id
+                    </td>
+
+
+                    <td>
+                        @p.Subject
+                    </td>
+
+
+                    <td>
+                        @p.OptionKey
+                    </td>
+
+
+                    <td>
+                        @p.OptionName
+                    </td>
+
+
+                    <td>
+                        @p.OptionValue
+                    </td>
+
+
+                    <td>
+
+                        <button class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="editParameter(@p.Id)">
+
+                            <i class="fa fa-edit"></i>
+
+                            <span class="tooltip-text">
+                                ویرایش
+                            </span>
+
+                        </button>
+
+
+                        <button class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deleteParameter(@p.Id)">
+
+                            <i class="fa fa-trash"></i>
+
+                            <span class="tooltip-text">
+                                حذف
+                            </span>
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+
+                rowNumber++;
+
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Pager -->
+<!-- ========================================================= -->
+
+<div id="pagerArea"
+     class="mt-3 d-flex justify-content-between">
+
+
+    <div>
+
+        <select asp-for="PageSize"
+                asp-items="Model.PageSizes"
+                class="form-select"
+                onchange="changeParameterPageSize(this.value)">
+        </select>
+
+    </div>
+
+
+    <div>
+
+        <button class="btn btn-secondary"
+                onclick="goParameterPage(1)">
+
+            اول
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goParameterPage(
+            @(Model.PageNumber - 1))">
+
+            قبلی
+
+        </button>
+
+
+        <span class="mx-2">
+
+            @Model.PageNumber /
+            @Model.TotalPages
+
+        </span>
+
+
+        <button class="btn btn-secondary"
+                onclick="goParameterPage(
+            @(Model.PageNumber + 1))">
+
+            بعدی
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goParameterPage(
+            @Model.TotalPages)">
+
+            آخر
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function goParameterPage(page) {
+
+        if (
+            page < 1 ||
+            page > @Model.TotalPages
+            ) {
+            return;
+        }
+
+
+        parameterCurrentPage = page;
+
+
+        loadParameterData();
+
+    }
+
+
+    function changeParameterPageSize(size) {
+
+        parameterPageSize =
+            parseInt(size);
+
+
+        parameterCurrentPage = 1;
+
+
+        loadParameterData();
+
+    }
+
+
+</script>

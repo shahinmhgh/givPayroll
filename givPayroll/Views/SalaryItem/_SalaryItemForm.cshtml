@@ -1,0 +1,278 @@
+﻿@model givPayroll.Models.SalaryItem
+
+@{
+    bool isEdit = Model.Id != 0;
+
+    string action =
+        isEdit ? "Edit" : "Create";
+}
+
+<form id="salaryItemForm"
+      asp-action="@action"
+      asp-controller="SalaryItem"
+      method="post"
+      onsubmit="return submitSalaryItemForm(this);">
+
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+
+        <h5 class="modal-title">
+            @(isEdit ? "ویرایش قلم حقوق" : "قلم حقوق جدید")
+        </h5>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal">
+        </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+
+        <div class="row g-3">
+
+            <!-- Id -->
+
+            <div class="col-md-2">
+
+                <label asp-for="Id"
+                       class="form-label">
+                </label>
+
+                <input asp-for="Id"
+                       class="form-control"
+                       readonly="@isEdit" />
+
+                <span asp-validation-for="Id"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Priority -->
+
+            <div class="col-md-2">
+
+                <label asp-for="Priority"
+                       class="form-label">
+                </label>
+
+                <input asp-for="Priority"
+                       class="form-control"
+                       type="number" />
+
+                <span asp-validation-for="Priority"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Name -->
+
+            <div class="col-md-4">
+
+                <label asp-for="SalaryItemName"
+                       class="form-label">
+                </label>
+
+                <input asp-for="SalaryItemName"
+                       class="form-control" />
+
+                <span asp-validation-for="SalaryItemName"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Label -->
+
+            <div class="col-md-4">
+
+                <label asp-for="Label"
+                       class="form-label">
+                </label>
+
+                <input asp-for="Label"
+                       class="form-control"
+                       dir="ltr" />
+
+            </div>
+
+
+            <!-- Unit -->
+
+            <div class="col-md-3">
+
+                <label asp-for="Unit"
+                       class="form-label">
+                </label>
+
+                <select asp-for="Unit"
+                        class="form-select">
+
+                    <option value="">-- انتخاب --</option>
+                    <option value="Amount">Amount</option>
+                    <option value="Hour">Hour</option>
+                    <option value="Day">Day</option>
+                    <option value="Percent">Percent</option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Source -->
+
+            <div class="col-md-3">
+
+                <label asp-for="Source"
+                       class="form-label">
+                </label>
+
+                <input asp-for="Source"
+                       class="form-control"
+                       dir="ltr" />
+
+            </div>
+
+
+            <!-- PlusMinus -->
+
+            <div class="col-md-3">
+
+                <label asp-for="PlusMinus"
+                       class="form-label">
+                </label>
+
+                <select asp-for="PlusMinus"
+                        class="form-select">
+
+                    <option value="1">
+                        +
+                    </option>
+
+                    <option value="-1">
+                        -
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- CalculationMode -->
+
+            <div class="col-md-3">
+
+                <label asp-for="CalculationMode"
+                       class="form-label">
+                </label>
+
+                <select asp-for="CalculationMode"
+                        class="form-select">
+
+                    <option value="">-- انتخاب --</option>
+                    <option value="Formula">Formula</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Tax">Tax</option>
+                    <option value="Insurance">Insurance</option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Formula -->
+
+            <div class="col-12">
+
+                <label asp-for="FormulaValue"
+                       class="form-label">
+                </label>
+
+                <textarea asp-for="FormulaValue"
+                          class="form-control"
+                          rows="4"
+                          dir="ltr"
+                          style="font-family:Consolas,monospace;">
+                </textarea>
+
+                <span asp-validation-for="FormulaValue"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+
+            <!-- Accounting -->
+
+            <div class="col-md-6">
+
+                <label asp-for="AccAccountCode"
+                       class="form-label">
+                </label>
+
+                <input asp-for="AccAccountCode"
+                       class="form-control"
+                       dir="ltr" />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label asp-for="AccUniqueId"
+                       class="form-label">
+                </label>
+
+                <input asp-for="AccUniqueId"
+                       class="form-control"
+                       type="number"
+                       dir="ltr" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+            انصراف
+        </button>
+
+        <button type="submit"
+                class="btn btn-primary">
+
+            <i class="bi bi-check-lg"></i>
+
+            ذخیره
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    $.validator.unobtrusive.parse(
+        '#salaryItemForm'
+    );
+
+</script>

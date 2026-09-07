@@ -1,0 +1,179 @@
+﻿@model givPayroll.Models.Holiday
+
+<form id="holidayForm"
+      asp-action="@(Model.Id == 0 ? "Create" : "Edit")"
+      asp-controller="Holiday"
+      method="post">
+
+
+    @Html.AntiForgeryToken()
+     
+    <input type="hidden"   asp-for="Id" />
+    <input type="hidden" asp-for="Year" />
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger mb-3">
+    </div>
+
+
+    <div class="row">
+
+      
+        
+
+        <div id="DateApp">
+            <label class="form-label">
+                تاریخ
+            </label>
+            <date-picker v-model="persianDate"
+                         format="jYYYY/jMM/jDD"
+                         display-format="jYYYY/jMM/jDD"
+                         color="#0d6efd"
+                         :editable="true"
+                         placeholder="تاریخ ">
+            </date-picker>
+
+            <input type="hidden"
+                   name="Date"
+                   :value="gregorianDate">
+
+        </div>
+
+
+        <div class="col-md-12 mb-3">
+
+            <label asp-for="Title"
+                   class="form-label">
+            </label>
+
+            <input asp-for="Title"
+                   class="form-control"
+                   placeholder="مثلاً عید نوروز" />
+
+            <span asp-validation-for="Title"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <div class="col-md-12 mb-3">
+
+            <div class="form-check">
+
+                <input asp-for="IsOfficial"
+                       class="form-check-input" />
+
+                <label asp-for="IsOfficial"
+                       class="form-check-label">
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-12 mb-3">
+
+            <label asp-for="Description"
+                   class="form-label">
+            </label>
+
+            <textarea asp-for="Description"
+                      class="form-control"
+                      rows="3">
+            </textarea>
+
+        </div>
+
+    </div>
+
+
+    <div class="text-end">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            انصراف
+
+        </button>
+
+        <button type="button"
+                class="btn btn-primary"
+                onclick="saveHoliday()">
+
+            ذخیره
+
+        </button>
+
+    </div>
+
+</form>
+
+<script>
+    $(document).ready(function() {
+
+        var HolidayDate = '@Model.Date';
+
+        initholidayDatePicker(HolidayDate, "#DateApp")
+
+    });
+
+    var holidayDatePicker = null;
+
+    function initholidayDatePicker(initialGregorianDate, elmnt) {
+
+        const element = $(elmnt); // document.getElementById(elmnt);
+
+        if (!element) {
+            return;
+        }
+
+        // Destroy previous Vue instance if the modal was loaded again
+        if (holidayDatePicker) {
+            holidayDatePicker.$destroy();
+            holidayDatePicker = null;
+        }
+
+        let initialPersianDate = "";
+
+        if (initialGregorianDate) {
+            initialPersianDate =
+                moment(initialGregorianDate, "M/D/YYYY h:mm:ss A")
+                    .format("jYYYY/jMM/jDD");
+        }
+
+        holidayDatePicker = new Vue({
+
+            el: elmnt,
+
+            data: {
+                persianDate: initialPersianDate
+            },
+
+            components: {
+                DatePicker: VuePersianDatetimePicker
+            },
+
+            computed: {
+
+                gregorianDate() {
+
+                    if (!this.persianDate) {
+                        return "";
+                    }
+
+                    return moment(
+                        this.persianDate,
+                        "jYYYY/jMM/jDD",
+                        true
+                    ).format("YYYY-MM-DD");
+                }
+
+            }
+
+        });
+    }
+
+</script>
