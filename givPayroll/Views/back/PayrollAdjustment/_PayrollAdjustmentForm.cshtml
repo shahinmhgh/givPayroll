@@ -1,0 +1,795 @@
+﻿@using givPersonnel.Models.DTO
+@model PayrollAdjustmentViewModel
+
+<div class="modal-header modal-drag-handle">
+
+    <h5 class="modal-title">
+        تعدیل حقوق جدید
+    </h5>
+
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal">
+    </button>
+
+</div>
+
+
+<div class="modal-body">
+
+    <form id="payrollAdjustmentForm">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="Id"
+               type="hidden" />
+
+
+        <!-- ========================================= -->
+        <!-- Adjustment information -->
+        <!-- ========================================= -->
+
+        <div class="card mb-3">
+
+            <div class="card-header">
+                اطلاعات تعدیل
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+
+                    <!-- Adjustment Type -->
+
+                    <div class="col-md-4">
+
+                        <label asp-for="AdjustmentTypeId"
+                               class="form-label">
+                            نوع تعدیل
+                        </label>
+
+                        <select asp-for="AdjustmentTypeId"
+                                asp-items="Model.AdjustmentTypes"
+                                class="form-select"
+                                id="AdjustmentTypeId">
+
+                            <option value="">
+                                -- انتخاب نوع تعدیل --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="AdjustmentTypeId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Amount -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            مبلغ ماهانه هر نفر
+                        </label>
+
+                        <input type="text"
+                               id="amountDisplay"
+                               class="form-control text-end"
+                               value="@Model.Amount.ToString("N0")"
+                               inputmode="numeric" />
+
+                        <input asp-for="Amount"
+                               type="hidden"
+                               id="amountValue" />
+
+                        <span asp-validation-for="Amount"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Count -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            تعداد ماه
+                        </label>
+
+                        <input type="text"
+                               id="monthCount"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+
+                    <!-- Start -->
+
+                    <div class="col-md-2">
+                        <div id="StartDateApp">
+                            <label class="form-label">
+                                تاریخ شروع
+                            </label>
+                            <date-picker v-model="persianDate"
+                                         format="jYYYY/jMM/jDD"
+                                         display-format="jYYYY/jMM/jDD"
+                                         color="#0d6efd"
+                                         :editable="true"
+                                         placeholder="تاریخ شروع">
+                            </date-picker>
+
+                            <input type="hidden"
+                                   name="StartDate"
+                                   :value="gregorianDate">
+
+                        </div>
+                    </div>
+
+                    <!-- End -->
+
+                    <div class="col-md-2">
+                        <div id="EndDateApp">
+                            <label class="form-label">
+                                تاریخ پایان
+                            </label>
+                            <date-picker v-model="persianDate"
+                                         format="jYYYY/jMM/jDD"
+                                         display-format="jYYYY/jMM/jDD"
+                                         color="#0d6efd"
+                                         :editable="true"
+                                         placeholder="تاریخ پایان">
+                            </date-picker>
+
+                            <input type="hidden"
+                                   name="EndDate"
+                                   :value="gregorianDate">
+
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+
+                    <div class="col-12">
+
+                        <label asp-for="Description"
+                               class="form-label">
+                            توضیحات
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="3"></textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- Personnel -->
+        <!-- ========================================= -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-between">
+
+                    <strong>
+                        پرسنل‌های مشمول
+                    </strong>
+
+                    <button type="button"
+                            class="btn btn-sm btn-success"
+                            onclick="addPersonnelRow()">
+
+                        <i class="fa fa-plus"></i>
+
+                        افزودن پرسنل
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered align-middle"
+                           id="personnelTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="width:60px;">
+                                    #
+                                </th>
+
+                                <th>
+                                    پرسنل
+                                </th>
+
+                                <th style="width:80px;">
+                                    عملیات
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="personnelTableBody">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <span asp-validation-for="PersonnelIds"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<div class="modal-footer">
+
+    <button type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal">
+
+        انصراف
+
+    </button>
+
+    <button type="button"
+            class="btn btn-primary"
+            onclick="savePayrollAdjustment()">
+
+        <i class="fa fa-save"></i>
+
+        ذخیره
+
+    </button>
+
+</div>
+
+<script>
+    let contractDatePickers = {};
+
+    function initContractDatePickers() {
+ // alert('@Model.StartDate');
+ // alert('@Model.EndDate');
+
+        initContractDatePicker(
+            '@Model.StartDate.ToString("yyyy-MM-dd")',
+            '#StartDateApp'
+        );
+
+        initContractDatePicker(
+            '@Model.EndDate.ToString("yyyy-MM-dd")',
+            '#EndDateApp'
+        );
+    }
+
+     
+    function initContractDatePicker(initialGregorianDate, elementSelector) {
+
+        const element = $(elementSelector);
+
+        // Element does not exist
+        if (!element.length) {
+            return;
+        }
+
+        // Destroy previous Vue instance
+        if (contractDatePickers[elementSelector]) {
+            contractDatePickers[elementSelector].$destroy();
+            contractDatePickers[elementSelector] = null;
+        }
+
+        let initialPersianDate = '';
+
+        if (initialGregorianDate) {
+
+            const date = moment(
+                initialGregorianDate,
+                [
+                    "M/D/YYYY h:mm:ss A",
+                    "M/D/YYYY HH:mm:ss",
+                    "YYYY-MM-DD"
+                ],
+                true
+            );
+
+            if (date.isValid()) {
+                initialPersianDate = date.format("jYYYY/jMM/jDD");
+            }
+        }
+
+        contractDatePickers[elementSelector] = new Vue({
+
+            el: elementSelector,
+
+            data: {
+                persianDate: initialPersianDate
+            },
+
+            components: {
+                DatePicker: VuePersianDatetimePicker
+            },
+
+            computed: {
+
+                gregorianDate() {
+
+                    if (!this.persianDate) {
+                        return '';
+                    }
+
+                    const date = moment(
+                        this.persianDate,
+                        "jYYYY/jMM/jDD",
+                        true
+                    );
+
+                    if (!date.isValid()) {
+                        return '';
+                    }
+
+                    return date.format("YYYY-MM-DD");
+                }
+            }
+        });
+    }
+ 
+
+</script>
+
+<script>
+
+    let personnelRowIndex = 0;
+
+    $(document).ready(function() {
+        
+    });
+
+    function readyProc()
+    {
+        alert('1');
+        initializeAmount();
+        alert('2');
+        updateMonthCount();
+        alert('3');
+        initializePersonnelRows();
+        alert('4');
+        $.validator.unobtrusive.parse(
+            "#payrollAdjustmentForm"
+        );
+    }
+    function initializePersonnelRows() {
+
+        @foreach (var personnelId in Model.PersonnelIds)
+            {
+                <text>
+                        addPersonnelRow(@personnelId);
+                </text>
+        }
+    }
+    // =========================================================
+    // AMOUNT
+    // =========================================================
+
+    function initializeAmount() {
+
+        $("#amountDisplay")
+            .off("input")
+            .on("input", function() {
+
+                let value =
+                    $(this)
+                        .val()
+                        .replace(/,/g, "")
+                        .replace(/[^\d]/g, "");
+
+                $("#amountValue").val(value);
+
+                if (value) {
+
+                    $(this).val(
+                        Number(value)
+                            .toLocaleString("en-US")
+                    );
+
+                } else {
+
+                    $(this).val("");
+
+                }
+
+            });
+    }
+
+
+    // =========================================================
+    // DATE
+    // =========================================================
+
+    function initializeDates() {
+
+        // If you already use VuePersianDatetimePicker
+        // in your project, initialize it here.
+
+        $("#startDate")
+            .off("change")
+            .on("change", function() {
+
+                $("#startDateValue")
+                    .val($(this).val());
+
+                updateMonthCount();
+
+            });
+
+
+        $("#endDate")
+            .off("change")
+            .on("change", function() {
+
+                $("#endDateValue")
+                    .val($(this).val());
+
+                updateMonthCount();
+
+            });
+    }
+
+
+    // =========================================================
+    // PERSONNEL ROW
+    // =========================================================
+
+    function addPersonnelRow(personnelId = "") {
+
+        let rowId =
+            personnelRowIndex++;
+
+
+        let options = `
+                <option value="">
+                    -- انتخاب پرسنل --
+                </option>
+            `;
+
+
+            @foreach (var personnel in Model.Personnels)
+            {
+                <text>
+
+                        options += `
+                        <option value="@personnel.Id">
+                                        @personnel.FirstName @personnel.LastName
+                        </option>
+                        `;
+
+                </text>
+        }
+
+
+            let row = `
+                <tr id="personnelRow_${rowId}">
+
+                    <td class="text-center row-number">
+                        ${rowId + 1}
+                    </td>
+
+                    <td>
+
+                        <select
+                            name="PersonnelIds"
+                            class="form-select personnel-select">
+
+                            ${options}
+
+                        </select>
+
+                    </td>
+
+                    <td class="text-center">
+
+                        <button type="button"
+                                class="btn btn-sm btn-danger"
+                                onclick="removePersonnelRow(${rowId})">
+
+                            <i class="fa fa-trash"></i>
+
+                        </button>
+
+                    </td>
+
+                </tr>
+            `;
+
+
+        $("#personnelTableBody")
+            .append(row);
+
+
+        if (personnelId) {
+
+            $(`#personnelRow_${rowId} select`)
+                .val(personnelId);
+
+        }
+
+
+        refreshPersonnelNumbers();
+
+        preventDuplicatePersonnel();
+    }
+
+
+    // =========================================================
+    // REMOVE
+    // =========================================================
+
+    function removePersonnelRow(rowId) {
+
+        $(`#personnelRow_${rowId}`)
+            .remove();
+
+        refreshPersonnelNumbers();
+
+    }
+
+
+    // =========================================================
+    // ROW NUMBERS
+    // =========================================================
+
+    function refreshPersonnelNumbers() {
+
+        $("#personnelTableBody tr")
+            .each(function(index) {
+
+                $(this)
+                    .find(".row-number")
+                    .text(index + 1);
+
+            });
+    }
+
+
+    // =========================================================
+    // DUPLICATES
+    // =========================================================
+
+    function preventDuplicatePersonnel() {
+
+        $(".personnel-select")
+            .off("change")
+            .on("change", function() {
+
+                let selected = [];
+
+                $(".personnel-select")
+                    .each(function() {
+
+                        let value =
+                            $(this).val();
+
+                        if (value)
+                            selected.push(value);
+
+                    });
+
+
+                let duplicates =
+                    selected.filter(
+                        (item, index) =>
+                            selected.indexOf(item) !== index
+                    );
+
+
+                if (duplicates.length > 0) {
+
+                    Swal.fire({
+                        icon: "warning",
+                        title: "پرسنل تکراری",
+                        text: "این پرسنل قبلاً انتخاب شده است."
+                    });
+
+                    $(this).val("");
+
+                }
+
+            });
+    }
+
+
+    // =========================================================
+    // MONTH COUNT
+    // =========================================================
+
+    function updateMonthCount() {
+
+        let start =
+            $("#startDateValue").val();
+
+        let end =
+            $("#endDateValue").val();
+
+
+        if (!start || !end) {
+
+            $("#monthCount").val("");
+
+            return;
+        }
+
+
+        let s =
+            start.split("/");
+
+        let e =
+            end.split("/");
+
+
+        if (s.length !== 3 ||
+            e.length !== 3) {
+
+            return;
+        }
+
+
+        let sy = parseInt(s[0]);
+        let sm = parseInt(s[1]);
+
+        let ey = parseInt(e[0]);
+        let em = parseInt(e[1]);
+
+
+        let count =
+            (ey - sy) * 12
+            + (em - sm) + 1;
+
+
+        if (count > 0) {
+
+            $("#monthCount")
+                .val(count);
+
+        } else {
+
+            $("#monthCount")
+                .val("");
+
+        }
+    }
+
+
+    // =========================================================
+    // SAVE
+    // =========================================================
+
+    function savePayrollAdjustment() {
+
+        let form =
+            $("#payrollAdjustmentForm");
+
+
+        if (!form.valid())
+            return;
+
+
+        let personnelCount =
+            $(".personnel-select")
+                .filter(function() {
+                    return $(this).val();
+                })
+                .length;
+
+
+        if (personnelCount === 0) {
+
+            Swal.fire({
+                icon: "warning",
+                title: "توجه",
+                text: "حداقل یک پرسنل انتخاب کنید."
+            });
+
+            return;
+        }
+
+
+        let start =
+            $("#startDate").val();
+
+        let end =
+            $("#endDate").val();
+
+
+        $("#startDateValue")
+            .val(start);
+
+        $("#endDateValue")
+            .val(end);
+
+
+        let data =
+            form.serialize();
+
+
+        $.ajax({
+
+            url: "/PayrollAdjustment/Save",
+
+            type: "POST",
+
+            data: data,
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#payrollAdjustmentModal")
+                        .modal("hide");
+
+                    loadData();
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "عملیات موفق",
+                        text: "تعدیل حقوق با موفقیت ثبت شد.",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                }
+                else {
+
+                    $("#payrollAdjustmentModalContent")
+                        .html(result);
+
+                    $.validator.unobtrusive.parse(
+                        "#payrollAdjustmentForm"
+                    );
+
+                }
+
+            },
+
+            error: function(xhr) {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "خطا",
+                    text: "خطا در ذخیره اطلاعات."
+                });
+
+            }
+
+        });
+    }
+
+</script>

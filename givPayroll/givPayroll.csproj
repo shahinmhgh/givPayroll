@@ -9,12 +9,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\back\**" />
+    <Compile Remove="Models\DTO\back\**" />
+    <Compile Remove="Views\back\**" />
     <Compile Remove="wwwroot\images\NewFolder\**" />
     <Compile Remove="wwwroot\images\Personnel - Copy\**" />
+    <Content Remove="Controllers\back\**" />
+    <Content Remove="Models\DTO\back\**" />
+    <Content Remove="Views\back\**" />
     <Content Remove="wwwroot\images\NewFolder\**" />
     <Content Remove="wwwroot\images\Personnel - Copy\**" />
+    <EmbeddedResource Remove="Controllers\back\**" />
+    <EmbeddedResource Remove="Models\DTO\back\**" />
+    <EmbeddedResource Remove="Views\back\**" />
     <EmbeddedResource Remove="wwwroot\images\NewFolder\**" />
     <EmbeddedResource Remove="wwwroot\images\Personnel - Copy\**" />
+    <None Remove="Controllers\back\**" />
+    <None Remove="Models\DTO\back\**" />
+    <None Remove="Views\back\**" />
     <None Remove="wwwroot\images\NewFolder\**" />
     <None Remove="wwwroot\images\Personnel - Copy\**" />
   </ItemGroup>

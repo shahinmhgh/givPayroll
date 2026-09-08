@@ -1,15 +1,10 @@
 ﻿using givPayroll.Data;
 using givPayroll.Models;
-using givPersonnel.Models.DTO;
+using givPayroll.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using givPayroll.Data;
-using givPayroll.Models;
-using Microsoft.IdentityModel.Tokens;
-
 
 namespace givPayroll.Controllers
 {
@@ -23,30 +18,26 @@ namespace givPayroll.Controllers
             _context = context;
         }
 
-
         // =========================================================
         // INDEX
         // =========================================================
 
-        [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             return View();
         }
 
-         
+
         // =========================================================
         // LIST
         // =========================================================
 
-        [HttpGet]  
+        [HttpGet]
         public async Task<IActionResult> List(
-            string description = "",
-            int? adjustmentTypeId = null,
+            string? description,
+            int? adjustmentTypeId,
             int page = 1,
-            int pageSize = 10,
-            string sortColumn = "StartDate",
-            string sortDirection = "desc")
+            int pageSize = 10)
         {
             var query = _context.PayrollAdjustments
                 .AsNoTracking()
@@ -65,70 +56,67 @@ namespace givPayroll.Controllers
                     x.AdjustmentTypeId == adjustmentTypeId.Value);
             }
 
-            query = (sortColumn, sortDirection) switch
-            {
-                ("Id", "asc") =>
-                    query.OrderBy(x => x.Id),
+            var totalCount = await query.CountAsync();
 
-                ("Id", "desc") =>
-                    query.OrderByDescending(x => x.Id),
-
-                ("StartDate", "asc") =>
-                    query.OrderBy(x => x.StartDate),
-
-                ("StartDate", "desc") =>
-                    query.OrderByDescending(x => x.StartDate),
-
-                ("EndDate", "asc") =>
-                    query.OrderBy(x => x.EndDate),
-
-                ("EndDate", "desc") =>
-                    query.OrderByDescending(x => x.EndDate),
-
-                ("TotalAmount", "asc") =>
-                    query.OrderBy(x => x.TotalAmount),
-
-                ("TotalAmount", "desc") =>
-                    query.OrderByDescending(x => x.TotalAmount),
-
-                _ =>
-                    query.OrderByDescending(x => x.StartDate)
-            };
-
-            var total = await query.CountAsync();
-
-            var data = await query
+            var items = await query
+                .OrderByDescending(x => x.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(x => new PayrollAdjustmentListViewModel
+                {
+                    Id = x.Id,
+                    Description = x.Description,
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    AdjustmentCount = x.AdjustmentCount,
+                    AdjustmentTypeName =
+                        x.SalaryItem != null
+                            ? x.SalaryItem.SalaryItemName
+                            : "",
+                    Loan = x.Loan,
+                    TotalAmount = x.TotalAmount,
+
+                    PersonnelCount =
+                        _context.PayrollAdjustmentPersonnels
+                            .Count(p =>
+                                p.PayrollAdjustmentId == x.Id)
+                })
                 .ToListAsync();
 
-            ViewBag.SortColumn = sortColumn;
-            ViewBag.SortDirection = sortDirection;
+            var model = new PayrollAdjustmentListResultViewModel
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
 
-            return PartialView(
-                "_PayrollAdjustmentList",
-                new PagedResult<PayrollAdjustment>
-                {
-                    Items = data,
-                    PageNumber = page,
-                    PageSize = pageSize,
-
-                    PageSizes = new List<SelectListItem>
-                    {
-                        new SelectListItem("5", "5"),
-                        new SelectListItem("10", "10"),
-                        new SelectListItem("20", "20"),
-                        new SelectListItem("50", "50")
-                    },
-
-                    TotalRecords = total,
-
-                    TotalPages =
-                        (int)Math.Ceiling(
-                            total / (double)pageSize)
-                });
+            return PartialView("_PayrollAdjustmentList", model);
         }
 
+
+        // =========================================================
+        // CREATE
+        // =========================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            var model = new PayrollAdjustmentViewModel
+            {
+                StartDate = DateTime.Today,
+                AdjustmentCount = 1
+            };
+
+            await LoadAdjustmentTypes(model);
+
+            return PartialView("_PayrollAdjustmentForm", model);
+        }
+
+
+        // =========================================================
+        // EDIT
+        // =========================================================
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
@@ -140,74 +128,39 @@ namespace givPayroll.Controllers
             if (adjustment == null)
                 return NotFound();
 
-
-            // Get selected personnel
-            var personnelIds =
-                await _context.PayrollAdjustmentPersonnels
-                    .AsNoTracking()
-                    .Where(x => x.PayrollAdjustmentId == id)
-                    .Select(x => x.PersonnelId)
-                    .ToListAsync();
-
-
             var model = new PayrollAdjustmentViewModel
             {
                 Id = adjustment.Id,
-
-                AdjustmentTypeId =
-                    adjustment.AdjustmentTypeId,
-
-                StartDate =
-                    adjustment.StartDate,
-
-                EndDate =
-                    adjustment.EndDate,
-
-                Description =
-                    adjustment.Description,
-
-                PersonnelIds =
-                    personnelIds,
-
-                // Amount in PayrollAdjustment is total amount,
-                // so calculate the monthly/person amount.
-                Amount =
-                    personnelIds.Count > 0 &&
-                    adjustment.AdjustmentCount > 0
-                        ? adjustment.TotalAmount /
-                          personnelIds.Count /
-                          adjustment.AdjustmentCount
-                        : 0
+                Description = adjustment.Description,
+                StartDate = adjustment.StartDate,
+                EndDate = adjustment.EndDate,
+                AdjustmentCount = adjustment.AdjustmentCount,
+                AdjustmentTypeId = adjustment.AdjustmentTypeId,
+                Loan = adjustment.Loan,
+                TotalAmount = adjustment.TotalAmount
             };
 
+            model.Personnels = await _context.PayrollAdjustmentPersonnels
+                .AsNoTracking()
+                .Where(x => x.PayrollAdjustmentId == id)
+                .Include(x => x.Personnel)
+                .Select(x => new PayrollAdjustmentPersonnelViewModel
+                {
+                    Id = x.Id,
+                    PersonnelId = x.PersonnelId,
+                    PersonnelName =
+                        x.Personnel!.FirstName + " " +
+                        x.Personnel.LastName
+                })
+                .ToListAsync();
 
-            await LoadFormData(model);
+            model.PersonnelIds = model.Personnels
+                .Select(x => x.PersonnelId)
+                .ToList();
 
+            await LoadAdjustmentTypes(model);
 
-            return PartialView(
-                "_PayrollAdjustmentForm",
-                model);
-        }
-
-        // =========================================================
-        // CREATE MODAL
-        // =========================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            var model = new PayrollAdjustmentViewModel
-            {
-                StartDate = DateTime.Now.Date,
-                EndDate = DateTime.Now.Date,
-                Amount = 0
-            };
-
-            await LoadFormData(model);
-
-            return PartialView(
-                "_PayrollAdjustmentForm",
-                model);
+            return PartialView("_PayrollAdjustmentForm", model);
         }
 
 
@@ -220,282 +173,183 @@ namespace givPayroll.Controllers
         public async Task<IActionResult> Save(
             PayrollAdjustmentViewModel model)
         {
-            if (model.PersonnelIds == null ||
-                model.PersonnelIds.Count == 0)
-            {
-                ModelState.AddModelError(
-                    nameof(model.PersonnelIds),
-                    "حداقل یک پرسنل را انتخاب کنید.");
-            }
-
             if (!ModelState.IsValid)
             {
-                await LoadFormData(model);
+                await LoadAdjustmentTypes(model);
 
                 return PartialView(
                     "_PayrollAdjustmentForm",
                     model);
             }
 
-            // -----------------------------------------
-            // Parse Persian dates
-            // -----------------------------------------
+            // Calculate end date on server too
+            model.EndDate = model.StartDate
+                .AddMonths(model.AdjustmentCount)
+                .AddDays(-1);
 
-            //if (!TryParsePersianDate(
-            //        model.StartDate,
-            //        out DateTime startDate))
-            //{
-            //    ModelState.AddModelError(
-            //        nameof(model.StartDate),
-            //        "تاریخ شروع نامعتبر است.");
-            //}
-            
-            //if (!TryParsePersianDate(
-            //        model.EndDate,
-            //        out DateTime endDate))
-            //{
-            //    ModelState.AddModelError(
-            //        nameof(model.EndDate),
-            //        "تاریخ پایان نامعتبر است.");
-            //}
-
-            if (ModelState.ErrorCount > 0)
-            {
-                await LoadFormData(model);
-
-                return PartialView(
-                    "_PayrollAdjustmentForm",
-                    model);
-            }
-
-            if (model.EndDate < model.StartDate)
-            {
-                ModelState.AddModelError(
-                    nameof(model.EndDate),
-                    "تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد.");
-
-                await LoadFormData(model);
-
-                return PartialView(
-                    "_PayrollAdjustmentForm",
-                    model);
-            }
-
-
-            // -----------------------------------------
-            // Adjustment Type
-            // -----------------------------------------
-
-            var adjustmentType =
-                await _context.SalaryItems
-                    .FirstOrDefaultAsync(x =>
-                        x.Id == model.AdjustmentTypeId);
-
-            if (adjustmentType == null)
-                return NotFound();
-
-
-            // -----------------------------------------
-            // Personnel
-            // -----------------------------------------
-
-            var personnelIds =
-                model.PersonnelIds
-                    .Distinct()
-                    .ToList();
-
-            var personnels =
-                await _context.Personnels
-                    .Where(x => personnelIds.Contains(x.Id))
-                    .ToListAsync();
-
-            if (personnels.Count != personnelIds.Count)
-            {
-                ModelState.AddModelError(
-                    nameof(model.PersonnelIds),
-                    "یکی از پرسنل‌های انتخاب شده معتبر نیست.");
-
-                await LoadFormData(model);
-
-                return PartialView(
-                    "_PayrollAdjustmentForm",
-                    model);
-            }
-
-
-            // -----------------------------------------
-            // Calculate months
-            // -----------------------------------------
-
-            var months =
-                GetPayrollMonths(model.StartDate, model.EndDate);
-
-            if (months.Count == 0)
-            {
-                ModelState.AddModelError(
-                    nameof(model.StartDate),
-                    "بازه زمانی حداقل باید شامل یک ماه باشد.");
-
-                await LoadFormData(model);
-
-                return PartialView(
-                    "_PayrollAdjustmentForm",
-                    model);
-            }
-
-
-            // -----------------------------------------
-            // Total amount
-            // -----------------------------------------
-
-            decimal totalAmount =
-                model.Amount
-                * personnelIds.Count
-                * months.Count;
-
-
-            // -----------------------------------------
-            // Transaction
-            // -----------------------------------------
-
-            await using var transaction =
+            using var transaction =
                 await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // =====================================
-                // PayrollAdjustment
-                // =====================================
+                PayrollAdjustment adjustment;
 
-                var maxId =
-                    await _context.PayrollAdjustments
-                        .Select(x => (int?)x.Id)
-                        .MaxAsync();
+                if (model.Id == 0)
+                {
+                    var maxId =
+                        await _context.PayrollAdjustments
+                            .Select(x => (int?)x.Id)
+                            .MaxAsync() ?? 0;
 
-                var adjustmentId =
-                    (maxId ?? 0) + 1;
-
-
-                var adjustment =
-                    new PayrollAdjustment
+                    adjustment = new PayrollAdjustment
                     {
-                        Id = adjustmentId,
-
-                        Description =
-                            model.Description ?? "",
-
-                        StartDate =
-                            model.StartDate,
-
-                        EndDate =
-                            model.EndDate,
-
-                        AdjustmentCount =
-                            months.Count,
-
-                        AdjustmentTypeId =
-                            model.AdjustmentTypeId,
-
-                        SalaryItemId =
-                            model.AdjustmentTypeId,
-
-                        TotalAmount =
-                            totalAmount
+                        Id = maxId + 1
                     };
+               
+                    
+                    _context.PayrollAdjustments.Add(adjustment);
+                }
+                else
+                {
+                    adjustment =
+                        await _context.PayrollAdjustments
+                            .FirstOrDefaultAsync(
+                                x => x.Id == model.Id);
+
+                    if (adjustment == null)
+                        return NotFound();
+
+                    // Delete old personnel
+                    var oldPersonnel =
+                        await _context.PayrollAdjustmentPersonnels
+                            .Where(x =>
+                                x.PayrollAdjustmentId == model.Id)
+                            .ToListAsync();
+
+                    _context.PayrollAdjustmentPersonnels
+                        .RemoveRange(oldPersonnel);
+
+                    // Delete old details
+                    var oldDetails =
+                        await _context.PayrollAdjustmentDetails
+                            .Where(x =>
+                                x.PayrollAdjustmentId == model.Id)
+                            .ToListAsync();
+
+                    _context.PayrollAdjustmentDetails
+                        .RemoveRange(oldDetails);
+                }
+
+                adjustment.Description = model.Description;
+                adjustment.StartDate = model.StartDate;
+                adjustment.EndDate = model.EndDate;
+                adjustment.AdjustmentCount = model.AdjustmentCount;
+                adjustment.AdjustmentTypeId =  model.AdjustmentTypeId;
+                adjustment.Loan = model.Loan;
+                adjustment.TotalAmount = model.TotalAmount;
+                adjustment.SalaryItemId = model.AdjustmentTypeId;
+
+                await _context.SaveChangesAsync();
 
 
-                _context.PayrollAdjustments
-                    .Add(adjustment);
+                // =================================================
+                // PERSONNEL
+                // =================================================
 
+                var personnelIds =
+                    model.PersonnelIds
+                        .Distinct()
+                        .ToList();
 
-                // =====================================
-                // PayrollAdjustmentPersonnel
-                // =====================================
-
-                var maxPersonnelId =
-                    await _context.PayrollAdjustments
+                var personnelMaxId =
+                    await _context.PayrollAdjustmentPersonnels
                         .Select(x => (int?)x.Id)
-                        .MaxAsync();
-
-                int nextPersonnelId =
-                    (maxPersonnelId ?? 0) + 1;
-
+                        .MaxAsync() ?? 0;
 
                 foreach (var personnelId in personnelIds)
                 {
                     _context.PayrollAdjustmentPersonnels.Add(
                         new PayrollAdjustmentPersonnel
                         {
-                            Id = nextPersonnelId++,
-
+                            Id = ++personnelMaxId,
                             PayrollAdjustmentId =
-                                adjustmentId,
-
-                            PersonnelId =
-                                personnelId
+                                adjustment.Id,
+                            PersonnelId = personnelId
                         });
                 }
 
 
-                // =====================================
-                // PayrollAdjustmentDetail
-                // =====================================
+                // =================================================
+                // DETAILS
+                // =================================================
 
-                var maxDetailId =
+                var detailMaxId =
                     await _context.PayrollAdjustmentDetails
                         .Select(x => (int?)x.Id)
-                        .MaxAsync();
+                        .MaxAsync() ?? 0;
 
-                int nextDetailId =
-                    (maxDetailId ?? 0) + 1;
+                var amountPerInstallment =
+                    model.AdjustmentCount > 0
+                        ? model.TotalAmount /
+                          model.AdjustmentCount
+                        : 0;
 
+                var currentDate = model.StartDate;
 
-                foreach (var personnel in personnels)
+                for (int i = 0;
+                     i < model.AdjustmentCount;
+                     i++)
                 {
-                    foreach (var month in months)
+                    foreach (var personnelId in personnelIds)
                     {
-                        _context.PayrollAdjustmentDetails.Add(
+                        var detail =
                             new PayrollAdjustmentDetail
                             {
-                                Id = nextDetailId++,
+                                Id = ++detailMaxId,
 
                                 PayrollAdjustmentId =
-                                    adjustmentId,
+                                    adjustment.Id,
 
                                 Description =
-                                    model.Description ?? "",
-
-                         
+                                    model.Description,
 
                                 PayrollYear =
-                                    month.Year,
+                                    currentDate.Year,
 
                                 PayrollMonth =
-                                    month.Month,
+                                    currentDate.Month,
 
                                 Amount =
-                                    model.Amount
-                            });
-                    }
-                }
+                                    amountPerInstallment
+                            };
 
+                        _context.PayrollAdjustmentDetails
+                            .Add(detail);
+                    }
+
+                    currentDate =
+                        currentDate.AddMonths(1);
+                }
 
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
-
                 return Json(new
                 {
                     success = true,
-                    id = adjustmentId
+                    message = "تعدیل حقوق با موفقیت ذخیره شد"
                 });
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
 
-                throw;
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
 
@@ -504,7 +358,8 @@ namespace givPayroll.Controllers
         // DELETE
         // =========================================================
 
-        [HttpDelete]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var adjustment =
@@ -512,211 +367,93 @@ namespace givPayroll.Controllers
                     .FirstOrDefaultAsync(x => x.Id == id);
 
             if (adjustment == null)
-                return NotFound();
-
-
-            await using var transaction =
-                await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var details =
-                    await _context.PayrollAdjustmentDetails
-                        .Where(x =>
-                            x.PayrollAdjustmentId == id)
-                        .ToListAsync();
-
-                _context.PayrollAdjustmentDetails
-                    .RemoveRange(details);
-
-
-                var personnel =
-                    await _context.PayrollAdjustmentPersonnels
-                        .Where(x =>
-                            x.PayrollAdjustmentId == id)
-                        .ToListAsync();
-
-                _context.PayrollAdjustmentPersonnels
-                    .RemoveRange(personnel);
-
-
-                _context.PayrollAdjustments
-                    .Remove(adjustment);
-
-
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-
-
                 return Json(new
                 {
-                    success = true
+                    success = false,
+                    message = "رکورد پیدا نشد"
                 });
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
 
-                throw;
-            }
-        }
-
-        public async Task<IActionResult> ListForSelect()
-        {
-            var adjustmentTypes =
-                await _context.SalaryItems
-                    .AsNoTracking()
-                    .Where(x => x.Label == "Bonus" || x.Label == "Penalty")
-                    .OrderBy(x => x.SalaryItemName)
-                    .Select(x => new SelectListItem
-                    {
-                        Value = x.Id.ToString(),
-                        Text = x.SalaryItemName
-                    })
+            var personnel =
+                await _context.PayrollAdjustmentPersonnels
+                    .Where(x =>
+                        x.PayrollAdjustmentId == id)
                     .ToListAsync();
 
-            return Json(adjustmentTypes);
+            var details =
+                await _context.PayrollAdjustmentDetails
+                    .Where(x =>
+                        x.PayrollAdjustmentId == id)
+                    .ToListAsync();
+
+            _context.PayrollAdjustmentPersonnels
+                .RemoveRange(personnel);
+
+            _context.PayrollAdjustmentDetails
+                .RemoveRange(details);
+
+            _context.PayrollAdjustments.Remove(adjustment);
+
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                message = "رکورد حذف شد"
+            });
         }
 
+
         // =========================================================
-        // FORM DATA
+        // PERSONNEL LIST
         // =========================================================
 
-        private async Task LoadFormData(
+        [HttpGet]
+        public async Task<IActionResult> PersonnelList(
+            string? search)
+        {
+            var query = _context.Personnels
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(x =>
+                    x.FirstName.Contains(search) ||
+                    x.LastName.Contains(search));
+            }
+
+            var result = await query
+                .OrderBy(x => x.FirstName)
+                .ThenBy(x => x.LastName)
+                .Select(x => new
+                {
+                    id = x.Id,
+                    name =
+                        x.FirstName + " " +
+                        x.LastName
+                })
+                .ToListAsync();
+
+            return Json(result);
+        }
+
+
+        private async Task LoadAdjustmentTypes(
             PayrollAdjustmentViewModel model)
         {
             model.AdjustmentTypes =
                 await _context.SalaryItems
                     .AsNoTracking()
                     .OrderBy(x => x.SalaryItemName)
-                    .Where (i=>i.Label=="Bonus" || i.Label=="Penalty")
+                    .Where(i =>
+                        i.Label == "Bonus" ||
+                        i.Label == "Penalty")
                     .Select(x => new SelectListItem
                     {
                         Value = x.Id.ToString(),
                         Text = x.SalaryItemName
                     })
                     .ToListAsync();
-
-            model.Personnels =
-                await _context.Personnels
-                    .AsNoTracking()
-                    .OrderBy(x => x.LastName)
-                    .ThenBy(x => x.FirstName)
-                    .ToListAsync();
-        }
-
-
-        // =========================================================
-        // PERSIAN DATE
-        // =========================================================
-
-        private bool TryParsePersianDate(
-            string value,
-            out DateTime date)
-        {
-            date = default;
-
-            if (string.IsNullOrWhiteSpace(value))
-                return false;
-
-            value = value.Trim()
-                .Replace("-", "/");
-
-            var parts =
-                value.Split('/');
-
-            if (parts.Length != 3)
-                return false;
-
-            if (!int.TryParse(parts[0], out int year))
-                return false;
-
-            if (!int.TryParse(parts[1], out int month))
-                return false;
-
-            if (!int.TryParse(parts[2], out int day))
-                return false;
-
-            try
-            {
-                var pc =
-                    new PersianCalendar();
-
-                date =
-                    pc.ToDateTime(
-                        year,
-                        month,
-                        day,
-                        0,
-                        0,
-                        0,
-                        0);
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-
-        // =========================================================
-        // GET PAYROLL MONTHS
-        // =========================================================
-
-        private List<(int Year, int Month)>
-            GetPayrollMonths(
-                DateTime startDate,
-                DateTime endDate)
-        {
-            var result =
-                new List<(int Year, int Month)>();
-
-            var pc =
-                new PersianCalendar();
-
-            int startYear =
-                pc.GetYear(startDate);
-
-            int startMonth =
-                pc.GetMonth(startDate);
-
-            int endYear =
-                pc.GetYear(endDate);
-
-            int endMonth =
-                pc.GetMonth(endDate);
-
-
-            int currentYear =
-                startYear;
-
-            int currentMonth =
-                startMonth;
-
-
-            while (
-                currentYear < endYear ||
-                (currentYear == endYear &&
-                 currentMonth <= endMonth))
-            {
-                result.Add(
-                    (currentYear, currentMonth));
-
-
-                currentMonth++;
-
-                if (currentMonth > 12)
-                {
-                    currentMonth = 1;
-                    currentYear++;
-                }
-            }
-
-
-            return result;
         }
     }
 }

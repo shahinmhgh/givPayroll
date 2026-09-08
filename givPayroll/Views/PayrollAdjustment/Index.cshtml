@@ -1,83 +1,73 @@
 ﻿@{
     ViewData["Title"] = "تعدیلات حقوق";
 }
+<style>
+    #payrollAdjustmentPersonnelModal .modal-content {
+        background-color: lightgray;
+    }
 
+    #payrollAdjustmentPersonnelModal .modal-body {
+        background-color: lightgray;
+    }
 
-<div class="card">
+    #payrollAdjustmentPersonnelModal .modal-header,
+    #payrollAdjustmentPersonnelModal .modal-footer {
+        background-color: lightgray;
+    }
+</style>
+<div class="container-fluid">
 
-    <div class="card-header">
+    <div class="card">
 
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center">
 
             <h5 class="mb-0">
                 تعدیلات حقوق
             </h5>
 
-
             <button type="button"
                     class="btn btn-primary"
-                    onclick="newPayrollAdjustment()">
+                    onclick="createPayrollAdjustment()">
 
                 <i class="fa fa-plus"></i>
-
                 تعدیل جدید
 
             </button>
 
         </div>
 
-    </div>
+        <div class="card-body">
 
+            <div class="row mb-3">
 
-    <div class="card-body">
+                <div class="col-md-4">
 
-        <!-- Search -->
+                    <input type="text"
+                           id="searchDescription"
+                           class="form-control"
+                           placeholder="جستجوی توضیحات..." />
 
-        <div class="row mb-3">
+                </div>
 
-            <div class="col-md-4">
+                <div class="col-md-2">
 
-                <input id="description"
-                       class="form-control"
-                       placeholder="توضیحات..." />
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="loadPayrollAdjustments()">
 
-            </div>
+                        جستجو
 
+                    </button>
 
-            <div class="col-md-3">
-
-                <select id="adjustmentTypeId"
-                        class="form-select">
-
-                    <option value="">
-                        همه انواع
-                    </option>
-
-                </select>
+                </div>
 
             </div>
 
-
-            <div class="col-md-2">
-
-                <button type="button"
-                        class="btn btn-secondary"
-                        onclick="loadData()">
-
-                    <i class="fa fa-search"></i>
-
-                    جستجو
-
-                </button>
-
+            <div >
+                <div id="payrollAdjustmentList">
+                </div>
             </div>
 
-        </div>
-
-
-        <!-- List -->
-
-        <div id="payrollAdjustmentTable">
         </div>
 
     </div>
@@ -85,9 +75,7 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- MODAL -->
-<!-- ========================================================= -->
+<!-- Main Modal -->
 
 <div class="modal fade"
      id="payrollAdjustmentModal"
@@ -104,238 +92,59 @@
 </div>
 
 
+<!-- Personnel Modal -->
+
+<div class="modal fade"
+     id="payrollAdjustmentPersonnelModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    انتخاب پرسنل
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input type="text"
+                       id="personnelSearch"
+                       class="form-control mb-3"
+                       placeholder="جستجوی پرسنل..." />
+
+                <div id="availablePersonnelList">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/payrollAdjustment.js"></script>
 
     <script>
 
-        let currentPage = 1;
-
-        let currentPageSize = 10;
-
-        let currentSortColumn = "StartDate";
-
-        let currentSortDirection = "desc";
-
-
         $(document).ready(function() {
 
-            loadData();
-
-            loadAdjustmentTypes();
+            loadPayrollAdjustments();
 
         });
 
-
-        // =====================================================
-        // LOAD LIST
-        // =====================================================
-
-        function loadData() {
-
-            $.get(
-                "/PayrollAdjustment/List",
-                {
-
-                    description:
-                        $("#description").val(),
-
-                    adjustmentTypeId:
-                        $("#adjustmentTypeId").val(),
-
-                    page:
-                        currentPage,
-
-                    pageSize:
-                        currentPageSize,
-
-                    sortColumn:
-                        currentSortColumn,
-
-                    sortDirection:
-                        currentSortDirection
-
-                },
-                function(data) {
-
-                    $("#payrollAdjustmentTable")
-                        .html(data);
-
-                }
-            );
-        }
-
-
-        // =====================================================
-        // ADJUSTMENT TYPES
-        // =====================================================
-
-        function loadAdjustmentTypes() {
-
-            $.get(
-                "/PayrollAdjustmentType/ListForSelect",
-                function(data) {
-
-                    let select =
-                        $("#adjustmentTypeId");
-
-
-                    $.each(data, function(_, item) {
-
-                        select.append(
-                            $("<option>", {
-                                value: item.id,
-                                text: item.name
-                            })
-                        );
-
-                    });
-
-                }
-            );
-        }
-
-
-        // =====================================================
-        // NEW
-        // =====================================================
-
-        function newPayrollAdjustment() {
-
-            $.get(
-                "/PayrollAdjustment/Create",
-                function(data) {
-
-                    $("#payrollAdjustmentModalContent")
-                        .html(data);
-
-
-                    $.validator.unobtrusive.parse(
-                        "#payrollAdjustmentForm"
-                    );
-
-                    initContractDatePickers();
-                    $("#payrollAdjustmentModal")
-                        .modal("show");
-
-                }
-            );
-        }
-
-
-        // =====================================================
-        // DELETE
-        // =====================================================
-
-        function deletePayrollAdjustment(id) {
-
-            Swal.fire({
-
-                title: "حذف تعدیل",
-
-                text:
-                    "تمام جزئیات و پرسنل‌های این تعدیل نیز حذف خواهند شد. ادامه می‌دهید؟",
-
-                icon: "warning",
-
-                showCancelButton: true,
-
-                confirmButtonText:
-                    "بله، حذف شود",
-
-                cancelButtonText:
-                    "انصراف"
-
-            }).then(function(result) {
-
-                if (!result.isConfirmed)
-                    return;
-
-
-                $.ajax({
-
-                    url:
-                        "/PayrollAdjustment/Delete?id="
-                        + id,
-
-                    type: "DELETE",
-
-                    success: function(result) {
-
-                        if (result.success) {
-
-                            loadData();
-
-                            Swal.fire({
-                                icon: "success",
-                                title: "حذف شد",
-                                timer: 1200,
-                                showConfirmButton: false
-                            });
-
-                        }
-
-                    }
-
-                });
-
-            });
-        }
-
-
-        // =====================================================
-        // PAGING
-        // =====================================================
-
-        function goPage(page) {
-
-            currentPage = page;
-
-            loadData();
-
-        }
-
-
-        function changePageSize(size) {
-
-            currentPageSize =
-                parseInt(size);
-
-            currentPage = 1;
-
-            loadData();
-
-        }
-
-
-        // =====================================================
-        // SORT
-        // =====================================================
-
-        function sortTable(column) {
-
-            if (currentSortColumn === column) {
-
-                currentSortDirection =
-                    currentSortDirection === "asc"
-                        ? "desc"
-                        : "asc";
-
-            }
-            else {
-
-                currentSortColumn =
-                    column;
-
-                currentSortDirection =
-                    "asc";
-
-            }
-
-
-            loadData();
-
-        }
-
     </script>
-
 }

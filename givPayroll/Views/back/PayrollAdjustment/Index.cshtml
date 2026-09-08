@@ -1,0 +1,342 @@
+﻿@{
+    ViewData["Title"] = "تعدیلات حقوق";
+}
+
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">
+                تعدیلات حقوق
+            </h5>
+
+
+            <button type="button"
+                    class="btn btn-primary"
+                    onclick="newPayrollAdjustment()">
+
+                <i class="fa fa-plus"></i>
+
+                تعدیل جدید
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <!-- Search -->
+
+        <div class="row mb-3">
+
+            <div class="col-md-4">
+
+                <input id="description"
+                       class="form-control"
+                       placeholder="توضیحات..." />
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <select id="adjustmentTypeId"
+                        class="form-select">
+
+                    <option value="">
+                        همه انواع
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="col-md-2">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="loadData()">
+
+                    <i class="fa fa-search"></i>
+
+                    جستجو
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- List -->
+
+        <div id="payrollAdjustmentTable">
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL -->
+<!-- ========================================================= -->
+
+<div class="modal fade"
+     id="payrollAdjustmentModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="payrollAdjustmentModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        let currentPage = 1;
+
+        let currentPageSize = 10;
+
+        let currentSortColumn = "StartDate";
+
+        let currentSortDirection = "desc";
+
+
+        $(document).ready(function() {
+
+            loadData();
+
+            loadAdjustmentTypes();
+
+        });
+
+
+        // =====================================================
+        // LOAD LIST
+        // =====================================================
+
+        function loadData() {
+
+            $.get(
+                "/PayrollAdjustment/List",
+                {
+
+                    description:
+                        $("#description").val(),
+
+                    adjustmentTypeId:
+                        $("#adjustmentTypeId").val(),
+
+                    page:
+                        currentPage,
+
+                    pageSize:
+                        currentPageSize,
+
+                    sortColumn:
+                        currentSortColumn,
+
+                    sortDirection:
+                        currentSortDirection
+
+                },
+                function(data) {
+
+                    $("#payrollAdjustmentTable")
+                        .html(data);
+
+                }
+            );
+        }
+
+
+        // =====================================================
+        // ADJUSTMENT TYPES
+        // =====================================================
+
+        function loadAdjustmentTypes() {
+
+            $.get(
+                "/PayrollAdjustmentType/ListForSelect",
+                function(data) {
+
+                    let select =
+                        $("#adjustmentTypeId");
+
+
+                    $.each(data, function(_, item) {
+
+                        select.append(
+                            $("<option>", {
+                                value: item.id,
+                                text: item.name
+                            })
+                        );
+
+                    });
+
+                }
+            );
+        }
+
+
+        // =====================================================
+        // NEW
+        // =====================================================
+
+        function newPayrollAdjustment() {
+
+            $.get(
+                "/PayrollAdjustment/Create",
+                function(data) {
+
+                    $("#payrollAdjustmentModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#payrollAdjustmentForm"
+                    );
+
+                    //initContractDatePickers();
+                    readyProc();
+                    $("#payrollAdjustmentModal")
+                        .modal("show");
+
+                }
+            );
+        }
+
+
+        // =====================================================
+        // DELETE
+        // =====================================================
+
+        function deletePayrollAdjustment(id) {
+
+            Swal.fire({
+
+                title: "حذف تعدیل",
+
+                text:
+                    "تمام جزئیات و پرسنل‌های این تعدیل نیز حذف خواهند شد. ادامه می‌دهید؟",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    "بله، حذف شود",
+
+                cancelButtonText:
+                    "انصراف"
+
+            }).then(function(result) {
+
+                if (!result.isConfirmed)
+                    return;
+
+
+                $.ajax({
+
+                    url:
+                        "/PayrollAdjustment/Delete?id="
+                        + id,
+
+                    type: "DELETE",
+
+                    success: function(result) {
+
+                        if (result.success) {
+
+                            loadData();
+
+                            Swal.fire({
+                                icon: "success",
+                                title: "حذف شد",
+                                timer: 1200,
+                                showConfirmButton: false
+                            });
+
+                        }
+
+                    }
+
+                });
+
+            });
+        }
+
+
+        // =====================================================
+        // PAGING
+        // =====================================================
+
+        function goPage(page) {
+
+            currentPage = page;
+
+            loadData();
+
+        }
+
+
+        function changePageSize(size) {
+
+            currentPageSize =
+                parseInt(size);
+
+            currentPage = 1;
+
+            loadData();
+
+        }
+
+
+        // =====================================================
+        // SORT
+        // =====================================================
+
+        function sortTable(column) {
+
+            if (currentSortColumn === column) {
+
+                currentSortDirection =
+                    currentSortDirection === "asc"
+                        ? "desc"
+                        : "asc";
+
+            }
+            else {
+
+                currentSortColumn =
+                    column;
+
+                currentSortDirection =
+                    "asc";
+
+            }
+
+
+            loadData();
+
+        }
+
+    </script>
+
+}

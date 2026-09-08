@@ -501,6 +501,14 @@ namespace givPayroll.Data
                     }
             );
 
+            builder.Entity<PayrollAdjustmentPersonnel>()
+                .HasIndex(x => new
+                {
+                    x.PayrollAdjustmentId,
+                    x.PersonnelId
+                })
+                .IsUnique();
+
             builder.Entity<PersonnelOrder>()
                .HasOne(p => p.Job)
                .WithMany(j => j.PersonnelOrders)

@@ -6,8 +6,8 @@
 
 <style>
     /* =========================================
-                       MAIN FORM
-                       ========================================= */
+                           MAIN FORM
+                           ========================================= */
 
     .vertical-form {
         display: flex;
@@ -21,8 +21,8 @@
 
 
     /* =========================================
-                       EACH SECTION
-                       ========================================= */
+                           EACH SECTION
+                           ========================================= */
 
     .vertical-section {
         display: flex;
@@ -37,8 +37,8 @@
 
 
     /* =========================================
-                       RIGHT TITLE
-                       ========================================= */
+                           RIGHT TITLE
+                           ========================================= */
 
     .vertical-section-title {
         width: 52px;
@@ -76,8 +76,8 @@
 
 
     /* =========================================
-                       CONTENT
-                       ========================================= */
+                           CONTENT
+                           ========================================= */
 
     .vertical-section-content {
         flex: 1;
@@ -88,8 +88,8 @@
 
 
     /* =========================================
-                       SECTION HEADER LINE
-                       ========================================= */
+                           SECTION HEADER LINE
+                           ========================================= */
 
     .vertical-section-content-header {
         display: flex;
@@ -102,8 +102,8 @@
 
 
     /* =========================================
-                       MOBILE
-                       ========================================= */
+                           MOBILE
+                           ========================================= */
 
     @@media (max-width: 768px) {
 
@@ -476,30 +476,27 @@
                                                 @(i + 1)
                                                 <input asp-for="
                                                        PersonnelOrder.Details[i].SalaryItemId"
-       type="hidden" />
-<input asp-for="
-                                                           PersonnelOrder.Details[i].Id"
-       type="hidden" />
-</td>
+                                                       type="hidden" />
+                                                <input asp-for="
+                                                     PersonnelOrder.Details[i].Id"
+                                                     type="hidden" />
+                                            </td>
                                             <td>
                                                 <strong>
                                                     @Model.PersonnelOrder.Details[i].SalaryItemName
                                                 </strong>
                                             </td>
-
                                             <td>
 
                                                 <input asp-for="
                                                        PersonnelOrder.Details[i].Amount"
-       class="form-control amount-input"
-       type="text"
-       dir="ltr"
-       inputmode="numeric"
-       autocomplete="off"
-       value="@Model.PersonnelOrder.Details[i].Amount.ToString("N0")" />
-
-</td>
-
+                                                       class="form-control amount-input"
+                                                       type="text"
+                                                       dir="ltr"
+                                                       inputmode="numeric"
+                                                       autocomplete="off"
+                                                       value="@Model.PersonnelOrder.Details[i].Amount.ToString("N0")" />
+                                            </td>
                                         </tr>
                                     }
 
@@ -589,7 +586,7 @@
 </form>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         alert("123 - DOM Ready");
     });
 </script>
@@ -633,7 +630,7 @@
 <script>
 
     
-    $(document).ready(function() {
+    $(document).ready(function () {
         //initContractDatePickers();
         //initJobSelect2();
 
@@ -738,7 +735,7 @@
     $(document).on(
         'blur',
         '.amount-input',
-        function() {
+        function () {
 
             let value =
                 $(this)
@@ -762,10 +759,10 @@
 
     $('#contractForm').on(
         'submit',
-        function() {
+        function () {
 
             $('.amount-input').each(
-                function() {
+                function () {
 
                     let value =
                         $(this)
@@ -809,7 +806,7 @@
             type: "POST",
             data: form.serialize(),
 
-            success: function(result) {
+            success: function (result) {
 
                 if (result.success) {
 
@@ -824,8 +821,7 @@
                         showConfirmButton: false
                     });
                 }
-                else
-                {
+                else {
                     Swal.fire({
                         icon: "error",
                         title: result.message,
@@ -835,7 +831,7 @@
                 }
             },
 
-            error: function() {
+            error: function () {
 
                 Swal.fire({
                     icon: "error",
@@ -844,7 +840,7 @@
 
             },
 
-            complete: function() {
+            complete: function () {
 
                 $("#saveLoading").hide();
                 // $("#btnSave").prop("disabled", false);

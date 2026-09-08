@@ -1,41 +1,55 @@
-using givPayroll.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace givPersonnel.Models.DTO
+namespace givPayroll.ViewModels
 {
     public class PayrollAdjustmentViewModel
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "انتخاب نوع تعدیل الزامی است.")]
-        [Display(Name = "نوع تعدیل")]
-        public int AdjustmentTypeId { get; set; }
-
-        [Required(ErrorMessage = "تاریخ شروع الزامی است.")]
-        [Display(Name = "تاریخ شروع")]
-        public DateTime StartDate { get; set; }  
-
-        [Required(ErrorMessage = "تاریخ پایان الزامی است.")]
-        [Display(Name = "تاریخ پایان")]
-        public DateTime EndDate { get; set; }  
-
-        [Required(ErrorMessage = "مبلغ الزامی است.")]
-        [Range(typeof(decimal), "1", "999999999999999",
-            ErrorMessage = "مبلغ باید بزرگتر از صفر باشد.")]
-        [Display(Name = "مبلغ ماهانه هر نفر")]
-        public decimal Amount { get; set; }
-
+        [Required(ErrorMessage = "توضیحات الزامی است")]
         [Display(Name = "توضیحات")]
         public string Description { get; set; } = string.Empty;
 
-        public List<int> PersonnelIds { get; set; }
-            = new List<int>();
+        [Required(ErrorMessage = "تاریخ شروع الزامی است")]
+        [Display(Name = "تاریخ شروع")]
+        public DateTime StartDate { get; set; }
+
+        [Required(ErrorMessage = "تعداد اقساط الزامی است")]
+        [Range(1, 120, ErrorMessage = "تعداد اقساط باید بین 1 تا 120 باشد")]
+        [Display(Name = "تعداد اقساط")]
+        public int AdjustmentCount { get; set; }
+
+        [Display(Name = "تاریخ پایان")]
+        public DateTime EndDate { get; set; }
+
+        [Required(ErrorMessage = "نوع تعدیل را انتخاب کنید")]
+        [Display(Name = "نوع تعدیل")]
+        public int AdjustmentTypeId { get; set; }
+
+        [Display(Name = "وام")]
+        public bool Loan { get; set; }
+
+        [Required(ErrorMessage = "مبلغ کل الزامی است")]
+        [Display(Name = "مبلغ کل")]
+        public decimal TotalAmount { get; set; }
 
         public List<SelectListItem> AdjustmentTypes { get; set; }
-            = new List<SelectListItem>();
+            = new();
 
-        public List<Personnel> Personnels { get; set; }
-            = new List<Personnel>();
+        public List<int> PersonnelIds { get; set; }
+            = new();
+
+        public List<PayrollAdjustmentPersonnelViewModel> Personnels { get; set; }
+            = new();
+    }
+
+    public class PayrollAdjustmentPersonnelViewModel
+    {
+        public int Id { get; set; }
+
+        public int PersonnelId { get; set; }
+
+        public string PersonnelName { get; set; } = string.Empty;
     }
 }

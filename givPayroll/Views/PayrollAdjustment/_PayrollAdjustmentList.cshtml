@@ -1,40 +1,32 @@
-﻿@model givPayroll.Models.PagedResult<givPayroll.Models.PayrollAdjustment>
+﻿@model PayrollAdjustmentListResultViewModel
 
 <div class="table-responsive">
 
-    <table class="table table-bordered table-hover align-middle">
+    <table class="table table-bordered table-hover">
 
         <thead>
 
             <tr>
 
-                <th>#</th>
+                <th>شناسه</th>
 
-                <th>
-                    نوع تعدیل
-                </th>
+                <th>توضیحات</th>
 
-                <th>
-                    توضیحات
-                </th>
+                <th>نوع تعدیل</th>
 
-                <th>
-                    شروع
-                </th>
+                <th>تاریخ شروع</th>
 
-                <th>
-                    پایان
-                </th>
+                <th>تاریخ پایان</th>
 
-                <th>
-                    ماه
-                </th>
+                <th>تعداد اقساط</th>
 
-                <th>
-                    مبلغ کل
-                </th>
+                <th>پرسنل</th>
 
-                <th>
+                <th>مبلغ کل</th>
+
+            @*     <th>وام</th> *@
+
+                <th style="width:150px">
                     عملیات
                 </th>
 
@@ -42,99 +34,78 @@
 
         </thead>
 
-
         <tbody>
-
-            @{
-                int row =
-                    (Model.PageNumber - 1)
-                    * Model.PageSize + 1;
-            }
-
 
             @foreach (var item in Model.Items)
             {
                 <tr>
 
                     <td>
-                        @row
+                        @item.Id
                     </td>
-
-
-                    <td>
-                        @item.SalaryItem?.SalaryItemName
-                    </td>
-
 
                     <td>
                         @item.Description
                     </td>
 
+                    <td>
+                        @item.AdjustmentTypeName
+                    </td>
 
                     <td>
                         @item.StartDate.ToString("yyyy/MM/dd")
                     </td>
 
-
                     <td>
                         @item.EndDate.ToString("yyyy/MM/dd")
                     </td>
 
-
-                    <td class="text-center">
+                    <td>
                         @item.AdjustmentCount
                     </td>
 
+                    <td>
+                        @item.PersonnelCount
+                    </td>
 
-                    <td class="text-end">
+                    <td>
                         @item.TotalAmount.ToString("N0")
                     </td>
 
+                   @*  <td>
+
+                        @if (item.Loan)
+                        {
+                            <span class="badge bg-success">
+                                بله
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                خیر
+                            </span>
+                        }
+
+                    </td> *@
 
                     <td>
-                        <div class="d-flex gap-1">
 
-                            <button type="button"
-                                    class="btn btn-sm btn-primary tooltip-btn"
-                                    onclick="editPayrollAdjustment(@item.Id)">
+                        <button type="button"
+                                class="btn btn-sm btn-warning"
+                                onclick="editPayrollAdjustment(@item.Id)">
 
-                                <i class="fa fa-edit"></i>
+                            <i class="fa fa-edit"></i>
 
-                                <span class="tooltip-text">
-                                    ویرایش
-                                </span>
+                        </button>
 
-                            </button>
+                        <button type="button"
+                                class="btn btn-sm btn-danger"
+                                onclick="deletePayrollAdjustment(@item.Id)">
 
-                            <button type="button"
-                                    class="btn btn-sm btn-danger tooltip-btn"
-                                    onclick="deletePayrollAdjustment(@item.Id)">
+                            <i class="fa fa-trash"></i>
 
-                                <i class="fa fa-trash"></i>
-
-                                <span class="tooltip-text">
-                                    حذف
-                                </span>
-
-                            </button>
-
-                        </div>
-                    </td>
-
-                </tr>
-
-                row++;
-            }
-
-
-            @if (!Model.Items.Any())
-            {
-                <tr>
-
-                    <td colspan="8"
-                        class="text-center text-muted">
-
-                        رکوردی یافت نشد.
+                        </button>
 
                     </td>
 
@@ -146,77 +117,3 @@
     </table>
 
 </div>
-
-
-<div class="d-flex justify-content-between">
-
-    <span>
-        تعداد رکورد:
-        <strong>@Model.TotalRecords</strong>
-    </span>
-
-
-    <div>
-
-        @for (int i = 1;
-              i <= Model.TotalPages;
-              i++)
-        {
-            <button type="button"
-                    class="btn btn-sm
-                @(i == Model.PageNumber
-                    ? "btn-primary"
-                    : "btn-outline-primary")"
-                    onclick="goPage(@i)">
-
-                @i
-
-            </button>
-        }
-
-    </div>
-
-</div>
-
-        <script>
-            function editPayrollAdjustment(id) {
-
-    $.ajax({
-
-        url: "/PayrollAdjustment/Edit",
-
-        type: "GET",
-
-        data: {
-            id: id
-        },
-
-        success: function (data) {
-
-            $("#payrollAdjustmentModalContent")
-                .html(data);
-
-
-            $.validator.unobtrusive.parse(
-                "#payrollAdjustmentForm"
-            );
-
-                initContractDatePickers();
-            $("#payrollAdjustmentModal")
-                .modal("show");
-
-        },
-
-        error: function () {
-
-            Swal.fire({
-                icon: "error",
-                title: "خطا",
-                text: "خطا در دریافت اطلاعات تعدیل."
-            });
-
-        }
-
-    });
-}
-        </script>
