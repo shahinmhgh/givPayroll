@@ -1,4 +1,5 @@
-﻿@model CalculateViewModel
+﻿@using static AttendanceCheckViewModel
+@model CalculateViewModel
 
 <div class="table-responsive">
 
@@ -11,9 +12,9 @@
                
                 <th>پرسنل</th>
 
-                <th>کارکرد</th>
+                <th style="width:200px;">عملیات</th>
 
-                <th>محاسبه</th>
+               
 
             </tr>
 
@@ -21,11 +22,13 @@
 
         <tbody>
 
-            @foreach (var row in Model.Check)
+            @foreach (AttendanceCheckViewModel row in Model.Check)
             {
                 var total = row.Work
                            + row.Leave
-                           + row.SickLeave
+                           + row.LeaveSickMinute
+                           + row.LeaveNormalMinute
+                           + row.LeaveWithoutSalary
                            + row.Absence
                            + row.Mission;
 
@@ -34,54 +37,42 @@
                     0
                 );
 
-                <tr class="@(row.IsCorrect ? "" : "table-danger")">
-
-                   @*  <td class="text-center">
-
-                        @if (row.IsCorrect)
-                        {
-                            <span class="text-success"
-                                  title="کارکرد صحیح است">
-
-                                <i class="fa fa-check-circle"></i>
-
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="text-danger"
-                                  title="کارکرد صحیح نیست">
-
-                                <i class="fa fa-exclamation-triangle"></i>
-
-                            </span>
-                        }
-
-                    </td> *@
-
-                  
+                <tr class="@(row.Status == AttendanceWorkStatus.Incorrect ? "" : "table-danger")">
 
                     <td>
                         @row.PersonnelName
                     </td>
 
-                     
- 
-                    <td>
-                        @if (shortage > 0)
+                    <td class="text-center">
+
+                        @if (row.Status == AttendanceWorkStatus.Incorrect)
                         {
-                            <span class="text-danger fw-bold">
-                                @shortage
-                            </span>
+                            <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId);">
+
+                                <i class="fa fa-times-circle"></i>
+                                کارکرد نادرست
+                            </button>
+                        }
+                        else if (row.Status == AttendanceWorkStatus.Incomplete)
+                        {
+                            <button type="button" class="btn btn-danger" onclick="buttonProc();">
+
+                                <i class="fa fa-times-circle"></i>
+                                کارکرد ناقص
+                            </button>
                         }
                         else
                         {
-                            <span class="text-success">
-                                0
-                            </span>
+                            <button type="button" class="btn  btn-success" onclick="buttonProc();">
+
+                                <i class="fa fa-exclamation-triangle"></i>
+                                محاسبه حقوق
+                            </button>
                         }
+
                     </td>
 
+                     
                 </tr>
             }
 
@@ -90,3 +81,46 @@
     </table>
 
 </div>
+
+<script>
+    function buttonProc(personnelId) {
+        const select = document.querySelector('select[name="year"]');
+        const year = select.options[select.selectedIndex].text;
+
+        var month = $("#attendanceMonth").val();
+        
+
+        $.ajax({
+
+            url: "/Attendance/List",
+
+            data:
+            {
+                year: year,
+                month: month,
+                personnelId: personnelId
+            },
+
+            success: function(data) {
+              
+
+                $("#attendanceCheckModalContent")
+                    .html(data);
+
+
+                // $.validator.unobtrusive.parse(
+                //     "#personnelOrderForm"
+                // );
+
+                // initContractSelect2();
+                // initContractDatePickers();
+                //initPersonnelOrderForm();
+
+                $("#attendanceCheckModal")
+                    .modal("show");
+            }
+
+        });
+
+    }
+</script>

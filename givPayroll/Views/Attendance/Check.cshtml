@@ -53,7 +53,7 @@
 
                 </div>
 
-               @*  <div class="col-md-2 d-flex align-items-end">
+                @*  <div class="col-md-2 d-flex align-items-end">
 
                     <button type="submit"
                             class="btn btn-primary w-100">
@@ -76,7 +76,7 @@
             </form>
 
 
-             <div id="attendanceResult">
+            <div id="attendanceResult">
                 @if (Model.Check != null && Model.Check.Any())
                 {
                     <partial name="_AttendanceCheckResult" model="Model" />
@@ -99,11 +99,77 @@
 
 </div>
 
-<script>
+ <div class="modal fade"
+     id="attendanceModal" style="z-index: 1060 !important;">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="attendanceModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div class="modal fade"
+     id="attendanceCheckModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content"
+             id="attendanceCheckModalContent">
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+
+    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.all.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.esm.all.min.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.esm.all.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.esm.min.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.esm.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.min.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.js"></script>
+<script src="~/js/attendance.js"></script>
+    <script>
+        function editAttendance(id) {
+            $.get(
+                "/Attendance/Edit/" + id,
+
+                function (data) {
+                    $("#attendanceModalContent")
+                        .html(data);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#attendanceForm"
+                    );
+
+
+                    $("#attendanceModal")
+                        .modal("show");
+                }
+            );
+        }
+
+    </script>
+
+   <script>
     function checkAttendance() {
 
         const year = $('select[name="year"]').val();
-        const month = $('select[name="month"]').val();
+        //const month = $('select[name="month"]').val();
+        let month =
+            $("#attendanceMonth").val();
 
         const button = $('button[onclick="checkAttendance()"]');
 
@@ -129,10 +195,10 @@
                 console.error(xhr);
 
                 $('#attendanceResult').html(`
-                        <div class="alert alert-danger">
-                            خطا در بررسی کارکرد پرسنل.
-                        </div>
-                    `);
+                            <div class="alert alert-danger">
+                                خطا در بررسی کارکرد پرسنل.
+                            </div>
+                        `);
             },
             complete: function() {
 
@@ -145,3 +211,5 @@
         });
     }
 </script>
+}
+

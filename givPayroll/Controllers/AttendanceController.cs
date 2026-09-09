@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using givPayroll.Data;
+using givPayroll.Models;
+using givPayroll.Services;
+using givPayroll.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.DiaSymReader;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Playwright;
 using System.Globalization;
-using givPayroll.Data;
-using givPayroll.Models;
+using static AttendanceCheckViewModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
-using givPayroll.ViewModels;
-using givPayroll.Services;
 
 namespace givPayroll.Controllers
 {
@@ -38,7 +41,7 @@ namespace givPayroll.Controllers
             if (!year.HasValue || !month.HasValue)
             {
                 result.Check = new List<AttendanceCheckViewModel>();
-                return PartialView(result);
+                return View(result);
             }
             string prefix =
                 $"{currentYear:0000}/{currentMonth:00}/";
@@ -117,8 +120,8 @@ namespace givPayroll.Controllers
             // 3. محاسبه
             // -----------------------------
 
-            
-            result.Check= new List<AttendanceCheckViewModel>();
+
+            result.Check = new List<AttendanceCheckViewModel>();
 
             foreach (var personnel in personnels)
             {
@@ -127,36 +130,59 @@ namespace givPayroll.Controllers
                     .Where(x => x.PersonnelId == personnel.PersonnelId)
                     .ToList();
 
+                bool hasWorked = true; string errWorked = "";
+                bool isCorrect = true; string errisCorrect = "";
+                List<AttendanceCheckViewModel> lst = new List<AttendanceCheckViewModel>();
+                foreach (Attendance x in attendance)
+                {
+                    int Work = x.WorkingMinute;
+
+                    int Leave = x.LeaveNormalMinute;
+                    int LeaveWithoutSalary = x.LeaveWithoutSalaryMinute;
+                    int LeaveNormalMinute = x.LeaveNormalMinute;
+                    int LeaveSickMinute = x.LeaveSickMinute;
+
+                    int Absence = x.AbsenceMinute;
+                    int Mission = x.MissionMinute;
+
+                    int Required = x.WorkingExpectedMinute;
+                    int total = Work + Leave + LeaveWithoutSalary + LeaveNormalMinute + LeaveSickMinute + Absence + Mission;
+                    bool iscorrect = total >= Required;
+                    if (!iscorrect)
+                    {
+                        errisCorrect += x.AttendancePersianDate + ", ";
+                        isCorrect = false;
+                    }
+                    if (!x.HasWorked)
+                    {
+                        errWorked += x.AttendancePersianDate + ", ";
+                        hasWorked = false;
+                    }
+                }
+                AttendanceWorkStatus status = AttendanceWorkStatus.None;
+                if (isCorrect == false)
+                    status = AttendanceWorkStatus.Incorrect;
+                else if (hasWorked == false)
+                    status = AttendanceWorkStatus.Incomplete;
+                else 
+                    status = AttendanceWorkStatus.Complete;
 
                 var model = new AttendanceCheckViewModel
                 {
                     PersonnelId = personnel.PersonnelId,
-
-                    //PersonnelCode = personnel.PersonnelCode,
-
                     PersonnelName = personnel.PersonnelName,
-
-                    // Required = personnel.Required,
-
-                    Work = attendance.Sum(x => x.WorkingMinute),
-
-                    Leave = attendance.Sum(x => x.LeaveNormalMinute),
-                    LeaveWithoutSalary = attendance.Sum(x => x.LeaveWithoutSalaryMinute),
-                    SickLeave = attendance.Sum(x => x.LeaveSickMinute),
-
-                    Absence = attendance.Sum(x => x.AbsenceMinute),
-
-                    Mission = attendance.Sum(x => x.MissionMinute)
+                    Status = status,
+                    //IsCorrect = isCorrect, // کارکرد درست / کارکرد نادرست
+                    //hasWorked = hasWorked, // کارکرد کامل / کارکرد ناقص
+                    IsCorrectErrText = errisCorrect,
+                    hasWorkedErrText = errWorked,
                 };
-
 
                 result.Check.Add(model);
             }
-
-
+            // 
             return PartialView("_AttendanceCheckResult", result);
         }
-
 
         // =========================================================
         // INDEX
@@ -729,23 +755,23 @@ namespace givPayroll.Controllers
         {
             FillYears(model);
             FillMonths(model);
-            
+
             model.Personnels =
                 await _context.Personnels
                     .OrderBy(x => x.LastName)
                     .ThenBy(x => x.FirstName)
                     .Select(x => new SelectListItem
                     {
-                        Value =  x.Id.ToString(),
-                        Text =  x.LastName +  " " + x.FirstName
+                        Value = x.Id.ToString(),
+                        Text = x.LastName + " " + x.FirstName
                     })
                     .ToListAsync();
         }
 
         private void FillYears(AttendanceViewModel model)
         {
-            var pc =new PersianCalendar();
-            int currentYear =   pc.GetYear(DateTime.Now);
+            var pc = new PersianCalendar();
+            int currentYear = pc.GetYear(DateTime.Now);
 
             model.Years =
                 Enumerable.Range(currentYear - 29, 30)
@@ -874,7 +900,8 @@ namespace givPayroll.Controllers
             ViewBag.Year = year;
             ViewBag.Month = month;
             ViewBag.PersonnelId = personnelId;
-
+            Personnel person =await  _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefaultAsync();
+            @ViewBag.PersonnelName = person.FirstName + " " + person.LastName;
             return PartialView("_AttendanceList", data);
         }
 
