@@ -12,9 +12,14 @@ namespace givPayroll.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(10)]
+        //[MaxLength(10)]
         [Display(Name = "تاریخ")]
-        public string AttendanceDate { get; set; } = string.Empty;
+        public DateTime AttendanceDate { get; set; }
+
+        [Required]
+        [MaxLength(10)]
+        [Display(Name = "تاریخ شمسی")]
+        public string AttendancePersianDate { get; set; }
 
         [Required]
         [Display(Name = "پرسنل")]

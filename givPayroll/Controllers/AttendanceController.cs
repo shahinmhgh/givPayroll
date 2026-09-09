@@ -33,9 +33,13 @@ namespace givPayroll.Controllers
             ViewBag.Month = currentMonth;
             ViewBag.Searched = year.HasValue && month.HasValue;
 
+            var result = new CalculateViewModel();
+            FillMonths(result);
             if (!year.HasValue || !month.HasValue)
-                return View(new List<AttendanceCheckViewModel>());
-
+            {
+                result.Check = new List<AttendanceCheckViewModel>();
+                return PartialView(result);
+            }
             string prefix =
                 $"{currentYear:0000}/{currentMonth:00}/";
 
@@ -65,7 +69,7 @@ namespace givPayroll.Controllers
             var personnels = await _context.PersonnelOrders
 
                 .Include(x => x.Personnel)
-                .Where(x => x.StartDate <= monthEndGregorian &&x.IsActive  &&
+                .Where(x => x.StartDate <= monthEndGregorian && x.IsActive &&
                     (
                         x.EndDate == null ||
                         x.EndDate >= monthStartGregorian
@@ -103,7 +107,7 @@ namespace givPayroll.Controllers
 
                 .Where(x =>
                     personnelIds.Contains(x.PersonnelId) &&
-                    x.AttendanceDate.StartsWith(prefix)
+                    x.AttendancePersianDate.StartsWith(prefix)
                 )
 
                 .ToListAsync();
@@ -113,7 +117,8 @@ namespace givPayroll.Controllers
             // 3. محاسبه
             // -----------------------------
 
-            var result = new List<AttendanceCheckViewModel>();
+            
+            result.Check= new List<AttendanceCheckViewModel>();
 
             foreach (var personnel in personnels)
             {
@@ -131,7 +136,7 @@ namespace givPayroll.Controllers
 
                     PersonnelName = personnel.PersonnelName,
 
-                   // Required = personnel.Required,
+                    // Required = personnel.Required,
 
                     Work = attendance.Sum(x => x.WorkingMinute),
 
@@ -145,7 +150,7 @@ namespace givPayroll.Controllers
                 };
 
 
-                result.Add(model);
+                result.Check.Add(model);
             }
 
 
@@ -214,7 +219,7 @@ namespace givPayroll.Controllers
 
                 .Where(x =>
                     x.PersonnelId == personnelId &&
-                    x.AttendanceDate.StartsWith(prefix))
+                    x.AttendancePersianDate.StartsWith(prefix))
 
                 .OrderBy(x => x.AttendanceDate)
 
@@ -242,8 +247,8 @@ namespace givPayroll.Controllers
             var model = new Attendance
             {
                 PersonnelId = personnelId,
-
-                AttendanceDate =
+                Personnel = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault(),
+                AttendancePersianDate =
                     $"{year:0000}/{month:00}/01"
             };
 
@@ -323,8 +328,7 @@ namespace givPayroll.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var item = await _context.Attendances
-                .FindAsync(id);
+            var item = await _context.Attendances.Include(x => x.Personnel).Where(x => x.Id == id).FirstOrDefaultAsync();
 
 
             if (item == null)
@@ -357,14 +361,14 @@ namespace givPayroll.Controllers
             }
 
 
-            var existing = await _context.Attendances
-                .FindAsync(model.Id);
+            var existing = await _context.Attendances.FindAsync(model.Id);
 
 
             if (existing == null)
                 return NotFound();
 
             existing.AttendanceDate = model.AttendanceDate;
+            existing.AttendancePersianDate = model.AttendancePersianDate;
             existing.PersonnelId = model.PersonnelId;
             existing.WorkingExpectedMinute = model.WorkingExpectedMinute;
             existing.WorkingMinute = model.WorkingMinute;
@@ -379,7 +383,7 @@ namespace givPayroll.Controllers
             existing.MissionMinute = model.MissionMinute;
             existing.Status = model.Status;
             existing.HasWorked = model.HasWorked;
-
+            existing.Personnel = _context.Personnels.Where(i => i.Id == model.PersonnelId).FirstOrDefault();
             await _context.SaveChangesAsync();
 
 
@@ -422,9 +426,9 @@ namespace givPayroll.Controllers
             existing.AbsenceMinute = 0;
             existing.MissionMinute = 0;
             existing.Status = 0;
-             
-            bool isholiday = await _holidayService.IsHolidayAsync(DateUtil.S2M(existing.AttendanceDate));
-            bool isFriday = DateUtil.S2M(existing.AttendanceDate).DayOfWeek == DayOfWeek.Friday;
+
+            bool isholiday = await _holidayService.IsHolidayAsync(DateUtil.S2M(existing.AttendancePersianDate));
+            bool isFriday = DateUtil.S2M(existing.AttendancePersianDate).DayOfWeek == DayOfWeek.Friday;
             if (isholiday || isFriday)
                 existing.HasWorked = true;
             else
@@ -602,7 +606,8 @@ namespace givPayroll.Controllers
                 */
                 attendance.Id = nextId++;
 
-                attendance.AttendanceDate = row.Cell(1).GetString().Replace("-", "/").Trim();
+                attendance.AttendancePersianDate = row.Cell(1).GetString().Replace("-", "/").Trim();
+                attendance.AttendanceDate = DateUtil.S2M(attendance.AttendancePersianDate);
                 attendance.PersonnelId = row.Cell(2).GetValue<int>();
                 attendance.WorkingExpectedMinute = row.Cell(3).GetValue<int>();
                 attendance.WorkingMinute = row.Cell(4).GetValue<int>();
@@ -623,7 +628,7 @@ namespace givPayroll.Controllers
 
                 string prefix = $"{year:0000}/{month:00}";
 
-                if (!attendance.AttendanceDate
+                if (!attendance.AttendancePersianDate
                     .StartsWith(prefix))
                 {
                     continue;
@@ -724,57 +729,35 @@ namespace givPayroll.Controllers
         {
             FillYears(model);
             FillMonths(model);
-
-
+            
             model.Personnels =
                 await _context.Personnels
-
                     .OrderBy(x => x.LastName)
                     .ThenBy(x => x.FirstName)
-
                     .Select(x => new SelectListItem
                     {
-                        Value =
-                            x.Id.ToString(),
-
-                        Text =
-                            x.LastName +
-                            " " +
-                            x.FirstName
+                        Value =  x.Id.ToString(),
+                        Text =  x.LastName +  " " + x.FirstName
                     })
-
                     .ToListAsync();
         }
 
-
-        private void FillYears(
-            AttendanceViewModel model)
+        private void FillYears(AttendanceViewModel model)
         {
-            var pc =
-                new PersianCalendar();
-
-
-            int currentYear =
-                pc.GetYear(DateTime.Now);
-
+            var pc =new PersianCalendar();
+            int currentYear =   pc.GetYear(DateTime.Now);
 
             model.Years =
-                Enumerable.Range(
-                    currentYear - 29,
-                    30)
-
+                Enumerable.Range(currentYear - 29, 30)
                 .OrderByDescending(x => x)
-
                 .Select(x =>
                     new SelectListItem
                     {
                         Value = x.ToString(),
                         Text = x.ToString()
                     })
-
                 .ToList();
         }
-
 
         private void FillImportYears(
             AttendanceImportViewModel model)
@@ -845,7 +828,7 @@ namespace givPayroll.Controllers
             var attendances = await _context.Attendances
                 .Where(x =>
                     x.PersonnelId == personnelId &&
-                    x.AttendanceDate.StartsWith(prefix))
+                    x.AttendancePersianDate.StartsWith(prefix))
                 .OrderBy(x => x.AttendanceDate)
                 .ToListAsync();
 
@@ -860,7 +843,7 @@ namespace givPayroll.Controllers
                     Id = x.Id,
                     PersonnelId = x.PersonnelId,
                     AttendanceDate = x.AttendanceDate,
-
+                    AttendancePersianDate = DateUtil.M2S(x.AttendanceDate),
                     WorkingExpectedMinute = x.WorkingExpectedMinute,
                     WorkingMinute = x.WorkingMinute,
                     ExtraMinute = x.ExtraMinute,
@@ -882,7 +865,7 @@ namespace givPayroll.Controllers
 
             foreach (AttendanceListViewModel item in data)
             {
-                item.Holiday = await _holidayService.IsHolidayAsync(DateUtil.S2M(item.AttendanceDate));
+                item.Holiday = await _holidayService.IsHolidayAsync(item.AttendanceDate);
                 //if (item.Holiday)
                 //    System.Diagnostics.Debugger.Break();
 
@@ -911,7 +894,22 @@ namespace givPayroll.Controllers
 
                 .ToList();
         }
+        private void FillMonths(
+           CalculateViewModel model)
+        {
+            model.Months =
+                Enumerable.Range(1, 12)
 
+                .Select(x =>
+                    new SelectListItem
+                    {
+                        Value = x.ToString(),
+                        Text =
+                            PersianMonth.Names[x - 1]
+                    })
+
+                .ToList();
+        }
 
         private void FillMonths(
             AttendanceImportViewModel model)

@@ -45,15 +45,15 @@
 
             <div class="col-md-6 mb-3">
 
-                <label asp-for="AttendanceDate"
+                <label asp-for="AttendancePersianDate"
                        class="form-label">
 
                 </label>
 
-                <input asp-for="AttendanceDate"
+                <input asp-for="AttendancePersianDate"
                        class="form-control" />
 
-                <span asp-validation-for="AttendanceDate"
+                <span asp-validation-for="AttendancePersianDate"
                       class="text-danger">
                 </span>
 
@@ -64,17 +64,16 @@
 
             <div class="col-md-6 mb-3">
 
-                <label asp-for="PersonnelId"
-                       class="form-label">
+                <input asp-for="PersonnelId" type="hidden" />
 
-                </label>
+                <div class="col-md-4">
+                    <label asp-for="PersonnelId"
+                           class="form-label">
+                    </label>
 
-                <input asp-for="PersonnelId"
-                       class="form-control" />
+                    <input value="@Model.Personnel.FirstName   @Model.Personnel.LastName" type="text" readonly class="form-control"></input>
 
-                <span asp-validation-for="PersonnelId"
-                      class="text-danger">
-                </span>
+                </div>
 
             </div>
 

@@ -6,7 +6,8 @@ namespace givPayroll.ViewModels
 
         public int PersonnelId { get; set; }
 
-        public string AttendanceDate { get; set; } = "";
+        public DateTime AttendanceDate { get; set; }
+        public string AttendancePersianDate { get; set; } = string.Empty;
 
         public int WorkingExpectedMinute { get; set; }
         public int WorkingMinute { get; set; }

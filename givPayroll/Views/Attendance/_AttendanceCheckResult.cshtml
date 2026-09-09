@@ -1,4 +1,4 @@
-﻿@model List<AttendanceCheckViewModel>
+﻿@model CalculateViewModel
 
 <div class="table-responsive">
 
@@ -8,27 +8,12 @@
 
             <tr>
 
-               @*  <th>وضعیت</th> *@
-
-                 
-
+               
                 <th>پرسنل</th>
-
-                <th>موظفی</th>
 
                 <th>کارکرد</th>
 
-                <th>مرخصی</th>
-
-                <th>استعلاجی</th>
-
-                <th>غیبت</th>
-
-                <th>ماموریت</th>
-
-                <th>جمع</th>
-
-                <th>کسری</th>
+                <th>محاسبه</th>
 
             </tr>
 
@@ -36,7 +21,7 @@
 
         <tbody>
 
-            @foreach (var row in Model)
+            @foreach (var row in Model.Check)
             {
                 var total = row.Work
                            + row.Leave
@@ -80,34 +65,8 @@
                         @row.PersonnelName
                     </td>
 
-                    <td>
-                        @row.Required
-                    </td>
-
-                    <td>
-                        @row.Work
-                    </td>
-
-                    <td>
-                        @row.Leave
-                    </td>
-
-                    <td>
-                        @row.SickLeave
-                    </td>
-
-                    <td>
-                        @row.Absence
-                    </td>
-
-                    <td>
-                        @row.Mission
-                    </td>
-
-                    <td class="fw-bold">
-                        @total
-                    </td>
-
+                     
+ 
                     <td>
                         @if (shortage > 0)
                         {

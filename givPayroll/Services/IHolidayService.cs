@@ -7,7 +7,7 @@ namespace givPayroll.Services
     public interface IHolidayService
     {
         Task<bool> IsHolidayAsync(DateTime date);
-  Task<string> HolidayDescriptionAsync(string date);
+  Task<string> HolidayDescriptionAsync(DateTime date);
         Task<HolidayInfo?> GetHolidayAsync(DateTime date);
         Task<List<HolidayInfo>> GetHolidaysAsync(
             DateTime fromDate,
@@ -37,9 +37,9 @@ namespace givPayroll.Services
                 .AnyAsync(x =>
                     x.Date.Date == date.Date);
         }
-        public async Task<string> HolidayDescriptionAsync(string date)
+        public async Task<string> HolidayDescriptionAsync(DateTime date)
         {
-            Holiday obj =await _context.Holidays.Where(x => x.PersianDate == date).FirstOrDefaultAsync();
+            Holiday obj =await _context.Holidays.Where(x => x.Date == date).FirstOrDefaultAsync();
             if (obj == null)
                 return "";
             return obj.Title;

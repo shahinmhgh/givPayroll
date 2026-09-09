@@ -1,4 +1,9 @@
 ﻿@model PayrollAdjustmentListResultViewModel
+@using System.Globalization
+
+@{
+    var persianCalendar = new PersianCalendar();
+}
 
 <div class="table-responsive">
 
@@ -53,11 +58,15 @@
                     </td>
 
                     <td>
-                        @item.StartDate.ToString("yyyy/MM/dd")
+                        @($"{persianCalendar.GetYear(item.StartDate):0000}/" +
+                          $"{persianCalendar.GetMonth(item.StartDate):00}/" +
+                          $"{persianCalendar.GetDayOfMonth(item.StartDate):00}")
                     </td>
 
                     <td>
-                        @item.EndDate.ToString("yyyy/MM/dd")
+                        @($"{persianCalendar.GetYear(item.EndDate):0000}/" +
+                          $"{persianCalendar.GetMonth(item.EndDate):00}/" +
+                          $"{persianCalendar.GetDayOfMonth(item.EndDate):00}")
                     </td>
 
                     <td>

@@ -127,13 +127,13 @@
                          
                         var pc = new PersianCalendar();
 
-                        var parts = item.AttendanceDate.Split('/');
+                    @*     var parts = item.AttendanceDate.Split('/');
 
                         var year = int.Parse(parts[0]);
                         var month = int.Parse(parts[1]);
-                        var day = int.Parse(parts[2]);
+                        var day = int.Parse(parts[2]); *@
 
-                        var gregorianDate = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
+                        var gregorianDate = item.AttendanceDate;
                         var tday = gregorianDate.DayOfWeek;
                        var isHoliday = item.Holiday;
                         var mark = isHoliday ? "*" : "";
@@ -157,7 +157,7 @@
                             </td>
 
                             <td>
-                                @item.AttendanceDate
+                                @item.AttendancePersianDate
                             </td>
 
                              <td>

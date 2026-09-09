@@ -1,5 +1,10 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
+
 public class AttendanceCheckViewModel
 {
+    public List<SelectListItem> Months { get; set; }
+        = new();
+
     public int PersonnelId { get; set; }
 
     public string PersonnelName { get; set; } = "";

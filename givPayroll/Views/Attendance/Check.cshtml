@@ -1,7 +1,7 @@
-﻿@model List<AttendanceCheckViewModel>
+﻿@model CalculateViewModel
 
 @{
-    ViewData["Title"] = "بررسی صحیح بودن کارکرد";
+    ViewData["Title"] = "محاسبه حقوق";
 }
 
 <div class="container-fluid">
@@ -10,7 +10,7 @@
 
         <div class="card-header">
             <h5 class="mb-0">
-                بررسی صحیح بودن کارکرد پرسنل
+                محاسبه حقوق
             </h5>
         </div>
 
@@ -40,23 +40,15 @@
 
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
 
                     <label class="form-label">
                         ماه
                     </label>
 
-                    <select name="month"
-                            class="form-select">
-
-                        @for (int month = 1; month <= 12; month++)
-                        {
-                            <option value="@month"
-                                    selected="@(ViewBag.Month == month)">
-                                @month.ToString("00")
-                            </option>
-                        }
-
+                    <select id="attendanceMonth"
+                            class="form-select"
+                            asp-items="Model.Months">
                     </select>
 
                 </div>
@@ -85,7 +77,7 @@
 
 
              <div id="attendanceResult">
-                @if (Model != null && Model.Any())
+                @if (Model.Check != null && Model.Check.Any())
                 {
                     <partial name="_AttendanceCheckResult" model="Model" />
                 }

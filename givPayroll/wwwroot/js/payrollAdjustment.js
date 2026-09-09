@@ -226,7 +226,7 @@ function loadAvailablePersonnel() {
 
 
                 html += `
-
+                 
                     <div class="d-flex
                                 justify-content-between
                                 align-items-center
@@ -258,6 +258,7 @@ function loadAvailablePersonnel() {
                         </button>
 
                     </div>
+                    
                 `;
             });
 

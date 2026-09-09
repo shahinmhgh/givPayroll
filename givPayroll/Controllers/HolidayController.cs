@@ -97,6 +97,7 @@ namespace givPayroll.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Holiday model)
         {
+            ModelState.Remove("PersianDate");
             if (!ModelState.IsValid)
                 return PartialView("_HolidayForm", model);
 
