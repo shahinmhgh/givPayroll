@@ -15,4 +15,5 @@ public class AttendanceTotalsViewModel
     public int AbsenceMinute { get; set; }
 
     public int MissionMinute { get; set; }
+    public int DelayMinute { get; internal set; }
 }

@@ -15,11 +15,15 @@ public class PayrollController : Controller
 {
     private readonly IPdfService _pdfService;
     private readonly ApplicationDbContext _context;
+    private readonly IPayrollFormulaService _payrollFormulaService;
 
-    public PayrollController(IPdfService pdfService, ApplicationDbContext context)
+    public PayrollController(IPdfService pdfService,
+        ApplicationDbContext context,
+        IPayrollFormulaService payrollFormulaService)
     {
         _pdfService = pdfService;
         _context = context;
+        _payrollFormulaService = payrollFormulaService;
     }
 
     // Personnel
@@ -107,6 +111,18 @@ public class PayrollController : Controller
         }
         #endregion
 
+        var result = await _context.Attendances
+            .Where(x =>
+                x.AttendancePersianDate.StartsWith(prefix) &&
+                x.PersonnelId == personnelId)
+            .GroupBy(x => x.PersonnelId)
+            .Select(g => new
+            {
+                Count = g.Count()
+            })
+            .FirstOrDefaultAsync();
+        int daysWorked = result?.Count ?? 0;
+
         #region Attendence
         var totals = await _context.Attendances
             .Where(x => x.PersonnelId == personnelId &&
@@ -114,6 +130,7 @@ public class PayrollController : Controller
             .GroupBy(x => x.PersonnelId)
             .Select(g => new AttendanceTotalsViewModel
             {
+                DelayMinute = g.Sum(x => x.DelayMinute),
                 WorkingMinute = g.Sum(x => x.WorkingMinute),
                 ExtraMinute = g.Sum(x => x.ExtraMinute),
                 HolidayMinute = g.Sum(x => x.HolidayMinute),
@@ -125,71 +142,110 @@ public class PayrollController : Controller
             })
             .FirstOrDefaultAsync();
 
-        List<SalaryItem> lst2 = _context.SalaryItems.Where(i => i.Source == "Attendence").ToList();
-        foreach (SalaryItem itemSalary in lst2)
+        var variables = new Dictionary<string, object>
         {
-            string Label = itemSalary.Label;
-            string formula = itemSalary.FormulaValue;
-            int total = 0;
-            decimal amount = 0;
-            switch (Label)
+            ["BaseSalary"] = BaseSalary,
+            ["MonthDays"] = monthDays,
+
+            ["DaysWorked"] = daysWorked,
+
+            ["ExtraMinute"] = totals?.ExtraMinute ?? 0,
+            ["MissionMinute"] = totals?.MissionMinute ?? 0,
+            ["AbsenceMinute"] = totals?.AbsenceMinute ?? 0,
+            ["DelayMinute"] = totals?.DelayMinute ?? 0,
+
+            ["WorkingMinute"] = totals?.WorkingMinute ?? 0,
+            ["HolidayMinute"] = totals?.HolidayMinute ?? 0,
+            ["LeaveNormalMinute"] = totals?.LeaveNormalMinute ?? 0,
+            ["LeaveSickMinute"] = totals?.LeaveSickMinute ?? 0,
+            ["LeaveWithoutSalaryMinute"] = totals?.LeaveWithoutSalaryMinute ?? 0
+        };
+
+        List<SalaryItem> attendanceSalaryItems = _context.SalaryItems.Where(i => i.Source == "Attendence").ToList();
+        foreach (var salaryItem in attendanceSalaryItems)
+        {
+            if (string.IsNullOrWhiteSpace(salaryItem.FormulaValue))
+                continue;
+
+            decimal amount = _payrollFormulaService.Calculate(
+                salaryItem.FormulaValue,
+                variables);
+
+            if (amount == 0)
+                continue;
+
+            model.PayrollItems.Add(new PayrollItem
             {
-                case "OverTime":
-                    total = totals?.ExtraMinute ?? 0;
-
-                    var expression1 = new Expression(formula);
-                    expression1.Parameters["BaseSalary"] = BaseSalary;
-                    expression1.Parameters["MonthDays"] = monthDays;
-                    expression1.Parameters["ExtraMinute"] = total;
-                    var result1 = expression1.Evaluate();
-                    amount = Convert.ToDecimal(result1);
-
-                    break;
-                case "MissionAllowance":
-                    total = totals?.MissionMinute ?? 0;
-
-                    var expression2 = new Expression(formula);
-                    expression2.Parameters["BaseSalary"] = BaseSalary;
-                    expression2.Parameters["MonthDays"] = monthDays;
-                    expression2.Parameters["MissionMinute"] = total;
-                    var result2 = expression2.Evaluate();
-                    amount = Convert.ToDecimal(result2);
-
-                    break;
-                case "AbsenceDeduction":
-                    total = totals?.AbsenceMinute ?? 0;
-
-                    var expression3 = new Expression(formula);
-                    expression3.Parameters["BaseSalary"] = BaseSalary;
-                    expression3.Parameters["MonthDays"] = monthDays;
-                    expression3.Parameters["AbsenceMinute"] = total;
-                    var result3 = expression3.Evaluate();
-                    amount = Convert.ToDecimal(result3);
-
-                    break;
-                case "DelayDeduction":
-                    total = totals?.HolidayMinute ?? 0;
-
-                    var expression4 = new Expression(formula);
-                    expression4.Parameters["BaseSalary"] = BaseSalary;
-                    expression4.Parameters["MonthDays"] = monthDays;
-                    expression4.Parameters["DelayMinute"] = total;
-                    var result4 = expression4.Evaluate();
-                    amount = Convert.ToDecimal(result4);
-
-                    break;
-
-                default:
-                    break;
-            }
-
-            PayrollItem item = new PayrollItem();
-            item.SalaryItemId = itemSalary.Id;
-            item.PlusMinus = itemSalary.PlusMinus;
-            item.Amount = amount;
-            if (amount > 0)
-                model.PayrollItems.Add(item);
+                SalaryItemId = salaryItem.Id,
+                PlusMinus = salaryItem.PlusMinus,
+                Amount = amount
+            });
         }
+
+        //foreach (SalaryItem itemSalary in attendanceSalaryItems)
+        //{
+        //    string Label = itemSalary.Label;
+        //    string formula = itemSalary.FormulaValue;
+        //    int total = 0;
+        //    decimal amount = 0;
+        //    switch (Label)
+        //    {
+        //        case "OverTime":
+        //            total = totals?.ExtraMinute ?? 0;
+
+        //            var expression1 = new Expression(formula);
+        //            expression1.Parameters["BaseSalary"] = BaseSalary;
+        //            expression1.Parameters["MonthDays"] = monthDays;
+        //            expression1.Parameters["ExtraMinute"] = total;
+        //            var result1 = expression1.Evaluate();
+        //            amount = Convert.ToDecimal(result1);
+
+        //            break;
+        //        case "MissionAllowance":
+        //            total = totals?.MissionMinute ?? 0;
+
+        //            var expression2 = new Expression(formula);
+        //            expression2.Parameters["BaseSalary"] = BaseSalary;
+        //            expression2.Parameters["MonthDays"] = monthDays;
+        //            expression2.Parameters["MissionMinute"] = total;
+        //            var result2 = expression2.Evaluate();
+        //            amount = Convert.ToDecimal(result2);
+
+        //            break;
+        //        case "AbsenceDeduction":
+        //            total = totals?.AbsenceMinute ?? 0;
+
+        //            var expression3 = new Expression(formula);
+        //            expression3.Parameters["BaseSalary"] = BaseSalary;
+        //            expression3.Parameters["MonthDays"] = monthDays;
+        //            expression3.Parameters["AbsenceMinute"] = total;
+        //            var result3 = expression3.Evaluate();
+        //            amount = Convert.ToDecimal(result3);
+
+        //            break;
+        //        case "DelayDeduction":
+        //            total = totals?.HolidayMinute ?? 0;
+
+        //            var expression4 = new Expression(formula);
+        //            expression4.Parameters["BaseSalary"] = BaseSalary;
+        //            expression4.Parameters["MonthDays"] = monthDays;
+        //            expression4.Parameters["DelayMinute"] = total;
+        //            var result4 = expression4.Evaluate();
+        //            amount = Convert.ToDecimal(result4);
+
+        //            break;
+
+        //        default:
+        //            break;
+        //    }
+
+        //    PayrollItem item = new PayrollItem();
+        //    item.SalaryItemId = itemSalary.Id;
+        //    item.PlusMinus = itemSalary.PlusMinus;
+        //    item.Amount = amount;
+        //    if (amount > 0)
+        //        model.PayrollItems.Add(item);
+        //}
         #endregion
 
         ////PayrollAdjustment
@@ -198,7 +254,7 @@ public class PayrollController : Controller
         {
             String Label = itemSalary.Label;
 
-            var result = await _context.PayrollAdjustmentDetails
+            var result3 = await _context.PayrollAdjustmentDetails
                 .Where(d =>
                     d.PayrollPersianYear == year &&
                     d.PayrollPersianMonth == month &&
@@ -217,8 +273,8 @@ public class PayrollController : Controller
             {
                 PayrollItem item = new PayrollItem();
                 item.SalaryItemId = itemSalary.Id;
-                item.Amount = Convert.ToDecimal(result.Amount);
-                item.Description = result.Description;
+                item.Amount = Convert.ToDecimal(result3.Amount);
+                item.Description = result3.Description;
                 model.PayrollItems.Add(item);
             }
 

@@ -31,6 +31,7 @@ options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IPdfService, PlaywrightPdfService>();
 builder.Services.AddScoped<IHolidayService, HolidayService>();
+builder.Services.AddScoped<IPayrollFormulaService, PayrollFormulaService>();
 
 //builder.Services
 //    .AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
