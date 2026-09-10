@@ -59,7 +59,7 @@
                         تاریخ
                     </th>
 
-                     <th>
+                    <th>
                         روز
 
                     </th>
@@ -77,6 +77,9 @@
 
                     <th>
                         تعطیل کاری
+                    </th>
+                    <th style="width:50px;font-size:6px;">
+                        روز تعطیل
                     </th>
 
                     <th>
@@ -124,45 +127,45 @@
 
                     foreach (var item in Model)
                     {
-                         
+
                         var pc = new PersianCalendar();
-
-                    @*     var parts = item.AttendanceDate.Split('/');
-
-                        var year = int.Parse(parts[0]);
-                        var month = int.Parse(parts[1]);
-                        var day = int.Parse(parts[2]); *@
 
                         var gregorianDate = item.AttendanceDate;
                         var tday = gregorianDate.DayOfWeek;
-                       var isHoliday = item.Holiday;
+                        var isHoliday = item.Holiday;
                         var mark = isHoliday ? "*" : "";
                         var markHoliday = item.HolidayDescriptrion;
-
-                        @* <tr class="@(@tday == DayOfWeek.Friday ? "friday-row" : "")"> *@
+  
                         <tr class="@(item.Holiday
-                                ? "holiday-row"
-                                : tday == DayOfWeek.Friday
-                                    ? "friday-row"
-                                    : "")">
+                            ? "holiday-row"
+                            : tday == DayOfWeek.Friday
+                                ? "friday-row"
+                                : "")">
                             <td>
-                                @if (@mark=="*")
-                                {
-                                    <label style="background-color:white;border-radius:5px; padding-right:5px;width:20px;height:20px;border:1px solid black;color:black" title="@markHoliday">
-                                        @mark
-                                    </label>
-                                }
-                              
-                                @row  
+
+                                @row
+
                             </td>
 
                             <td>
                                 @item.AttendancePersianDate
+
+                                @if (ViewBag.CorrectErrText != null &&
+                                     ViewBag.CorrectErrText.ToString().Contains(item.AttendancePersianDate))
+                                {
+                                    <i class="fa fa-exclamation-triangle" style="color:red;"></i>
+                                }
+                                @if (ViewBag.HasWorkedText != null &&
+                                     ViewBag.HasWorkedText.ToString().Contains(item.AttendancePersianDate))
+                                {
+                                    <i class="fa fa-exclamation-triangle" style="color:darkorange;"></i>
+                                }
+
                             </td>
 
-                             <td>
-                               
+                            <td>
 
+                               
                                 @persianDays[@tday]
                             </td>
 
@@ -181,7 +184,14 @@
                             <td>
                                 @item.HolidayMinute
                             </td>
-
+                            <td>
+                                @if (@mark == "*")
+                                {
+                                    <label style="background-color:white;border-radius:5px; padding-right:5px;width:20px;height:20px;border:1px solid black;color:black" title="@markHoliday">
+                                        @mark
+                                    </label>
+                                }
+                            </td>
                             <td>
                                 @item.DelayMinute
                             </td>

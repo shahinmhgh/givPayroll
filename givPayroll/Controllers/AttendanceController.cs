@@ -164,7 +164,7 @@ namespace givPayroll.Controllers
                     status = AttendanceWorkStatus.Incorrect;
                 else if (hasWorked == false)
                     status = AttendanceWorkStatus.Incomplete;
-                else 
+                else
                     status = AttendanceWorkStatus.Complete;
 
                 var model = new AttendanceCheckViewModel
@@ -393,8 +393,8 @@ namespace givPayroll.Controllers
             if (existing == null)
                 return NotFound();
 
-            existing.AttendanceDate = model.AttendanceDate;
             existing.AttendancePersianDate = model.AttendancePersianDate;
+            existing.AttendanceDate = DateUtil.S2M(model.AttendancePersianDate);
             existing.PersonnelId = model.PersonnelId;
             existing.WorkingExpectedMinute = model.WorkingExpectedMinute;
             existing.WorkingMinute = model.WorkingMinute;
@@ -847,7 +847,10 @@ namespace givPayroll.Controllers
         public async Task<IActionResult> List(
             int year,
             int month,
-            int personnelId)
+            int personnelId,
+            string CorrectErrText = "",
+            string HasWorkedText = ""
+            )
         {
             string prefix = $"{year:0000}/{month:00}/";
 
@@ -863,31 +866,33 @@ namespace givPayroll.Controllers
                 .Select(x => x.Date)
                 .ToListAsync();
 
-            var data = attendances
-                .Select(x => new AttendanceListViewModel
-                {
-                    Id = x.Id,
-                    PersonnelId = x.PersonnelId,
-                    AttendanceDate = x.AttendanceDate,
-                    AttendancePersianDate = DateUtil.M2S(x.AttendanceDate),
-                    WorkingExpectedMinute = x.WorkingExpectedMinute,
-                    WorkingMinute = x.WorkingMinute,
-                    ExtraMinute = x.ExtraMinute,
-                    HolidayMinute = x.HolidayMinute,
-                    DelayMinute = x.DelayMinute,
-                    EarlyArrivalMinute = x.EarlyArrivalMinute,
-                    LeaveNormalMinute = x.LeaveNormalMinute,
-                    LeaveSickMinute = x.LeaveSickMinute,
-                    AbsenceMinute = x.AbsenceMinute,
-                    MissionMinute = x.MissionMinute,
+            List<AttendanceListViewModel> data = new List<AttendanceListViewModel>();
 
-                    HasWorked = x.HasWorked,
+            data = attendances
+                            .Select(x => new AttendanceListViewModel
+                            {
+                                Id = x.Id,
+                                PersonnelId = x.PersonnelId,
+                                AttendanceDate = x.AttendanceDate,
+                                AttendancePersianDate = DateUtil.M2S(x.AttendanceDate),
+                                WorkingExpectedMinute = x.WorkingExpectedMinute,
+                                WorkingMinute = x.WorkingMinute,
+                                ExtraMinute = x.ExtraMinute,
+                                HolidayMinute = x.HolidayMinute,
+                                DelayMinute = x.DelayMinute,
+                                EarlyArrivalMinute = x.EarlyArrivalMinute,
+                                LeaveNormalMinute = x.LeaveNormalMinute,
+                                LeaveSickMinute = x.LeaveSickMinute,
+                                AbsenceMinute = x.AbsenceMinute,
+                                MissionMinute = x.MissionMinute,
 
-                    // New field
-                    // Holiday = holidays.Contains(DateUtil.S2M(x.AttendanceDate)),
+                                HasWorked = x.HasWorked,
 
-                })
-                .ToList();
+                                // New field
+                                // Holiday = holidays.Contains(DateUtil.S2M(x.AttendanceDate)),
+
+                            })
+                            .ToList();
 
             foreach (AttendanceListViewModel item in data)
             {
@@ -897,11 +902,14 @@ namespace givPayroll.Controllers
 
                 item.HolidayDescriptrion = await _holidayService.HolidayDescriptionAsync(item.AttendanceDate);
             }
+            ViewBag.CorrectErrText = CorrectErrText;
+            ViewBag.HasWorkedText = HasWorkedText;
+
             ViewBag.Year = year;
             ViewBag.Month = month;
             ViewBag.PersonnelId = personnelId;
-            Personnel person =await  _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefaultAsync();
-            @ViewBag.PersonnelName = person.FirstName + " " + person.LastName;
+            Personnel person = await _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefaultAsync();
+            ViewBag.PersonnelName = person.FirstName + " " + person.LastName;
             return PartialView("_AttendanceList", data);
         }
 

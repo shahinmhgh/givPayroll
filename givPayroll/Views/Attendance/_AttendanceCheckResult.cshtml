@@ -12,7 +12,7 @@
                
                 <th>پرسنل</th>
 
-                <th style="width:200px;">عملیات</th>
+                <th style="width:300px;">عملیات</th>
 
                
 
@@ -24,20 +24,12 @@
 
             @foreach (AttendanceCheckViewModel row in Model.Check)
             {
-                var total = row.Work
-                           + row.Leave
-                           + row.LeaveSickMinute
-                           + row.LeaveNormalMinute
-                           + row.LeaveWithoutSalary
-                           + row.Absence
-                           + row.Mission;
+                  
+                var errClass = "";
+                if (row.Status == AttendanceWorkStatus.Incorrect || row.Status == AttendanceWorkStatus.Incomplete)
+                { errClass = "table-danger"; }
 
-                var shortage = Math.Max(
-                    row.Required - total,
-                    0
-                );
-
-                <tr class="@(row.Status == AttendanceWorkStatus.Incorrect ? "" : "table-danger")">
+                <tr class="@errClass">
 
                     <td>
                         @row.PersonnelName
@@ -47,26 +39,28 @@
 
                         @if (row.Status == AttendanceWorkStatus.Incorrect)
                         {
-                            <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId);">
-
+                            <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-times-circle"></i>
                                 کارکرد نادرست
                             </button>
                         }
                         else if (row.Status == AttendanceWorkStatus.Incomplete)
                         {
-                            <button type="button" class="btn btn-danger" onclick="buttonProc();">
-
+                            <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-times-circle"></i>
                                 کارکرد ناقص
                             </button>
                         }
                         else
                         {
-                            <button type="button" class="btn  btn-success" onclick="buttonProc();">
+                            <button type="button" class="btn btn-primary" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
 
+                                <i class="fa fa-check-circle"></i>
+                                کارکرد صحیح
+                            </button>
+                            <button type="button" class="btn  btn-success" onclick="buttonProc();">
                                 <i class="fa fa-exclamation-triangle"></i>
-                                محاسبه حقوق
+                                محاسبه
                             </button>
                         }
 
@@ -83,13 +77,15 @@
 </div>
 
 <script>
-    function buttonProc(personnelId) {
+    function buttonProc(personnelId, correctErrText, hasWorkedText) {
+
+         
         const select = document.querySelector('select[name="year"]');
         const year = select.options[select.selectedIndex].text;
 
         var month = $("#attendanceMonth").val();
-        
 
+        
         $.ajax({
 
             url: "/Attendance/List",
@@ -98,12 +94,14 @@
             {
                 year: year,
                 month: month,
-                personnelId: personnelId
+                personnelId: personnelId,
+                CorrectErrText: correctErrText,
+                HasWorkedText: hasWorkedText
             },
 
             success: function(data) {
-              
 
+              
                 $("#attendanceCheckModalContent")
                     .html(data);
 
