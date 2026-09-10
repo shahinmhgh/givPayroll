@@ -21,15 +21,23 @@ namespace givPayroll.Models
         [Display(Name = "توضیحات")]
         public string Description { get; set; } = string.Empty;
 
-   
+        [Required]
+        public DateTime PayrollAdjustmentDate { get; internal set; }
+        //[Required]
+        //[Display(Name = "سال حقوق")]
+        //public int PayrollYear { get; set; }
+
+        //[Required]
+        //[Display(Name = "ماه حقوق")]
+        //public int PayrollMonth { get; set; }
 
         [Required]
-        [Display(Name = "سال حقوق")]
-        public int PayrollYear { get; set; }
+        [Display(Name = "سال")]
+        public int PayrollPersianYear { get; set; }
 
         [Required]
-        [Display(Name = "ماه حقوق")]
-        public int PayrollMonth { get; set; }
+        [Display(Name = "ماه")]
+        public int PayrollPersianMonth { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,3)")]
@@ -40,8 +48,7 @@ namespace givPayroll.Models
         // Navigation Properties
 
         [ForeignKey(nameof(PayrollAdjustmentId))]
-        public virtual PayrollAdjustment? PayrollAdjustment { get; set; }
-
-  
+        public virtual PayrollAdjustment PayrollAdjustment { get; set; }
+        
     }
 }

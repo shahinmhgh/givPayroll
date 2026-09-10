@@ -11,6 +11,46 @@ namespace givPayroll
 
             return $"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}";
         }
+        private static readonly string[] PersianMonths =
+  {
+        "فروردین",
+        "اردیبهشت",
+        "خرداد",
+        "تیر",
+        "مرداد",
+        "شهریور",
+        "مهر",
+        "آبان",
+        "آذر",
+        "دی",
+        "بهمن",
+        "اسفند"
+    };
+
+        public static string GetPersianMonthName(int month)
+        {
+            string[] persianMonths =
+                {
+                    "فروردین",
+                    "اردیبهشت",
+                    "خرداد",
+                    "تیر",
+                    "مرداد",
+                    "شهریور",
+                    "مهر",
+                    "آبان",
+                    "آذر",
+                    "دی",
+                    "بهمن",
+                    "اسفند"
+                };
+            
+
+            if (month < 1 || month > 12)
+                throw new ArgumentOutOfRangeException(nameof(month));
+
+            return PersianMonths[month - 1];
+        }
 
         internal static DateTime S2M(string theDate)
         {

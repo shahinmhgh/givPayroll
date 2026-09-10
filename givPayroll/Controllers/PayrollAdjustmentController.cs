@@ -295,11 +295,17 @@ namespace givPayroll.Controllers
                         : 0;
 
                 var currentDate = model.StartDate;
+               
 
                 for (int i = 0;
                      i < model.AdjustmentCount;
                      i++)
                 {
+                    var currentPersianDate = DateUtil.M2S(currentDate);
+                    var parts = currentPersianDate.Split('/');
+                    var payrollPersianYear = int.Parse(parts[0]);
+                    var payrollPersianMonth = int.Parse(parts[1]);
+
                     foreach (var personnelId in personnelIds)
                     {
                         var detail =
@@ -307,20 +313,13 @@ namespace givPayroll.Controllers
                             {
                                 Id = ++detailMaxId,
 
-                                PayrollAdjustmentId =
-                                    adjustment.Id,
+                                PayrollAdjustmentId = adjustment.Id,
+                                Description = model.Description,
+                                PayrollAdjustmentDate =   currentDate,
+                                PayrollPersianYear = payrollPersianYear,
+                                PayrollPersianMonth = payrollPersianMonth,
 
-                                Description =
-                                    model.Description,
-
-                                PayrollYear =
-                                    currentDate.Year,
-
-                                PayrollMonth =
-                                    currentDate.Month,
-
-                                Amount =
-                                    amountPerInstallment
+                                Amount =  amountPerInstallment
                             };
 
                         _context.PayrollAdjustmentDetails

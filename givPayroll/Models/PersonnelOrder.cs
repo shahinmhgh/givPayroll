@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace givPayroll.Models
 {
+     
     public class PersonnelOrder
     {
         [Key]

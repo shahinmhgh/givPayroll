@@ -27,7 +27,7 @@ namespace givPayroll.Controllers
         {
             var query = _context.SalaryItems
                 .Include(i=>i.SalaryItemRules)
-                .Where(i=>i.Label!= "Bonus" && i.Label != "Penalty")
+                //.Where(i=>i.Label!= "Bonus" && i.Label != "Penalty")
                 .AsNoTracking()
                 .AsQueryable();
 

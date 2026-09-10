@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace givPayroll.Models
 {
+    
     public class PersonnelOrderDetail
     {
         [Key]
@@ -36,9 +37,10 @@ namespace givPayroll.Models
 
 
         // Navigation
-
+        [ForeignKey(nameof(PersonnelOrderId))]
         public PersonnelOrder? PersonnelOrder { get; set; }
 
-        public SalaryItem? SalaryItem { get; set; }
+        [ForeignKey(nameof(SalaryItemId))]
+        public SalaryItem SalaryItem { get; set; }
     }
 }

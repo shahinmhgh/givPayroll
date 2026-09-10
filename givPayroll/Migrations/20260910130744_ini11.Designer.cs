@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using givPayroll.Data;
 
@@ -11,9 +12,11 @@ using givPayroll.Data;
 namespace givPayroll.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910130744_ini11")]
+    partial class ini11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3213,16 +3216,13 @@ namespace givPayroll.Migrations
                         .IsRequired()
                         .HasColumnType("ntext");
 
-                    b.Property<DateTime>("PayrollAdjustmentDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("PayrollAdjustmentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PayrollPersianMonth")
+                    b.Property<int>("PayrollMonth")
                         .HasColumnType("int");
 
-                    b.Property<int>("PayrollPersianYear")
+                    b.Property<int>("PayrollYear")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -3261,17 +3261,10 @@ namespace givPayroll.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,3)");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<int?>("PayrollAdjustmentId")
                         .HasColumnType("int");
 
                     b.Property<int>("PayrollId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlusMinus")
                         .HasColumnType("int");
 
                     b.Property<int>("SalaryItemId")
@@ -3550,7 +3543,7 @@ namespace givPayroll.Migrations
 
                     b.HasIndex("RuleInsuranceGroupId");
 
-                    b.ToTable("PersonnelOrder", "Payroll");
+                    b.ToTable("PersonnelOrder", (string)null);
                 });
 
             modelBuilder.Entity("givPayroll.Models.PersonnelOrderDetail", b =>
@@ -3590,7 +3583,7 @@ namespace givPayroll.Migrations
 
                     b.HasIndex("SalaryItemId");
 
-                    b.ToTable("PersonnelOrderDetail", "Payroll");
+                    b.ToTable("PersonnelOrderDetail", (string)null);
                 });
 
             modelBuilder.Entity("givPayroll.Models.RuleInsurance", b =>

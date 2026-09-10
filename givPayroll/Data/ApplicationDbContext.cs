@@ -604,7 +604,7 @@ namespace givPayroll.Data
 
             builder.Entity<PersonnelOrder>(entity =>
             {
-                entity.ToTable("PersonnelOrder");
+                entity.ToTable("PersonnelOrder", "Payroll");
 
                 entity.HasKey(x => x.Id);
 
@@ -643,10 +643,22 @@ namespace givPayroll.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            builder.Entity<PersonnelOrderDetail>()
+                 .HasOne(d => d.SalaryItem)
+                 .WithMany()
+                 .HasForeignKey(d => d.SalaryItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<PersonnelOrderDetail>()
+                .HasOne(d => d.PersonnelOrder)
+                .WithMany(o => o.Details)
+                .HasForeignKey(d => d.PersonnelOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<PersonnelOrderDetail>(entity =>
             {
-                entity.ToTable("PersonnelOrderDetail");
+                entity.ToTable("PersonnelOrderDetail", "Payroll");
 
                 entity.HasKey(x => x.Id);
 
@@ -1120,7 +1132,7 @@ namespace givPayroll.Data
          SalaryItemName = "پاداش",
          Label = "Bonus",
          Unit = "Amount",
-         Source = "BonusMonthTable",
+         Source = "PayrollAdjustment",
          PlusMinus = 1,
          CalculationMode = "Manual",
          FormulaValue = ""
@@ -1250,7 +1262,7 @@ namespace givPayroll.Data
          SalaryItemName = "جریمه",
          Label = "Penalty",
          Unit = "Amount",
-         Source = "PayrollAdjustmentDetail",
+         Source = "PayrollAdjustment",
          PlusMinus = -1,
          CalculationMode = "Manual",
          FormulaValue = ""

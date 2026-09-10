@@ -11,6 +11,10 @@ namespace givPayroll.Models
         [Display(Name = "شناسه")]
         public int Id { get; set; }
 
+        [MaxLength(500)]
+        [Display(Name = "توضیحات")]
+        public string? Description { get; set; }
+
         [Required]
         [Display(Name = "حقوق")]
         public int PayrollId { get; set; }
@@ -26,8 +30,7 @@ namespace givPayroll.Models
 
         [Display(Name = "تعدیل حقوق")]
         public int? PayrollAdjustmentId { get; set; }
-
-
+ 
         // Navigation Properties
 
         [ForeignKey(nameof(PayrollId))]
@@ -38,5 +41,6 @@ namespace givPayroll.Models
 
         [ForeignKey(nameof(PayrollAdjustmentId))]
         public virtual PayrollAdjustment? PayrollAdjustment { get; set; }
+        public int PlusMinus { get; internal set; }
     }
 }

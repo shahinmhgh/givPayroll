@@ -24,7 +24,7 @@
 
             @foreach (AttendanceCheckViewModel row in Model.Check)
             {
-                  
+
                 var errClass = "";
                 if (row.Status == AttendanceWorkStatus.Incorrect || row.Status == AttendanceWorkStatus.Incomplete)
                 { errClass = "table-danger"; }
@@ -58,7 +58,7 @@
                                 <i class="fa fa-check-circle"></i>
                                 کارکرد صحیح
                             </button>
-                            <button type="button" class="btn  btn-success" onclick="buttonProc();">
+                            <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
                                 <i class="fa fa-exclamation-triangle"></i>
                                 محاسبه
                             </button>
@@ -77,6 +77,38 @@
 </div>
 
 <script>
+  
+    function PayrollProc(personnelId) {
+        const select = document.querySelector('select[name="year"]');
+        const year = select.options[select.selectedIndex].text;
+
+        var month = $("#attendanceMonth").val();
+
+        $.ajax({
+            type: "GET",
+            url: "/Payroll/PayrollPreview",
+            data:
+            {
+                year: year,
+                month: month,
+                personnelId: personnelId 
+            },
+
+            success: function(data) {
+
+              
+                $("#attendanceCheckModalContent")
+                    .html(data);
+
+ 
+
+                $("#attendanceCheckModal")
+                    .modal("show");
+            }
+
+        });
+    }
+
     function buttonProc(personnelId, correctErrText, hasWorkedText) {
 
          

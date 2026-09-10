@@ -49,6 +49,8 @@ namespace givPayroll.Models
         [ForeignKey(nameof(SalaryItemId))]
         public virtual SalaryItem? SalaryItem { get; set; }
 
+       
+
         public virtual ICollection<PayrollAdjustmentDetail> Details { get; set; }
                 = new List<PayrollAdjustmentDetail>();
 

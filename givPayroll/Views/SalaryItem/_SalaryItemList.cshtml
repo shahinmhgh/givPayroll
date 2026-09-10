@@ -124,33 +124,37 @@
                         </td>
 
                         <td>
+                            @if (@item.Label != "Bonus" && @item.Label != "Penalty")
+                            {
 
-                            <button type="button"
-                                    class="btn btn-sm btn-warning tooltip-btn"
-                                    onclick="openSalaryItemEdit(@item.Id)">
+                                <button type="button"
+                                class="btn btn-sm btn-warning tooltip-btn"
+                                onclick="openSalaryItemEdit(@item.Id)">
 
-                                   <i class="fa fa-edit"></i>
-                            <span class="tooltip-text">ویرایش</span>
+                                    <i class="fa fa-edit"></i>
+                                    <span class="tooltip-text">ویرایش</span>
 
-                            </button>
+                                </button>
 
 
-                            <button type="button"
-                                    class="btn btn-sm btn-danger tooltip-btn"
-                                    onclick="deleteSalaryItem(@item.Id)">
+                                <button type="button"
+                                class="btn btn-sm btn-danger tooltip-btn"
+                                onclick="deleteSalaryItem(@item.Id)">
 
-                                   <i class="fa fa-trash"></i>
-                            <span class="tooltip-text">حذف</span>
+                                    <i class="fa fa-trash"></i>
+                                    <span class="tooltip-text">حذف</span>
 
-                            </button>
-                            <button type="button" class="btn btn-sm btn-info tooltip-btn"
-                                    onclick="salaryItemRule(@item.Id)">
+                                </button>
+                                <button type="button" class="btn btn-sm btn-info tooltip-btn"
+                                        onclick="salaryItemRule(@item.Id)">
 
-                                <i class="fa fa-cog"></i>
-                                <span class="tooltip-text">قوانین حقوق</span>
+                                    <i class="fa fa-cog"></i>
+                                    <span class="tooltip-text">قوانین حقوق</span>
+
                                
-
-                            </button>
+                                </button>
+                            }
+                           
                         </td>
 
                     </tr>
