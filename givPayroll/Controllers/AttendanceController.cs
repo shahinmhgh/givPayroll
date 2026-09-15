@@ -843,6 +843,24 @@ namespace givPayroll.Controllers
         //        "_AttendanceList",
         //        data);
         //}
+
+        [HttpGet]
+        public async Task<IActionResult> CheckList(
+            int year,
+            int month,
+            int personnelId,
+            string CorrectErrText = "",
+            string HasWorkedText = ""
+            )
+        {
+            ViewBag.year = year;
+            ViewBag.month = month;
+            ViewBag.personnelId = personnelId;
+            ViewBag.CorrectErrText = CorrectErrText;
+            ViewBag.HasWorkedText = HasWorkedText;
+            return PartialView("_AttendanceCheckForm");
+        }
+
         [HttpGet]
         public async Task<IActionResult> List(
             int year,

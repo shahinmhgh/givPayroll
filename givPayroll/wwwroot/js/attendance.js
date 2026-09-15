@@ -1,4 +1,5 @@
 ﻿function loadAttendance() {
+   
     let year =
         $("#attendanceYear").val();
 
@@ -8,13 +9,13 @@
     let personnelId =
         $("#attendancePersonnel").val();
 
-
+     
     if (!personnelId) {
         $("#attendanceTable").html("");
 
         return;
     }
-
+   
 
     $.ajax({
 

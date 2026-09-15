@@ -1,0 +1,67 @@
+﻿@model Attendance
+
+<link rel="stylesheet"  href="~/pages/css/modal.css" />
+<link rel="stylesheet"   href="~/pages/css/validation.css" />
+
+<form id="attendanceForm" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="PersonnelId" />
+
+    <div class="modal-header modal-drag-handle">
+        <h5>
+         لیست حضور و غیاب
+        </h5>
+    </div>
+
+ @*    <div id="attendanceSaveLoading"
+         class="modal-loading"
+         style="display:none;">
+
+        <img src="~/images/hourglass.gif"  alt="ذخیره ..." />
+    </div>
+
+ *@
+    <div class="modal-body">
+
+       
+        <div id="attendanceTable">
+        </div>
+
+
+    </div>
+
+
+    <div class="modal-footer">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            بستن
+
+        </button>
+
+
+        <button  
+                type="button"
+                class="btn btn-primary"
+                onclick="loadAttendance()()">
+
+            برور رسانی
+
+        </button>
+
+    </div>
+
+</form>
+
+<script src="~/js/attendance.js"></script>
+<script>
+    $(document).ready(function() {
+        
+           loadAttendance();
+    });
+
+</script>

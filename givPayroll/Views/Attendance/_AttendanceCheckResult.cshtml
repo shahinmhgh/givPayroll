@@ -1,7 +1,7 @@
 ﻿@using static AttendanceCheckViewModel
 @model CalculateViewModel
 
-<div class="table-responsive">
+<div class="table-responsive" >
 
     <table class="table table-bordered table-hover align-middle">
 
@@ -116,11 +116,11 @@
         const year = select.options[select.selectedIndex].text;
 
         var month = $("#attendanceMonth").val();
-
+        $("#attendancePersonnel").val(personnelId);
         
         $.ajax({
 
-            url: "/Attendance/List",
+            url: "/Attendance/CheckList",
 
             data:
             {
@@ -137,6 +137,11 @@
                 $("#attendanceCheckModalContent")
                     .html(data);
 
+                //var height = $("#tableResult").height();
+                //alert(height);
+                //$("#tableResult").height(500);
+                //height = $("#tableResult").height();
+                //alert(height);
 
                 // $.validator.unobtrusive.parse(
                 //     "#personnelOrderForm"

@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "محاسبه حقوق";
 }
+<input type="hidden" asp-for="attendancePersonnel" />
 
 <div class="container-fluid">
 
@@ -25,7 +26,8 @@
                         سال
                     </label>
 
-                    <select name="year"
+                    <select id="attendanceYear" 
+                            name="year"
                             class="form-select">
 
                         @for (int year = 1400; year <= 1410; year++)
@@ -53,26 +55,23 @@
 
                 </div>
 
-                @*  <div class="col-md-2 d-flex align-items-end">
+           <div class="col-md-2">
 
-                    <button type="submit"
-                            class="btn btn-primary w-100">
+                    <label class="form-label">
+                          
+                    </label>
+
+                    <button type="button" style="margin-top:7px;"
+                            class="btn btn-primary w-100"
+                            onclick="checkAttendance()">
 
                         <i class="fa fa-search"></i>
-
                         بررسی
 
                     </button>
 
-                </div> *@
-                <button type="button"
-                        class="btn btn-primary w-100"
-                        onclick="checkAttendance()">
-
-                    <i class="fa fa-search"></i>
-                    بررسی
-
-                </button>
+                </div>
+              
             </form>
 
 
