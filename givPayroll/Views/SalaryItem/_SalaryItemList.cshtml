@@ -145,7 +145,11 @@
                                     <span class="tooltip-text">حذف</span>
 
                                 </button>
-                                <button type="button" class="btn btn-sm btn-info tooltip-btn"
+                               
+                            } 
+                            @if (@item.Label != "Insurance" && @item.Label != "Tax")
+                            {
+                            <button type="button" class="btn btn-sm btn-info tooltip-btn"
                                         onclick="salaryItemRule(@item.Id)">
 
                                     <i class="fa fa-cog"></i>
@@ -154,7 +158,6 @@
                                
                                 </button>
                             }
-                           
                         </td>
 
                     </tr>
