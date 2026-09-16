@@ -11,6 +11,7 @@ namespace givPayroll.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
+        [Required]
         public int SalaryItemId { get; set; }
 
         public DateTime EffectiveDate { get; set; }  
@@ -22,6 +23,6 @@ namespace givPayroll.Models
         public decimal Amount { get; set; }
 
         [ForeignKey("SalaryItemId")]
-        public SalaryItem? SalaryItem { get; set; }
+        public SalaryItem  SalaryItem { get; set; }
     }
 }

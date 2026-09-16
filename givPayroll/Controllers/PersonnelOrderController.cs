@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using givPayroll.Data;
 using givPayroll.Models;
+using System.IO.Enumeration;
 
 namespace givPayroll.Controllers
 {
@@ -45,7 +46,7 @@ namespace givPayroll.Controllers
                 query = query.Where(x =>
                     x.Personnel!.FirstName.Contains(search) ||
                     x.Personnel.LastName.Contains(search) ||
-                    x.No.ToString().Contains(search) );
+                    x.No.ToString().Contains(search));
             }
 
 
@@ -266,7 +267,7 @@ namespace givPayroll.Controllers
 
             model.StartDate = DateTime.Now.Date;
             model.EndDate = DateTime.Now.Date.AddYears(1);
-           
+
 
             foreach (var item in model.Details)
             {
@@ -306,7 +307,7 @@ namespace givPayroll.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(  PersonnelOrderViewModel model)
+        public async Task<IActionResult> Create(PersonnelOrderViewModel model)
         {
             ModelState.Remove("Contract");
             ModelState.Remove("Job");
@@ -355,14 +356,14 @@ namespace givPayroll.Controllers
                  .ExecuteUpdateAsync(setters =>
                      setters.SetProperty(x => x.IsActive, false));
 
-                PersonnelContract con =await _context.Contracts
+                PersonnelContract con = await _context.Contracts
                  .Where(x => x.PersonnelId == model.PersonnelId && x.IsActive).FirstOrDefaultAsync();
 
                 var order = new PersonnelOrder
                 {
                     PersonnelId = model.PersonnelId,
                     ContractId = con.Id,
-                    RuleInsuranceGroupId =model.RuleInsuranceGroupId,
+                    RuleInsuranceGroupId = model.RuleInsuranceGroupId,
                     JobId = model.JobId,
                     No = model.No,
                     IssueDate = model.IssueDate,
@@ -370,7 +371,7 @@ namespace givPayroll.Controllers
                     EndDate = model.EndDate,
                     Description = model.Description,
                     IsActive = model.IsActive,
-                     
+
                     DateCreated = DateTime.Now,
                     UserCreated = GetCurrentUserId()
                 };
@@ -458,17 +459,14 @@ namespace givPayroll.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-
             if (order == null)
                 return NotFound();
-
 
             var model = new PersonnelOrderViewModel
             {
                 Id = order.Id,
 
                 PersonnelId = order.PersonnelId,
-
                 ContractId = order.ContractId,
 
                 RuleInsuranceGroupId =
@@ -476,7 +474,7 @@ namespace givPayroll.Controllers
 
                 No = order.No,
 
-                IssueDate = order.IssueDate ,
+                IssueDate = order.IssueDate,
                 StartDate = order.StartDate,
                 EndDate = order.EndDate,
                 JobId = order.JobId,
@@ -485,29 +483,33 @@ namespace givPayroll.Controllers
                 IsActive = order.IsActive
             };
 
-             model.Personnel =await _context.Personnels.FindAsync(model.PersonnelId);
+            model.Personnel = await _context.Personnels.FindAsync(model.PersonnelId);
 
             await PrepareSelectLists(model);
-
 
             var salaryItems =
                 await _context.SalaryItems
                     .AsNoTracking()
-                    .Where(x =>
-                        x.Source == "PersonnelOrder")
+                    .Where(x => x.Source == "PersonnelOrder")
                     .OrderBy(x => x.Priority)
                     .ToListAsync();
 
-
-            var existingDetails =
+            Dictionary<int, PersonnelOrderDetail> existingDetails = null;
+            try
+            {
+                existingDetails=
                 await _context.PersonnelOrderDetails
                     .AsNoTracking()
-                    .Where(x =>
-                        x.PersonnelOrderId == id)
+                    .Where(x =>x.PersonnelOrderId == id)
                     .ToDictionaryAsync(
                         x => x.SalaryItemId,
                         x => x);
-
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.Message);
+            }
+           
 
             model.Details =
                 salaryItems.Select(x =>
@@ -519,15 +521,10 @@ namespace givPayroll.Controllers
                     return new PersonnelOrderDetailViewModel
                     {
                         Id = detail?.Id ?? 0,
-
                         SalaryItemId = x.Id,
-                       
                         SalaryItemName = x.SalaryItemName,
-
                         SalaryItemLabel = x.Label,
-
                         Unit = x.Unit,
-
                         Amount = detail?.Amount ?? 0
                     };
 
@@ -604,7 +601,7 @@ namespace givPayroll.Controllers
 
                 order.UserChanged =
                     GetCurrentUserId();
-                
+
                 // حذف Details قبلی
                 //var oldDetails =
                 //    await _context.PersonnelOrderDetails
@@ -615,7 +612,10 @@ namespace givPayroll.Controllers
 
                 //_context.PersonnelOrderDetails.RemoveRange(
                 //    oldDetails);
-
+                int? maxOrdDetailId = await _context.PersonnelOrderDetails
+                          .Select(x => (int?)x.Id)
+                           .MaxAsync();
+                maxOrdDetailId = (maxOrdDetailId ?? 0) ;
 
                 // اضافه کردن Details جدید
                 foreach (var detail in model.Details)
@@ -630,22 +630,34 @@ namespace givPayroll.Controllers
                     //    continue;
                     var orderDetail =
                await _context.PersonnelOrderDetails.FirstOrDefaultAsync(x => x.Id == detail.Id);
-
                     //_context.PersonnelOrderDetails.Add(
                     // new PersonnelOrderDetail
                     //{
                     //PersonnelOrderId = order.Id,
-
                     //SalaryItemId =
                     //   detail.SalaryItemId,
+                    if (detail.Amount != 0)
+                        if (orderDetail == null)
+                        {
+                            maxOrdDetailId += 1;
 
-                    orderDetail.Amount = detail.Amount;
+                            orderDetail = new PersonnelOrderDetail();
+                            orderDetail.Id = maxOrdDetailId.GetValueOrDefault();
+                            orderDetail.PersonnelOrderId = order.Id;
+                            orderDetail.SalaryItemId = detail.SalaryItemId;
+                            orderDetail.DateCreated = DateTime.Now.Date;
+                            orderDetail.UserCreated = GetCurrentUserId();
+                            orderDetail.Amount = detail.Amount;
+                            _context.PersonnelOrderDetails.Add(orderDetail);
+                        }
+                    else if (detail.Amount != 0)
+                        orderDetail.Amount = detail.Amount;
 
-                            //DateCreated = DateTime.Now,
+                    //DateCreated = DateTime.Now,
 
-                            //UserCreated =
-                       //         GetCurrentUserId()
-                        //});
+                    //UserCreated =
+                    //         GetCurrentUserId()
+                    //});
                 }
 
 
@@ -660,8 +672,9 @@ namespace givPayroll.Controllers
                     message = "حکم پرسنلی با شماره " + order.No + " موفقیت ویرایش شد."
                 });
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.Print(ex.Message);
                 await transaction.RollbackAsync();
 
                 throw;

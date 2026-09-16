@@ -541,7 +541,9 @@ namespace givPayroll.Data
                 .HasForeignKey(x => x.PersonnelId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
+            builder.Entity<SalaryItem>()
+            .Property(x => x.FormulaValue)
+            .HasColumnType("nvarchar(max)");
 
 
             builder.Entity<Company>().HasData(

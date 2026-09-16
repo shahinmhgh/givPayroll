@@ -57,10 +57,7 @@
             <strong>
                 اقلام حقوق دستمزد
             </strong>
-
- 
         </div>
-
 
         <div class="card-body p-0">
 
@@ -96,11 +93,20 @@
                     </thead>
 
 
-                    <tbody>
+                    <tbody style="height:500px;overflow-y:auto">
                         @{
                             var row = 1;
+                            decimal total = 0;
                             foreach (PayrollItem item in Model.PayrollItems)
                             {
+                                var amount = item.Amount;
+
+                                if (item.SalaryItem.PlusMinus == 1)
+                                    total += amount;
+                                else
+                                    total -= amount;
+                            
+
                                 <tr>
                                     <td style="width:80px">
                                         @row
@@ -139,7 +145,16 @@
                         }
 
                     </tbody>
-
+                    <tfoot>
+                        <tr class="table-secondary fw-bold">
+                            <td colspan="3" class="text-end">
+                                جمع
+                            </td>
+                            <td style="width:250px">
+                                @total.ToString("N0")
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
 
             </div>

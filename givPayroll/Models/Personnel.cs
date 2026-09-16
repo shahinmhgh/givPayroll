@@ -15,19 +15,21 @@ namespace givPayroll.Models
         [MaxLength(50)]
         [Required(ErrorMessage = "First Name is required.")]
         [Display(Name = "نام")]
-        public  String FirstName { get; set; }
+        public String FirstName { get; set; }
 
-        //[Display(Name = "ترک کار")]
-        //public Boolean ContractFinished { get; set; }
+
 
         [MaxLength(50)]
         [Required(ErrorMessage = "Last Name is required.")]
         [Display(Name = "نام خانوادگی")]
-        public  String LastName { get; set; }
+        public String LastName { get; set; }
 
         [Required(ErrorMessage = "MaritalStatus is required")]
         [Display(Name = "وضعیت تاهل")]
         public int MaritalStatusId { get; set; }
+
+        [Display(Name = "تعداد بچه")]
+        public int ChildNo { get; set; }
 
         [ForeignKey(nameof(MaritalStatusId))]
         public MaritalStatus MaritalStatus { get; set; } = null!;
@@ -49,7 +51,7 @@ namespace givPayroll.Models
         [ForeignKey(nameof(GenderID))]
         public virtual Gender Gender { get; set; } = null!;
 
-       
+
 
         public virtual ICollection<PayrollAdjustmentPersonnel> PayrollAdjustmentPersonnels { get; set; }
     = new List<PayrollAdjustmentPersonnel>();

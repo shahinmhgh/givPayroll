@@ -40,7 +40,7 @@ namespace givPayroll.Models
 
         [Display(Name = "فرمول")]
         [Column(TypeName = "ntext")]
-        public string FormulaValue { get; set; } = string.Empty;
+        public string? FormulaValue { get; set; } = string.Empty;
 
         [MaxLength(50)]
         [Display(Name = "کد حساب")]

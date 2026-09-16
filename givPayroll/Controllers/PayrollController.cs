@@ -97,6 +97,9 @@ public class PayrollController : Controller
 
         // formula items
         decimal BaseSalary = 0;
+        decimal JobAllowance = 0;
+        decimal ResponsibilityAllowance = 0;
+        decimal TechnicalAllowance = 0;
         int monthDays = GetPersianMonthDays(month);
 
         foreach (PersonnelOrderDetail pOrderItem in activeOrderItem.Details)
@@ -105,9 +108,15 @@ public class PayrollController : Controller
             item.SalaryItemId = pOrderItem.SalaryItemId;
             if (pOrderItem.SalaryItem.Label == "BaseSalary")
                 BaseSalary = pOrderItem.Amount;
+            if (pOrderItem.SalaryItem.Label == "JobAllowance")
+                JobAllowance = pOrderItem.Amount;
+            if (pOrderItem.SalaryItem.Label == "ResponsibilityAllowance")
+                ResponsibilityAllowance = pOrderItem.Amount;
+            if (pOrderItem.SalaryItem.Label == "TechnicalAllowance")
+                TechnicalAllowance = pOrderItem.Amount;
 
             item.Amount = pOrderItem.Amount;
-            model.PayrollItems.Add(item);
+            //model.PayrollItems.Add(item);
         }
         #endregion
 
@@ -142,12 +151,33 @@ public class PayrollController : Controller
             })
             .FirstOrDefaultAsync();
 
+        SalaryItemRule rulesHousing = await _context.SalaryItemRules
+            .Where(r => r.SalaryItem.Label == "HousingAllowance").FirstAsync();
+        SalaryItemRule rulesChild = await _context.SalaryItemRules
+                   .Where(r => r.SalaryItem.Label == "ChildAllowance").FirstAsync();
+        SalaryItemRule rulesFood = await _context.SalaryItemRules
+                  .Where(r => r.SalaryItem.Label == "FoodAllowance").FirstAsync();
+        SalaryItemRule rulesMarital = await _context.SalaryItemRules
+                  .Where(r => r.SalaryItem.Label == "MaritalAllowance").FirstAsync();
+
+        Personnel Person = await _context.Personnels.FindAsync(personnelId);
         var variables = new Dictionary<string, object>
         {
             ["BaseSalary"] = BaseSalary,
             ["MonthDays"] = monthDays,
-
             ["DaysWorked"] = daysWorked,
+
+            //coming from personnel
+            ["ChildNo"] = Person.ChildNo,
+            //coming from salaryItemRule
+            ["HousingAllowance"] = rulesHousing.Amount,
+            ["ChildAllowance"] = rulesChild.Amount,
+            ["FoodAllowance"] = rulesFood.Amount,
+            ["MaritalAllowance"] = rulesMarital.Amount,
+            //coming from personnelOrder
+            ["JobAllowance"] = JobAllowance,
+            ["ResponsibilityAllowance"] = ResponsibilityAllowance,
+            ["TechnicalAllowance"] = TechnicalAllowance,
 
             ["ExtraMinute"] = totals?.ExtraMinute ?? 0,
             ["MissionMinute"] = totals?.MissionMinute ?? 0,
@@ -161,27 +191,36 @@ public class PayrollController : Controller
             ["LeaveWithoutSalaryMinute"] = totals?.LeaveWithoutSalaryMinute ?? 0
         };
 
-        List<SalaryItem> attendanceSalaryItems = _context.SalaryItems.Where(i => i.Source == "Attendence").ToList();
-        foreach (var salaryItem in attendanceSalaryItems)
+        List<SalaryItem> attendanceSalaryItems = null;// _context.SalaryItems.Where(i => i.FormulaValue.Trim()!="").ToList();
+        try
         {
-            if (string.IsNullOrWhiteSpace(salaryItem.FormulaValue))
-                continue;
-
-            decimal amount = _payrollFormulaService.Calculate(
-                salaryItem.FormulaValue,
-                variables);
-
-            if (amount == 0)
-                continue;
-
-            model.PayrollItems.Add(new PayrollItem
+            attendanceSalaryItems = _context.SalaryItems.Where(i => i.FormulaValue.Trim() != "").ToList();
+            foreach (var salaryItem in attendanceSalaryItems)
             {
-                SalaryItemId = salaryItem.Id,
-                PlusMinus = salaryItem.PlusMinus,
-                Amount = amount
-            });
+                if (string.IsNullOrWhiteSpace(salaryItem.FormulaValue))
+                    continue;
+
+                decimal amount = _payrollFormulaService.Calculate(
+                    salaryItem.FormulaValue,
+                    variables);
+
+                if (amount == 0)
+                    continue;
+
+                model.PayrollItems.Add(new PayrollItem
+                {
+                    SalaryItemId = salaryItem.Id,
+                    PlusMinus = salaryItem.PlusMinus,
+                    Amount = amount
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.Print(ex.Message);
         }
 
+        int c = 0;
         //foreach (SalaryItem itemSalary in attendanceSalaryItems)
         //{
         //    string Label = itemSalary.Label;
@@ -269,7 +308,7 @@ public class PayrollController : Controller
                 })
                 .FirstOrDefaultAsync();
 
-            if (result != null)
+            if (result3 != null)
             {
                 PayrollItem item = new PayrollItem();
                 item.SalaryItemId = itemSalary.Id;
@@ -279,8 +318,8 @@ public class PayrollController : Controller
             }
 
         }
-        Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
-        string PersonnelName = person.FirstName + " " + person.LastName;
+         
+        string PersonnelName = Person.FirstName + " " + Person.LastName;
         ViewBag.PersonnelYearMonthName = DateUtil.GetPersianMonthName(month) + " " + year + " " + PersonnelName;
 
         ////RuleInsurance
@@ -303,7 +342,14 @@ public class PayrollController : Controller
         //}
 
         foreach (PayrollItem item in model.PayrollItems)
-            item.SalaryItem = _context.SalaryItems.Where(i => i.Id == item.SalaryItemId).FirstOrDefault();
+        {
+            //item.SalaryItem = _context.SalaryItems.Where(i => i.Id == item.SalaryItemId).FirstOrDefault();
+            item.SalaryItem = _context.SalaryItems
+                .FirstOrDefault(i => i.Id == item.SalaryItemId);
+        }
+        model.PayrollItems = model.PayrollItems
+            .OrderBy(item => item.SalaryItem.Priority)
+            .ToList();
 
         return PartialView("_PayrollPreview", model);
     }
