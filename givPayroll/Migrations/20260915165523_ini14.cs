@@ -5,7 +5,7 @@
 namespace givPayroll.Migrations
 {
     /// <inheritdoc />
-    public partial class ini15 : Migration
+    public partial class ini14 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

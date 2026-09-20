@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.DiaSymReader;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Playwright;
+using NPOI.HSSF.UserModel;
+using Org.BouncyCastle.Security;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using static AttendanceCheckViewModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 
@@ -62,8 +65,8 @@ namespace givPayroll.Controllers
                 monthEnd =
                     $"{currentYear:0000}/{currentMonth:00}/29";
 
-            DateTime monthStartGregorian = DateUtil.S2M(monthStart);
-            DateTime monthEndGregorian = DateUtil.S2M(monthEnd);
+            DateTime monthStartGregorian = AppUtil.S2M(monthStart);
+            DateTime monthEndGregorian = AppUtil.S2M(monthEnd);
 
             // -----------------------------
             // 1. پرسنل دارای حکم فعال
@@ -394,7 +397,7 @@ namespace givPayroll.Controllers
                 return NotFound();
 
             existing.AttendancePersianDate = model.AttendancePersianDate;
-            existing.AttendanceDate = DateUtil.S2M(model.AttendancePersianDate);
+            existing.AttendanceDate = AppUtil.S2M(model.AttendancePersianDate);
             existing.PersonnelId = model.PersonnelId;
             existing.WorkingExpectedMinute = model.WorkingExpectedMinute;
             existing.WorkingMinute = model.WorkingMinute;
@@ -440,7 +443,7 @@ namespace givPayroll.Controllers
             if (existing == null)
                 return NotFound();
 
-            existing.WorkingExpectedMinute = 0;
+            // existing.WorkingExpectedMinute = 0;
             existing.WorkingMinute = 0;
             existing.ExtraMinute = 0;
             existing.HolidayMinute = 0;
@@ -449,12 +452,12 @@ namespace givPayroll.Controllers
             existing.LeaveNormalMinute = 0;
             existing.LeaveWithoutSalaryMinute = 0;
             existing.LeaveSickMinute = 0;
-            existing.AbsenceMinute = 0;
+            existing.AbsenceMinute = existing.WorkingExpectedMinute;
             existing.MissionMinute = 0;
             existing.Status = 0;
 
-            bool isholiday = await _holidayService.IsHolidayAsync(DateUtil.S2M(existing.AttendancePersianDate));
-            bool isFriday = DateUtil.S2M(existing.AttendancePersianDate).DayOfWeek == DayOfWeek.Friday;
+            bool isholiday = await _holidayService.IsHolidayAsync(AppUtil.S2M(existing.AttendancePersianDate));
+            bool isFriday = AppUtil.S2M(existing.AttendancePersianDate).DayOfWeek == DayOfWeek.Friday;
             if (isholiday || isFriday)
                 existing.HasWorked = true;
             else
@@ -521,7 +524,8 @@ namespace givPayroll.Controllers
                 .ToLowerInvariant();
 
 
-            if (extension != ".xlsx")
+
+            if (extension != ".xlsx" && extension != ".xls")
             {
                 ModelState.AddModelError(
                     "File",
@@ -542,7 +546,7 @@ namespace givPayroll.Controllers
                     await ImportExcel(
                         model.File,
                         model.Year,
-                        model.Month);
+                        model.Month, model.File.FileName);
 
 
                 return Json(new
@@ -563,7 +567,14 @@ namespace givPayroll.Controllers
             }
         }
 
+        private int hourToMinute(string hour)
+        {
+            //"08:00"
+            var time = TimeSpan.Parse(hour);
+            int minutes = (int)time.TotalMinutes;
 
+            return minutes;
+        }
         // =========================================================
         // EXCEL IMPORT
         // =========================================================
@@ -571,36 +582,47 @@ namespace givPayroll.Controllers
         private async Task<(int imported, int updated)> ImportExcel(
             IFormFile file,
             int year,
-            int month)
+            int month,
+            string filename)
         {
-            using var stream =
-                new MemoryStream();
+            string mobile = Path.GetFileNameWithoutExtension(filename)
+                   .TakeLast(11)
+                   .Aggregate("", (s, c) => s + c);
 
-            await file.CopyToAsync(stream);
+            Personnel personnel = _context.Personnels.Where(i => i.Mobile == mobile).FirstOrDefault();
+            if (personnel==null)
+                return (-1, -1);
+            int personnelid = personnel.Id;
+
+            MemoryStream stream = new MemoryStream();
+            string extension = System.IO.Path.GetExtension(filename);
+            if (extension == ".xls")
+            {
+                Stream stream1 = null;
+                string src = filename;
+                string dest = System.IO.Path.GetFileNameWithoutExtension(filename) + ".xlsx";
+                byte[] xlsxBytes = null;
+
+                stream1 = file.OpenReadStream();
+
+                xlsxBytes = AppUtil.ConvertXlsToXlsx(stream1);
+
+                stream = new MemoryStream(xlsxBytes);
+            }
+            else
+                await file.CopyToAsync(stream);
 
             stream.Position = 0;
 
-
-            using var workbook =
-                new ClosedXML.Excel.XLWorkbook(stream);
-
-
-            var worksheet =
-                workbook.Worksheets.First();
-
-
-            var rows =
-                worksheet.RowsUsed()
-                    .Skip(1);
-
+            using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+            var worksheet = workbook.Worksheets.First();
+            var rows = worksheet.RowsUsed().Skip(2);
 
             var maxId =
                 await _context.Attendances
                     .Select(x => (int?)x.Id)
                     .MaxAsync()
                 ?? 0;
-
-
             int nextId = maxId + 1;
 
             int imported = 0;
@@ -608,8 +630,16 @@ namespace givPayroll.Controllers
 
             foreach (var row in rows)
             {
-                var attendance =
-                    new Attendance();
+                // check last row
+                string temp = row.Cell(1).GetString().Replace("-", "/").Trim();
+                bool isValid = Regex.IsMatch(
+                        temp,
+                        @"^\d{4}[-/]\d{2}[-/]\d{2}$"
+                    );
+                if (!isValid)
+                    continue;
+
+                var attendance =new Attendance();
 
                 /*
                  Excel columns:
@@ -633,21 +663,24 @@ namespace givPayroll.Controllers
                 attendance.Id = nextId++;
 
                 attendance.AttendancePersianDate = row.Cell(1).GetString().Replace("-", "/").Trim();
-                attendance.AttendanceDate = DateUtil.S2M(attendance.AttendancePersianDate);
-                attendance.PersonnelId = row.Cell(2).GetValue<int>();
-                attendance.WorkingExpectedMinute = row.Cell(3).GetValue<int>();
-                attendance.WorkingMinute = row.Cell(4).GetValue<int>();
-                attendance.ExtraMinute = row.Cell(5).GetValue<int>();
-                attendance.HolidayMinute = row.Cell(6).GetValue<int>();
-                attendance.DelayMinute = row.Cell(7).GetValue<int>();
-                attendance.EarlyArrivalMinute = row.Cell(8).GetValue<int>();
-                attendance.LeaveNormalMinute = row.Cell(9).GetValue<int>();
-                attendance.LeaveWithoutSalaryMinute = row.Cell(10).GetValue<int>();
-                attendance.LeaveSickMinute = row.Cell(11).GetValue<int>();
-                attendance.AbsenceMinute = row.Cell(12).GetValue<int>();
-                attendance.MissionMinute = row.Cell(13).GetValue<int>();
-                attendance.Status = row.Cell(14).GetValue<int>();
-                attendance.HasWorked = row.Cell(15).GetValue<bool>();
+                attendance.AttendanceDate = AppUtil.S2M(attendance.AttendancePersianDate);
+                attendance.PersonnelId = personnelid; // row.Cell(2).GetValue<int>();
+                attendance.ShiftMinute =hourToMinute( row.Cell(8).GetString());
+                attendance.WorkingExpectedMinute = hourToMinute(row.Cell(9).GetString());
+                attendance.WorkingMinute = hourToMinute(row.Cell(10).GetString());
+                attendance.ExtraMinute = hourToMinute(row.Cell(11).GetString());
+                attendance.HolidayMinute = hourToMinute(row.Cell(12).GetString());
+                attendance.DelayMinute = hourToMinute(row.Cell(13).GetString());
+                attendance.EarlyArrivalMinute = hourToMinute(row.Cell(14).GetString());
+                attendance.LeaveNormalMinute = hourToMinute(row.Cell(15).GetString());
+                //attendance.LeaveWithoutSalaryMinute = row.Cell(10).GetValue<int>();
+                //attendance.LeaveSickMinute = row.Cell(11).GetValue<int>();
+                attendance.AbsenceMinute = hourToMinute(row.Cell(16).GetString());
+                attendance.MissionMinute = hourToMinute(row.Cell(17).GetString());
+                string stat = row.Cell(21).GetString();
+                attendance.Status = stat == "صحیح"?1:0;
+
+                //attendance.HasWorked = row.Cell(15).GetValue<bool>();
 
                 // Make sure imported date belongs
                 // to selected year/month
@@ -892,7 +925,7 @@ namespace givPayroll.Controllers
                                 Id = x.Id,
                                 PersonnelId = x.PersonnelId,
                                 AttendanceDate = x.AttendanceDate,
-                                AttendancePersianDate = DateUtil.M2S(x.AttendanceDate),
+                                AttendancePersianDate = AppUtil.M2S(x.AttendanceDate),
                                 WorkingExpectedMinute = x.WorkingExpectedMinute,
                                 WorkingMinute = x.WorkingMinute,
                                 ExtraMinute = x.ExtraMinute,
@@ -926,8 +959,12 @@ namespace givPayroll.Controllers
             ViewBag.Year = year;
             ViewBag.Month = month;
             ViewBag.PersonnelId = personnelId;
-            Personnel person = await _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefaultAsync();
-            ViewBag.PersonnelName = person.FirstName + " " + person.LastName;
+            ViewBag.PersonnelName = "";
+            if (personnelId != 0)
+            {
+                Personnel person = await _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefaultAsync();
+                ViewBag.PersonnelName = person.FirstName + " " + person.LastName;
+            }
             return PartialView("_AttendanceList", data);
         }
 

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Playwright;
 using NCalc;
+using NPOI.Util.Optional;
 
 namespace givPayroll.Controllers;
 
@@ -70,16 +71,16 @@ public class PayrollController : Controller
 
     public async Task<IActionResult> PayrollPreview(int year, int month, int personnelId)
     {
-        string prefix = $"{year:0000}/{month:00}/";
-        // base on salaryitem 
-        //  and personnelOrder
-        //   and payrolladjustment
+        PayrollViewModel model = await GetPayrollData(year, month, personnelId);
 
-        //there are four sources: 
-        // PersonnelOrder
-        // Attendence
-        // PayrollAdjustmentDetail
-        // RuleInsurance - RuleTax
+        return PartialView("_PayrollPreview", model);
+    }
+
+    private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)
+    {
+         
+
+        string prefix = $"{year:0000}/{month:00}/";
 
         //1 find active personnellorder - detail 
         PayrollViewModel model = new PayrollViewModel();
@@ -90,6 +91,7 @@ public class PayrollController : Controller
 
         #region PersonnelOrder
         //List<SalaryItem> lst1 = _context.SalaryItems.Where(i => i.Source == "PersonnelOrder").ToList();
+
         PersonnelOrder activeOrderItem = _context.PersonnelOrders
             .Include(x => x.Details)
             .ThenInclude(x => x.SalaryItem)
@@ -100,6 +102,7 @@ public class PayrollController : Controller
         decimal JobAllowance = 0;
         decimal ResponsibilityAllowance = 0;
         decimal TechnicalAllowance = 0;
+        decimal SeniorityAllowance = 0;
         int monthDays = GetPersianMonthDays(month);
 
         foreach (PersonnelOrderDetail pOrderItem in activeOrderItem.Details)
@@ -114,6 +117,8 @@ public class PayrollController : Controller
                 ResponsibilityAllowance = pOrderItem.Amount;
             if (pOrderItem.SalaryItem.Label == "TechnicalAllowance")
                 TechnicalAllowance = pOrderItem.Amount;
+            if (pOrderItem.SalaryItem.Label == "SeniorityAllowance")
+                SeniorityAllowance = pOrderItem.Amount;
 
             item.Amount = pOrderItem.Amount;
             //model.PayrollItems.Add(item);
@@ -151,14 +156,22 @@ public class PayrollController : Controller
             })
             .FirstOrDefaultAsync();
 
-        SalaryItemRule rulesHousing = await _context.SalaryItemRules
-            .Where(r => r.SalaryItem.Label == "HousingAllowance").FirstAsync();
-        SalaryItemRule rulesChild = await _context.SalaryItemRules
-                   .Where(r => r.SalaryItem.Label == "ChildAllowance").FirstAsync();
-        SalaryItemRule rulesFood = await _context.SalaryItemRules
-                  .Where(r => r.SalaryItem.Label == "FoodAllowance").FirstAsync();
-        SalaryItemRule rulesMarital = await _context.SalaryItemRules
-                  .Where(r => r.SalaryItem.Label == "MaritalAllowance").FirstAsync();
+        SalaryItemRule? rulesHousing = await _context.SalaryItemRules
+            .Where(r => r.SalaryItem.Label == "HousingAllowance").FirstOrDefaultAsync();
+        SalaryItemRule? rulesChild = await _context.SalaryItemRules
+                   .Where(r => r.SalaryItem.Label == "ChildAllowance").FirstOrDefaultAsync();
+        SalaryItemRule? rulesFood = await _context.SalaryItemRules
+                  .Where(r => r.SalaryItem.Label == "FoodAllowance").FirstOrDefaultAsync();
+        SalaryItemRule? rulesMarital = await _context.SalaryItemRules
+                  .Where(r => r.SalaryItem.Label == "MaritalAllowance").FirstOrDefaultAsync();
+        SalaryItemRule? rulesSeniority = await _context.SalaryItemRules
+                         .Where(r => r.SalaryItem.Label == "SeniorityAllowance").FirstOrDefaultAsync();
+
+        rulesMarital.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "MaritalAllowance").FirstOrDefault().Amount;
+        rulesHousing.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "HousingAllowance").FirstOrDefault().Amount;
+        rulesChild.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "ChildAllowance").FirstOrDefault().Amount;
+        rulesFood.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "FoodAllowance").FirstOrDefault().Amount;
+        rulesSeniority.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "SeniorityAllowance").FirstOrDefault().Amount;
 
         Personnel Person = await _context.Personnels.FindAsync(personnelId);
         var variables = new Dictionary<string, object>
@@ -171,9 +184,11 @@ public class PayrollController : Controller
             ["ChildNo"] = Person.ChildNo,
             //coming from salaryItemRule
             ["HousingAllowance"] = rulesHousing.Amount,
+            ["SeniorityAllowance"] = rulesSeniority.Amount,
             ["ChildAllowance"] = rulesChild.Amount,
             ["FoodAllowance"] = rulesFood.Amount,
-            ["MaritalAllowance"] = rulesMarital.Amount,
+            ["MaritalAllowance"] =    rulesMarital.Amount,
+            ["SeniorityAllowance"] = rulesSeniority?.Amount ?? 0,
             //coming from personnelOrder
             ["JobAllowance"] = JobAllowance,
             ["ResponsibilityAllowance"] = ResponsibilityAllowance,
@@ -221,77 +236,14 @@ public class PayrollController : Controller
         }
 
         int c = 0;
-        //foreach (SalaryItem itemSalary in attendanceSalaryItems)
-        //{
-        //    string Label = itemSalary.Label;
-        //    string formula = itemSalary.FormulaValue;
-        //    int total = 0;
-        //    decimal amount = 0;
-        //    switch (Label)
-        //    {
-        //        case "OverTime":
-        //            total = totals?.ExtraMinute ?? 0;
 
-        //            var expression1 = new Expression(formula);
-        //            expression1.Parameters["BaseSalary"] = BaseSalary;
-        //            expression1.Parameters["MonthDays"] = monthDays;
-        //            expression1.Parameters["ExtraMinute"] = total;
-        //            var result1 = expression1.Evaluate();
-        //            amount = Convert.ToDecimal(result1);
-
-        //            break;
-        //        case "MissionAllowance":
-        //            total = totals?.MissionMinute ?? 0;
-
-        //            var expression2 = new Expression(formula);
-        //            expression2.Parameters["BaseSalary"] = BaseSalary;
-        //            expression2.Parameters["MonthDays"] = monthDays;
-        //            expression2.Parameters["MissionMinute"] = total;
-        //            var result2 = expression2.Evaluate();
-        //            amount = Convert.ToDecimal(result2);
-
-        //            break;
-        //        case "AbsenceDeduction":
-        //            total = totals?.AbsenceMinute ?? 0;
-
-        //            var expression3 = new Expression(formula);
-        //            expression3.Parameters["BaseSalary"] = BaseSalary;
-        //            expression3.Parameters["MonthDays"] = monthDays;
-        //            expression3.Parameters["AbsenceMinute"] = total;
-        //            var result3 = expression3.Evaluate();
-        //            amount = Convert.ToDecimal(result3);
-
-        //            break;
-        //        case "DelayDeduction":
-        //            total = totals?.HolidayMinute ?? 0;
-
-        //            var expression4 = new Expression(formula);
-        //            expression4.Parameters["BaseSalary"] = BaseSalary;
-        //            expression4.Parameters["MonthDays"] = monthDays;
-        //            expression4.Parameters["DelayMinute"] = total;
-        //            var result4 = expression4.Evaluate();
-        //            amount = Convert.ToDecimal(result4);
-
-        //            break;
-
-        //        default:
-        //            break;
-        //    }
-
-        //    PayrollItem item = new PayrollItem();
-        //    item.SalaryItemId = itemSalary.Id;
-        //    item.PlusMinus = itemSalary.PlusMinus;
-        //    item.Amount = amount;
-        //    if (amount > 0)
-        //        model.PayrollItems.Add(item);
-        //}
         #endregion
 
         ////PayrollAdjustment
         List<SalaryItem> lst3 = _context.SalaryItems.Where(i => i.Source == "PayrollAdjustment").ToList();
-        foreach (SalaryItem itemSalary in lst3)
+        foreach (SalaryItem itemSalary3 in lst3)
         {
-            String Label = itemSalary.Label;
+            String Label = itemSalary3.Label;
 
             var result3 = await _context.PayrollAdjustmentDetails
                 .Where(d =>
@@ -311,92 +263,155 @@ public class PayrollController : Controller
             if (result3 != null)
             {
                 PayrollItem item = new PayrollItem();
-                item.SalaryItemId = itemSalary.Id;
+                item.SalaryItemId = itemSalary3.Id;
                 item.Amount = Convert.ToDecimal(result3.Amount);
                 item.Description = result3.Description;
+                item.FormulaValue = itemSalary3.FormulaValue;
                 model.PayrollItems.Add(item);
             }
 
         }
-         
-        string PersonnelName = Person.FirstName + " " + Person.LastName;
-        ViewBag.PersonnelYearMonthName = DateUtil.GetPersianMonthName(month) + " " + year + " " + PersonnelName;
+        ////Total insurance
 
-        ////RuleInsurance
-        //List<SalaryItem> lst4 = _context.SalaryItems.Where(i => i.Label == "RuleInsurance").ToList();
-        //foreach (SalaryItem itemSalary in lst4)
-        //{
-        //    PayrollItem item = new PayrollItem();
-        //    item.SalaryItemId = itemSalary.Id;
-        //    item.Amount = 1;
-        //    model.PayrollItems.Add(item);
-        //}
-        ////RuleTax
-        //List<SalaryItem> lst5 = _context.SalaryItems.Where(i => i.Label == "RuleTax").ToList();
-        //foreach (SalaryItem itemSalary in lst5)
-        //{
-        //    PayrollItem item = new PayrollItem();
-        //    item.SalaryItemId = itemSalary.Id;
-        //    item.Amount = 1;
-        //    model.PayrollItems.Add(item);
-        //}
+        var salaryItemIds = model.PayrollItems
+        .Select(x => x.SalaryItemId)
+        .Distinct()
+        .ToList();
+
+        var insuranceRules = await _context.SalaryItemRules
+            .Where(r => salaryItemIds.Contains(r.SalaryItem.Id))
+            .ToDictionaryAsync(r => r.SalaryItem.Id);
+
+        decimal totalInsuranceAmount = 0;
+        foreach (PayrollItem item in model.PayrollItems)
+            item.SalaryItem = _context.SalaryItems.Where(i => i.Id == item.SalaryItemId).FirstOrDefault();
+
+        foreach (var itemPayroll in model.PayrollItems)
+            if (insuranceRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
+                rule.IsInsuranceBase)
+                totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
+
+        //// empoyee rate
+        decimal employeeRate = await _context.PersonnelOrders
+          .Where(po => po.IsActive && po.PersonnelId == personnelId)
+          .Join(
+              _context.RuleInsurances,
+              po => po.RuleInsuranceGroupId,
+              ri => ri.RuleInsuranceGroupId,
+              (po, ri) => ri.EmployeeRate
+          )
+          .FirstOrDefaultAsync();
+        employeeRate = employeeRate / 100;
+        decimal InsuranceAmount = totalInsuranceAmount * employeeRate;
+
+        ////Insurance 
+        SalaryItem itemSalary1 = _context.SalaryItems.Where(i => i.Label == "Insurance").FirstOrDefault();
+
+        PayrollItem itemInsurance = new PayrollItem();
+        itemInsurance.SalaryItemId = itemSalary1.Id;
+        itemInsurance.Amount = Convert.ToDecimal(InsuranceAmount);
+        itemInsurance.FormulaValue = itemSalary1.FormulaValue;
+        model.PayrollItems.Add(itemInsurance);
+
+        ////Total Tax amount
+
+        var salaryItemIdsTax = model.PayrollItems
+           .Select(x => x.SalaryItemId)
+           .Distinct()
+           .ToList();
+
+        var taxRules = await _context.SalaryItemRules
+            .Where(r => salaryItemIdsTax.Contains(r.SalaryItem.Id))
+            .ToDictionaryAsync(r => r.SalaryItem.Id);
+
+        decimal totalTaxAmount = 0;
+        foreach (var itemPayroll in model.PayrollItems)
+            if (taxRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
+                rule.IsTaxBase)
+                totalTaxAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
+
+
+        ////Tax 
+        decimal TaxAmount = CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList());
+        SalaryItem itemSalary2 = _context.SalaryItems.Where(i => i.Label == "Tax").FirstOrDefault();
+
+        PayrollItem itemTax = new PayrollItem();
+        itemTax.SalaryItemId = itemSalary2.Id;
+        itemTax.Amount = Convert.ToDecimal(TaxAmount);
+        itemTax.FormulaValue = itemSalary2.FormulaValue;
+        model.PayrollItems.Add(itemTax);
+
+        string PersonnelName = Person.FirstName + " " + Person.LastName;
+        ViewBag.PersonnelYearMonthName = AppUtil.GetPersianMonthName(month) + " " + year + " " + PersonnelName;
 
         foreach (PayrollItem item in model.PayrollItems)
-        {
-            //item.SalaryItem = _context.SalaryItems.Where(i => i.Id == item.SalaryItemId).FirstOrDefault();
-            item.SalaryItem = _context.SalaryItems
-                .FirstOrDefault(i => i.Id == item.SalaryItemId);
-        }
+            item.SalaryItem = _context.SalaryItems.FirstOrDefault(i => i.Id == item.SalaryItemId);
+
         model.PayrollItems = model.PayrollItems
             .OrderBy(item => item.SalaryItem.Priority)
             .ToList();
-
-        return PartialView("_PayrollPreview", model);
+        return model;
     }
 
-    public IActionResult Salary(int id)
+    decimal CalculateTax(decimal amount, List<RuleTax> rules)
     {
-        Personnel person = _context.Personnels.Where(i => i.Id == id).FirstOrDefault();
+        decimal tax = 0;
+        decimal previousLimit = 0;
 
-        var model = new SalaryReportViewModel
+        foreach (var rule in rules.OrderBy(x => x.Amount))
         {
-            PersonnelId = id,
+            if (amount <= previousLimit)
+                break;
 
-            PersonnelCode = "1001",
+            decimal taxableAmount =
+                Math.Min(amount, rule.Amount) - previousLimit;
 
-            FirstName = person.FirstName,
+            if (taxableAmount > 0)
+                tax += taxableAmount * rule.Rate / 100m;
 
-            LastName = person.LastName,
+            previousLimit = rule.Amount;
+        }
 
-            NationalCode = "1234567890",
+        return tax;
+    }
 
-            PayrollMonth = "مرداد ۱۴۰۵",
+    public async Task<IActionResult> Salary(int id, string ym)
+    {
+       
 
-            BasicSalary = 150000000,
+        Personnel person = _context.Personnels.Where(i => i.Id == id).FirstOrDefault();
+        int month = Convert.ToInt32( ym.Substring(5, 2));
+        int year = Convert.ToInt32(ym.Substring(0, 4));
 
-            HousingAllowance = 9000000,
+         PayrollViewModel modelData = await  GetPayrollData(year, month, id);
 
-            FoodAllowance = 14000000,
-
-            Overtime = 12000000,
-
-            Deductions = 18000000
-        };
-
-        return View(model);
+        //var model = new SalaryReportViewModel
+        //{
+        //    PersonnelId = id,
+        //    PersonnelCode = "1001",
+        //    FirstName = person.FirstName,
+        //    LastName = person.LastName,
+        //    NationalCode = "1234567890",
+        //    PayrollMonth = year + " " +  DateUtil.GetPersianMonthName(month),
+        //    BasicSalary = 150000000,
+        //    HousingAllowance = 9000000,
+        //    FoodAllowance = 14000000,
+        //    Overtime = 12000000,
+        //    Deductions = 18000000
+        //};
+        ViewBag.YearMonthName = AppUtil.GetPersianMonthName(modelData.PayrollMonth) + " " + year;
+        return View(modelData);
     }
 
     [HttpGet]
-    public async Task<IActionResult> SalaryPdf(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> SalaryPdf(  int id, string ym,   CancellationToken cancellationToken)
     {
 
         var url =
             Url.Action(
                 nameof(Salary),
                 "Payroll",
-                new { id },
+                new { id, ym },
                 Request.Scheme)!;
 
         var pdf = await _pdfService.GeneratePdfFromUrlAsync(

@@ -636,7 +636,7 @@ namespace givPayroll.Controllers
                     //PersonnelOrderId = order.Id,
                     //SalaryItemId =
                     //   detail.SalaryItemId,
-                    if (detail.Amount != 0)
+                    //if (detail.Amount != 0)
                         if (orderDetail == null)
                         {
                             maxOrdDetailId += 1;
@@ -650,7 +650,7 @@ namespace givPayroll.Controllers
                             orderDetail.Amount = detail.Amount;
                             _context.PersonnelOrderDetails.Add(orderDetail);
                         }
-                    else if (detail.Amount != 0)
+                    else  //if (detail.Amount != 0)
                         orderDetail.Amount = detail.Amount;
 
                     //DateCreated = DateTime.Now,

@@ -6,6 +6,8 @@ namespace givPayroll.Models
 {
     public class PayrollViewModel 
     {
+      
+
         [Required]
         [Display(Name = "پرسنل")]
         public int PersonnelId { get; set; }

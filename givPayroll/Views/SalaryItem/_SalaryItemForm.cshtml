@@ -14,6 +14,7 @@
       onsubmit="return submitSalaryItemForm(this);">
 
     @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
 
     <div class="modal-header">
 
@@ -38,25 +39,7 @@
 
         <div class="row g-3">
 
-            <!-- Id -->
-
-            <div class="col-md-2">
-
-                <label asp-for="Id"
-                       class="form-label">
-                </label>
-
-                <input asp-for="Id"
-                       class="form-control"
-                       readonly="@isEdit" />
-
-                <span asp-validation-for="Id"
-                      class="text-danger">
-                </span>
-
-            </div>
-
-
+            <!-- Id  -->
             <!-- Priority -->
 
             <div class="col-md-2">
@@ -255,8 +238,9 @@
             انصراف
         </button>
 
-        <button type="submit"
-                class="btn btn-primary">
+        <button type="button"
+                onclick="saveSalaryItem()" 
+            class="btn btn-primary">
 
             <i class="bi bi-check-lg"></i>
 
@@ -268,7 +252,138 @@
 
 </form>
 
+<!-- =========================================================
+         LOADING
+         ========================================================= -->
 
+<div id="salaryItemLoading"
+     class="modal-loading"
+     style="display:none;">
+
+    <img src="~/images/hourglass.gif"
+         alt="ذخیره ..." />
+
+</div>
+
+<script>
+    function saveSalaryItem() {
+
+    var form =
+        $("#salaryItemForm");
+        var id = $("#Id").val();
+        alert(id);
+        if (!form.valid()) {
+
+            return false;
+        }
+
+         
+        $("#btnSaveSalaryItem")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> ' +
+                'در حال ذخیره...'
+            );
+
+        //alert($("#salaryItemRuleAmount").val());
+
+        $("#salaryItemLoading")
+            .show();
+
+            var url = (id==0? "/SalaryItem/Create":"/SalaryItem/Edit");
+
+        $.ajax({
+
+            url: url
+                ,
+
+            type:
+                "POST",
+
+            data:
+                form.serialize(),
+
+
+            success: function(result) {
+
+                if (result.success) {
+
+                    $("#salaryItemRuleModal")
+                        .modal("hide");
+
+
+                    Swal.fire({
+
+                        icon:
+                            "success",
+
+                        title:
+                            "قوانین با موفقیت ذخیره شد",
+
+                        timer:
+                            1200,
+
+                        showConfirmButton:
+                            false
+
+                    });
+
+                }
+                else {
+
+                    $("#salaryItemRuleModalContent")
+                        .html(result);
+
+
+                    $.validator.unobtrusive.parse(
+                        "#salaryItemRuleForm"
+                    );
+
+                }
+
+            },
+
+
+            error: function(xhr) {
+
+                console.error(xhr);
+
+
+                Swal.fire({
+
+                    icon:
+                        "error",
+
+                    title:
+                        "ذخیره انجام نشد",
+
+                    text:
+                        "خطایی هنگام ذخیره قوانین رخ داد."
+
+                });
+
+            },
+
+
+            complete: function() {
+
+                $("#salaryItemRuleLoading")
+                    .hide();
+
+
+                $("#btnSaveSalaryItemRule")
+                    .prop("disabled", false)
+                    .html("ثبت");
+
+            }
+
+        });
+
+
+        return false;
+    }
+</script>
 <script>
 
     $.validator.unobtrusive.parse(

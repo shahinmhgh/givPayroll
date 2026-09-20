@@ -12,6 +12,7 @@
 
     <input type="hidden"  asp-for="Id" />
     <input type="hidden"  asp-for="PersonnelId" />
+    <input type="hidden" asp-for="HasWorked" />
 
     <div class="modal-header modal-drag-handle">
 
@@ -74,6 +75,19 @@
                     <input value="@Model.Personnel.FirstName   @Model.Personnel.LastName" type="text" readonly class="form-control"></input>
 
                 </div>
+
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+                <label asp-for="ShiftMinute"
+                       class="form-label">
+
+                </label>
+
+                <input asp-for="ShiftMinute"
+                       type="number"
+                       class="form-control" />
 
             </div>
 
@@ -272,7 +286,7 @@
 
             <!-- Has Worked -->
 
-            <div class="col-md-4 mb-3">
+          @*   <div class="col-md-4 mb-3">
 
                 <div class="form-check mt-4">
 
@@ -286,7 +300,7 @@
 
                 </div>
 
-            </div>
+            </div> *@
 
         </div>
 

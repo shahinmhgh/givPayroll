@@ -25,6 +25,9 @@ namespace givPayroll.Models
         [Display(Name = "پرسنل")]
         public int PersonnelId { get; set; }
 
+        [Display(Name = "طول شیفت")]
+        public int ShiftMinute { get; set; }
+
         [Display(Name = "موظفی")]
         public int WorkingExpectedMinute { get; set; }
 

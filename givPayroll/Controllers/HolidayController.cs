@@ -51,6 +51,8 @@ namespace givPayroll.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Holiday model)
         {
+            ModelState.Remove("PersianDate");
+
             if (!ModelState.IsValid)
                 return PartialView("_HolidayForm", model);
 
@@ -67,8 +69,8 @@ namespace givPayroll.Controllers
 
                 return PartialView("_HolidayForm", model);
             }
-            model.Year = Convert.ToInt32(DateUtil.M2S(model.Date).Substring(0, 4));
-            model.PersianDate = DateUtil.M2S(model.Date);
+            model.Year = Convert.ToInt32(AppUtil.M2S(model.Date).Substring(0, 4));
+            model.PersianDate = AppUtil.M2S(model.Date);
 
             _context.Holidays.Add(model);
             await _context.SaveChangesAsync();
@@ -104,8 +106,8 @@ namespace givPayroll.Controllers
             var holiday = await _context.Holidays
                 .FirstOrDefaultAsync(x => x.Id == model.Id);
 
-            model.Year =Convert.ToInt32( DateUtil.M2S(model.Date).Substring(0, 4));
-            model.PersianDate = DateUtil.M2S(model.Date);
+            model.Year =Convert.ToInt32( AppUtil.M2S(model.Date).Substring(0, 4));
+            model.PersianDate = AppUtil.M2S(model.Date);
 
             if (holiday == null)
                 return NotFound();

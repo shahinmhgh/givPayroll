@@ -27,7 +27,7 @@ namespace givPayroll.Controllers
         {
             var query = _context.SalaryItems
                 .Include(i=>i.SalaryItemRules)
-                //.Where(i=>i.Label!= "Bonus" && i.Label != "Penalty")
+                 .Where(i=>i.Label!= "Bonus" && i.Label != "Penalty")
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -111,9 +111,12 @@ namespace givPayroll.Controllers
 
         // GET: SalaryItem/Create
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return PartialView("_SalaryItemForm", new SalaryItem());
+            SalaryItem model = new SalaryItem();
+          
+
+            return PartialView("_SalaryItemForm", model);
         }
 
         // POST: SalaryItem/Create
@@ -121,12 +124,12 @@ namespace givPayroll.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SalaryItem model)
         {
-            if (await _context.SalaryItems.AnyAsync(x => x.Id == model.Id))
-            {
-                ModelState.AddModelError(
-                    nameof(model.Id),
-                    "این کد قبلاً استفاده شده است.");
-            }
+            //if (await _context.SalaryItems.AnyAsync(x => x.Id == model.Id))
+            //{
+            //    ModelState.AddModelError(
+            //        nameof(model.Id),
+            //        "این کد قبلاً استفاده شده است.");
+            //}
 
             if (string.IsNullOrWhiteSpace(model.SalaryItemName))
             {
@@ -140,6 +143,8 @@ namespace givPayroll.Controllers
                 return PartialView("_SalaryItemForm", model);
             }
 
+           
+
             model.SalaryItemName = model.SalaryItemName.Trim();
             model.Label ??= "";
             model.Unit ??= "";
@@ -147,6 +152,13 @@ namespace givPayroll.Controllers
             model.CalculationMode ??= "";
             model.FormulaValue ??= "";
 
+            if (model.Id==0)
+            {
+                var maxId = await _context.SalaryItems
+                  .Select(x => (int?)x.Id)
+                  .MaxAsync();
+                model.Id = (maxId ?? 0) + 1;
+            }
             await _context.SalaryItems.AddAsync(model);
             await _context.SaveChangesAsync();
 

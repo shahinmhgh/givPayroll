@@ -1,18 +1,27 @@
 ﻿@model givPayroll.Models.Holiday
 
 <form id="holidayForm"
-      asp-action="@(Model.Id == 0 ? "Create" : "Edit")"
-      asp-controller="Holiday"
+    @*      asp-action="@(Model.Id == 0 ? "Create" : "Edit")"
+      asp-controller="Holiday" *@
       method="post">
 
 
     @Html.AntiForgeryToken()
-     
-    <input type="hidden"   asp-for="Id" />
+
+    <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="Year" />
 
     <div asp-validation-summary="ModelOnly"
          class="text-danger mb-3">
+    </div>
+
+    <div id="holidaySaveLoading"
+         class="modal-loading"
+         style="display:none;width:300px;height:300px">
+
+        <img src="~/images/hourglass.gif"
+             alt="ذخیره ..." />
+
     </div>
 
 
@@ -99,7 +108,7 @@
 
         </button>
 
-        <button type="button"
+        <button type="button" id="btnSaveHoliday"
                 class="btn btn-primary"
                 onclick="saveHoliday()">
 
@@ -174,6 +183,69 @@
             }
 
         });
+    }
+
+    function saveHoliday() {
+        var form =$("#holidayForm");
+
+        if (!form.valid()) {
+            return false;
+        }
+
+        $("#btnSaveHoliday")
+            .prop("disabled", true)
+            .html(
+                '<img src="/images/hourglass.gif" ' +
+                'style="width:20px;height:20px;"> ذخیره...'
+            );
+
+        $("#holidaySaveLoading").show();
+
+        let id =$("[name=Id]").val();
+        //مراسم تشییع رهبر فقید انقلاب
+       
+        let url =
+            id == 0
+                ? "/Holiday/Create"
+                : "/Holiday/Edit";
+        alert(1);
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: form.serialize(),
+            success:
+                function(result) {
+                    if (result.success) {
+                        $("#holidayModal").modal("hide");
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "ثبت با موفقیت انجام شد",
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+                    }
+                },
+            error:
+                function(xhr) {
+                    console.log(
+                        xhr.responseText
+                    );
+                    Swal.fire({
+                        icon: "error",
+                        title: "ثبت انجام نشد"
+                    });
+                },
+
+            complete:
+                function() {
+                    $("#holidaySaveLoading").hide();
+                    $("#btnSaveHoliday")
+                        .prop("disabled", false)
+                        .html("ثبت");
+                }
+        });
+
     }
 
 </script>

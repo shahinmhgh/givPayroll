@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using givPayroll.Data;
 
@@ -11,9 +12,11 @@ using givPayroll.Data;
 namespace givPayroll.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260916093454_ini16")]
+    partial class ini16
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -271,9 +274,6 @@ namespace givPayroll.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("PersonnelId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShiftMinute")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -3269,7 +3269,7 @@ namespace givPayroll.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("FormulaValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("ntext");
 
                     b.Property<int?>("PayrollAdjustmentId")
                         .HasColumnType("int");
@@ -3370,11 +3370,6 @@ namespace givPayroll.Migrations
 
                     b.Property<int>("MaritalStatusId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Mobile")
-                        .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
 
                     b.HasKey("Id");
 
@@ -3745,9 +3740,6 @@ namespace givPayroll.Migrations
                         .HasColumnType("ntext")
                         .HasDefaultValue("");
 
-                    b.Property<int>("IsSystem")
-                        .HasColumnType("int");
-
                     b.Property<string>("Label")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -3801,7 +3793,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "BaseSalary * DaysWorked",
-                            IsSystem = 1,
                             Label = "BaseSalary",
                             PlusMinus = 1,
                             Priority = 10,
@@ -3816,7 +3807,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(BaseSalary * MonthDays/220)*1.2/60*ExtraMinute",
-                            IsSystem = 1,
                             Label = "OverTime",
                             PlusMinus = 1,
                             Priority = 70,
@@ -3831,7 +3821,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(HousingAllowance / MonthDays) * DaysWorked",
-                            IsSystem = 1,
                             Label = "HousingAllowance",
                             PlusMinus = 1,
                             Priority = 50,
@@ -3846,7 +3835,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(ChildAllowance * ChildNo / MonthDays) * DaysWorked",
-                            IsSystem = 1,
                             Label = "ChildAllowance",
                             PlusMinus = 1,
                             Priority = 60,
@@ -3857,11 +3845,24 @@ namespace givPayroll.Migrations
                         },
                         new
                         {
+                            Id = 5,
+                            CalculationMode = "Manual",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FormulaValue = "",
+                            Label = "Bonus",
+                            PlusMinus = 1,
+                            Priority = 110,
+                            SalaryItemName = "پاداش",
+                            Source = "PayrollAdjustment",
+                            Unit = "Amount",
+                            UserCreated = 0
+                        },
+                        new
+                        {
                             Id = 6,
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*MissionMinute",
-                            IsSystem = 1,
                             Label = "MissionAllownce",
                             PlusMinus = 1,
                             Priority = 100,
@@ -3876,7 +3877,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*AbsenceMinute",
-                            IsSystem = 1,
                             Label = "AbsenceDeduction",
                             PlusMinus = -1,
                             Priority = 80,
@@ -3891,7 +3891,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*DelayMinute",
-                            IsSystem = 1,
                             Label = "DelayDeduction",
                             PlusMinus = -1,
                             Priority = 90,
@@ -3906,7 +3905,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Tax",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "",
-                            IsSystem = 1,
                             Label = "Tax",
                             PlusMinus = -1,
                             Priority = 130,
@@ -3921,7 +3919,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Insurance",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "",
-                            IsSystem = 1,
                             Label = "Insurance",
                             PlusMinus = -1,
                             Priority = 120,
@@ -3936,7 +3933,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(FoodAllowance / MonthDays) * DaysWorked",
-                            IsSystem = 1,
                             Label = "FoodAllowance",
                             PlusMinus = 1,
                             Priority = 40,
@@ -3951,7 +3947,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(JobAllowance / MonthDays) * DaysWorked",
-                            IsSystem = 1,
                             Label = "JobAllowance",
                             PlusMinus = 1,
                             Priority = 30,
@@ -3966,7 +3961,6 @@ namespace givPayroll.Migrations
                             CalculationMode = "Formula",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "(ResponsibilityAllowance / MonthDays) * DaysWorked",
-                            IsSystem = 1,
                             Label = "ResponsibilityAllowance",
                             PlusMinus = 1,
                             Priority = 20,
@@ -3977,30 +3971,14 @@ namespace givPayroll.Migrations
                         },
                         new
                         {
-                            Id = 5,
-                            CalculationMode = "Manual",
-                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FormulaValue = "",
-                            IsSystem = 1,
-                            Label = "Bonus",
-                            PlusMinus = 1,
-                            Priority = 110,
-                            SalaryItemName = "تعدیلات افزایش",
-                            Source = "PayrollAdjustment",
-                            Unit = "Amount",
-                            UserCreated = 0
-                        },
-                        new
-                        {
                             Id = 15,
                             CalculationMode = "Manual",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FormulaValue = "",
-                            IsSystem = 1,
                             Label = "Penalty",
                             PlusMinus = -1,
                             Priority = 111,
-                            SalaryItemName = "تعدیلات کاهشی",
+                            SalaryItemName = "جریمه",
                             Source = "PayrollAdjustment",
                             Unit = "Amount",
                             UserCreated = 0

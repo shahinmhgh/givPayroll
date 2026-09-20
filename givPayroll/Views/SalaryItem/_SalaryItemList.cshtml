@@ -23,8 +23,8 @@
 
             <tr>
 
-                <th>
-                    کد
+                <th style="width:25px!important">
+                    #
                 </th>
 
                 <th>
@@ -74,12 +74,13 @@
                         var amount = item.SalaryItemRules?
                                 .OrderByDescending(x => x.EffectiveDate)
                                 .FirstOrDefault()?.Amount;
-                        var mark = amount != null ? "*" : "";
+                        var mark = (amount.GetValueOrDefault()!=0) ? true : false;
                     
                     <tr >
 
-                        <td>
-                            <label style="color:red">@mark</label>  @item.Id
+                        <td style="width:25px!important">
+                            <label class="fa @(mark ? "fa-bookmark" : "")" style="color:red"></label>
+
                         </td>
 
                         <td>
@@ -138,16 +139,25 @@
 
 
                                 <button type="button"
-                                class="btn btn-sm btn-danger tooltip-btn"
-                                onclick="deleteSalaryItem(@item.Id)">
+                                        class="btn btn-sm btn-danger tooltip-btn"
+                                        onclick="deleteSalaryItem(@item.Id)"
+                                    @(item.IsSystem==1 ? "disabled" : "")>
 
                                     <i class="fa fa-trash"></i>
                                     <span class="tooltip-text">حذف</span>
 
                                 </button>
+
+                                <button type="button" class="btn btn-sm btn-info tooltip-btn"
+                                        onclick="salaryItemRule(@item.Id)">
+
+                                    <i class="fa fa-cog"></i>
+                                    <span class="tooltip-text">قوانین حقوق</span>
+
                                
+                                </button>
                             } 
-                            @if (@item.Label != "Insurance" && @item.Label != "Tax")
+                         @*    @if (@item.Label != "Insurance" && @item.Label != "Tax")
                             {
                             <button type="button" class="btn btn-sm btn-info tooltip-btn"
                                         onclick="salaryItemRule(@item.Id)">
@@ -157,7 +167,7 @@
 
                                
                                 </button>
-                            }
+                            } *@
                         </td>
 
                     </tr>

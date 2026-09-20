@@ -12,8 +12,8 @@ using givPayroll.Data;
 namespace givPayroll.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260916030106_ini15")]
-    partial class ini15
+    [Migration("20260916094512_ini171")]
+    partial class ini171
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3267,6 +3267,9 @@ namespace givPayroll.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FormulaValue")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PayrollAdjustmentId")
                         .HasColumnType("int");

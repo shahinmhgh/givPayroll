@@ -33,10 +33,13 @@
                     <label>@Html.DisplayNameFor(m => m.FirstName)</label>
                     <input asp-for="FirstName" class="form-control" />
                 </div>
-
                 <div class="mb-3">
                     <label>@Html.DisplayNameFor(m => m.LastName)</label>
                     <input asp-for="LastName" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label>@Html.DisplayNameFor(m => m.Mobile)</label>
+                    <input asp-for="Mobile" type="number" class="form-control" />
                 </div>
 
                 <div class="mb-3">
@@ -178,9 +181,9 @@
 
 
     $(document).ready(function() {
-         
+
         var BirthDate = '@Model.BirthDate';
-        
+
         initPersonnelDatePicker(BirthDate, "#BirthDateApp")
 
     });

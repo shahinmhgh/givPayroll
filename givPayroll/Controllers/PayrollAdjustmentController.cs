@@ -301,7 +301,7 @@ namespace givPayroll.Controllers
                      i < model.AdjustmentCount;
                      i++)
                 {
-                    var currentPersianDate = DateUtil.M2S(currentDate);
+                    var currentPersianDate = AppUtil.M2S(currentDate);
                     var parts = currentPersianDate.Split('/');
                     var payrollPersianYear = int.Parse(parts[0]);
                     var payrollPersianMonth = int.Parse(parts[1]);

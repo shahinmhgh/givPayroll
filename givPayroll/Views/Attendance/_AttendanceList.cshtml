@@ -2,6 +2,8 @@
 @using System.Globalization
 @using givPayroll.ViewModels
 
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
 @{
     var persianDays = new Dictionary<DayOfWeek, string>
     {
@@ -43,7 +45,7 @@
     </div>
 
 
-    <div class="table-responsive"   style="height:700px;overflow-y:auto;">
+    <div class="table-responsive"   style="height:500px;overflow-y:auto;">
 
         <table class="table table-bordered table-hover">
 
@@ -71,14 +73,14 @@
                         کارکرد
                     </th>
 
-                    <th>
+                    <th >
                         اضافه کار
                     </th>
 
-                    <th>
+                    <th style="font-size:8px">
                         تعطیل کاری
                     </th>
-                    <th style="width:50px;font-size:6px;">
+                    <th style="width:40px!important;font-size:9px;">
                         روز تعطیل
                     </th>
 
@@ -177,11 +179,11 @@
                                 @item.WorkingMinute
                             </td>
 
-                            <td>
+                            <td  >
                                 @item.ExtraMinute
                             </td>
 
-                            <td>
+                            <td style="width:40px!important;font-size:9px;">
                                 @item.HolidayMinute
                             </td>
                             <td>
@@ -236,19 +238,23 @@
 
                             <td>
 
-                                <button class="btn btn-sm btn-warning"
+                                <button class="btn btn-sm btn-warning tooltip-btn"
                                         onclick="editAttendance(@item.Id)">
 
                                     <i class="fa fa-edit"></i>
-
+                                    <span class="tooltip-text">
+                                        ویرایش
+                                    </span>
                                 </button>
 
 
-                                <button class="btn btn-sm btn-danger"
+                                <button class="btn btn-sm btn-danger tooltip-btn"
                                         onclick="deleteAttendance(@item.Id)">
 
                                     <i class="fa fa-trash"></i>
-
+                                    <span class="tooltip-text">
+                                        حذف کارکرد
+                                    </span>
                                 </button>
 
                             </td>

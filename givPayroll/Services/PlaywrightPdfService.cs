@@ -20,7 +20,7 @@ public sealed class PlaywrightPdfService : IPdfService
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            ExecutablePath = @"C:\Users\shahin\source\repos\givPayroll\givPayroll\Playwright\chromium-1228\chrome.exe",
+            ExecutablePath = _environment.ContentRootPath + @"\Playwright\chromium-1228\chrome.exe",
             Headless = true
         });
 

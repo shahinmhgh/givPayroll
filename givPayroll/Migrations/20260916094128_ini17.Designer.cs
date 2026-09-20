@@ -12,8 +12,8 @@ using givPayroll.Data;
 namespace givPayroll.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260916025329_ini14")]
-    partial class ini14
+    [Migration("20260916094128_ini17")]
+    partial class ini17
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3268,6 +3268,9 @@ namespace givPayroll.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("FormulaValue")
+                        .HasColumnType("ntext");
+
                     b.Property<int?>("PayrollAdjustmentId")
                         .HasColumnType("int");
 
@@ -3345,6 +3348,9 @@ namespace givPayroll.Migrations
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ChildNo")
+                        .HasColumnType("int");
 
                     b.Property<int>("EducationID")
                         .HasColumnType("int");
@@ -3730,7 +3736,6 @@ namespace givPayroll.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FormulaValue")
-                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("ntext")
                         .HasDefaultValue("");

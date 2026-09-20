@@ -509,6 +509,14 @@ namespace givPayroll.Data
                 })
                 .IsUnique();
 
+            builder.Entity<SalaryItem>()
+           .Property(x => x.FormulaValue)
+           .HasColumnType("nvarchar(max)");
+
+            builder.Entity<PayrollItem>()
+          .Property(x => x.FormulaValue)
+          .HasColumnType("nvarchar(max)");
+
             builder.Entity<PersonnelOrder>()
                .HasOne(p => p.Job)
                .WithMany(j => j.PersonnelOrders)
@@ -738,7 +746,7 @@ namespace givPayroll.Data
                 })
                 .IsUnique();
 
-        
+
 
 
             builder.Entity<PersonnelContract>()
@@ -754,7 +762,7 @@ namespace givPayroll.Data
                 .HasForeignKey(x => x.ContractTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-           
+
 
             builder.Entity<RuleInsurance>()
                .ToTable("RuleInsurance", "Payroll");
@@ -769,7 +777,7 @@ namespace givPayroll.Data
         // =====================================================
         // 1405 - فروردین
         // =====================================================
-        
+
         new Holiday
         {
             Id = 1001,
@@ -777,7 +785,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 3, 21),
             Title = "عید سعید فطر و آغاز نوروز",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 3, 21))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 3, 21))
         },
 
         new Holiday
@@ -787,7 +795,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 3, 22),
             Title = "عید نوروز و تعطیل به مناسبت عید سعید فطر",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 3, 22))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 3, 22))
         },
 
         new Holiday
@@ -797,7 +805,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 3, 23),
             Title = "عید نوروز",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 3, 23))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 3, 23))
         },
 
         new Holiday
@@ -807,7 +815,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 3, 24),
             Title = "عید نوروز",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 3, 24))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 3, 24))
         },
 
         new Holiday
@@ -817,7 +825,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 4, 1),
             Title = "روز جمهوری اسلامی ایران",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 4,  1))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 4, 1))
         },
 
         new Holiday
@@ -827,7 +835,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 4, 2),
             Title = "روز طبیعت",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 4, 2))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 4, 2))
         },
 
         new Holiday
@@ -837,7 +845,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 4, 14),
             Title = "شهادت امام جعفر صادق (ع)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 4, 14))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 4, 14))
         },
 
 
@@ -852,7 +860,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 5, 27),
             Title = "عید سعید قربان",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 5, 27))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 5, 27))
         },
 
         new Holiday
@@ -862,7 +870,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 6, 4),
             Title = "رحلت حضرت امام خمینی (ره) و عید سعید غدیر خم",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 6, 4))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 6, 4))
         },
 
         new Holiday
@@ -872,7 +880,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 6, 5),
             Title = "قیام ۱۵ خرداد",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 6,5))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 6, 5))
         },
 
 
@@ -887,7 +895,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 6, 24),
             Title = "تاسوعای حسینی",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026,6, 24))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 6, 24))
         },
 
         new Holiday
@@ -897,7 +905,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 6, 25),
             Title = "عاشورای حسینی",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 6, 25))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 6, 25))
         },
 
 
@@ -912,7 +920,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 8, 4),
             Title = "اربعین حسینی",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 8, 4))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 8, 4))
         },
 
         new Holiday
@@ -922,7 +930,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 8, 12),
             Title = "رحلت پیامبر اکرم (ص) و شهادت امام حسن مجتبی (ع)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 8, 12))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 8, 12))
         },
 
         new Holiday
@@ -932,7 +940,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 8, 13),
             Title = "شهادت امام رضا (ع)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 8, 13))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 8, 13))
         },
 
         new Holiday
@@ -942,7 +950,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 8, 21),
             Title = "شهادت امام حسن عسکری (ع)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 8, 21))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 8, 21))
         },
 
 
@@ -957,7 +965,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 8, 30),
             Title = "میلاد پیامبر اکرم (ص) و میلاد امام جعفر صادق (ع)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 8, 30))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 8, 30))
         },
 
 
@@ -972,7 +980,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 11, 13),
             Title = "شهادت حضرت فاطمه زهرا (س)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 11, 13))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 11, 13))
         },
 
 
@@ -987,7 +995,7 @@ namespace givPayroll.Data
             Date = new DateTime(2026, 12, 23),
             Title = "ولادت حضرت علی (ع) و روز پدر",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2026, 12, 23))
+            PersianDate = AppUtil.M2S(new DateTime(2026, 12, 23))
         },
 
         new Holiday
@@ -997,7 +1005,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 1, 6),
             Title = "مبعث حضرت رسول اکرم (ص)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 1 , 6))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 1, 6))
         },
 
 
@@ -1012,7 +1020,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 1, 24),
             Title = "ولادت حضرت قائم (عج) و جشن نیمه شعبان",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 1, 24))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 1, 24))
         },
 
         new Holiday
@@ -1022,7 +1030,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 2, 11),
             Title = "پیروزی انقلاب اسلامی ایران",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 2, 11))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 2, 11))
         },
 
 
@@ -1037,7 +1045,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 2, 28),
             Title = "شهادت حضرت علی (ع)",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 2, 28))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 2, 28))
         },
 
         new Holiday
@@ -1047,7 +1055,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 3, 10),
             Title = "عید سعید فطر",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 3, 10))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 3, 10))
         },
 
         new Holiday
@@ -1057,7 +1065,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 3, 11),
             Title = "تعطیل به مناسبت عید سعید فطر",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 3, 11))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 3, 11))
         },
 
         new Holiday
@@ -1067,7 +1075,7 @@ namespace givPayroll.Data
             Date = new DateTime(2027, 3, 20),
             Title = "روز ملی شدن صنعت نفت ایران",
             IsOfficial = true,
-            PersianDate = DateUtil.M2S(new DateTime(2027, 3, 20))
+            PersianDate = AppUtil.M2S(new DateTime(2027, 3, 20))
         }
     );
         }
@@ -1085,7 +1093,8 @@ namespace givPayroll.Data
          Source = "PersonnelOrder",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "BaseSalary * DaysWorked"
+         FormulaValue = "BaseSalary * DaysWorked",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1098,7 +1107,8 @@ namespace givPayroll.Data
          Source = "Attendence",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(BaseSalary * MonthDays/220)*1.2/60*ExtraMinute"
+         FormulaValue = "(BaseSalary * MonthDays/220)*1.2/60*ExtraMinute",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1111,7 +1121,8 @@ namespace givPayroll.Data
          Source = "PersonnelOrder",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(HousingAllowance / MonthDays) * DaysWorked"
+         FormulaValue = "(HousingAllowance / MonthDays) * DaysWorked",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1124,21 +1135,11 @@ namespace givPayroll.Data
          Source = "PersonnelOrder",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(ChildAllowance * ChildNo / MonthDays) * DaysWorked"
+         FormulaValue = "(ChildAllowance * ChildNo / MonthDays) * DaysWorked",
+         IsSystem = 1,
      },
 
-     new SalaryItem
-     {
-         Id = 5,
-         Priority = 110,
-         SalaryItemName = "پاداش",
-         Label = "Bonus",
-         Unit = "Amount",
-         Source = "PayrollAdjustment",
-         PlusMinus = 1,
-         CalculationMode = "Manual",
-         FormulaValue = ""
-     },
+
 
      new SalaryItem
      {
@@ -1150,7 +1151,8 @@ namespace givPayroll.Data
          Source = "Attendence",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(BaseSalary * MonthDays/220)*2/60*MissionMinute"
+         FormulaValue = "(BaseSalary * MonthDays/220)*2/60*MissionMinute",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1163,7 +1165,8 @@ namespace givPayroll.Data
          Source = "Attendence",
          PlusMinus = -1,
          CalculationMode = "Formula",
-         FormulaValue = "(BaseSalary * MonthDays/220)*2/60*AbsenceMinute"
+         FormulaValue = "(BaseSalary * MonthDays/220)*2/60*AbsenceMinute",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1176,7 +1179,8 @@ namespace givPayroll.Data
          Source = "Attendence",
          PlusMinus = -1,
          CalculationMode = "Formula",
-         FormulaValue = "(BaseSalary * MonthDays/220)*2/60*DelayMinute"
+         FormulaValue = "(BaseSalary * MonthDays/220)*2/60*DelayMinute",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1189,7 +1193,8 @@ namespace givPayroll.Data
          Source = "RuleTax",
          PlusMinus = -1,
          CalculationMode = "Tax",
-         FormulaValue = ""
+         FormulaValue = "",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1202,21 +1207,10 @@ namespace givPayroll.Data
          Source = "RuleInsurance",
          PlusMinus = -1,
          CalculationMode = "Insurance",
-         FormulaValue = ""
+         FormulaValue = "",
+         IsSystem = 1,
      },
 
-     //new SalaryItem
-     //{
-     //    Id = 11,
-     //    Priority = 140,
-     //    SalaryItemName = "قسط وام",
-     //    Label = "LoanInstallment",
-     //    Unit = "Amount",
-     //    Source = "PersonnelInstallment",
-     //    PlusMinus = -1,
-     //    CalculationMode = "Manual",
-     //    FormulaValue = ""
-     //},
 
      new SalaryItem
      {
@@ -1228,7 +1222,8 @@ namespace givPayroll.Data
          Source = "PersonnelOrder",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(FoodAllowance / MonthDays) * DaysWorked"
+         FormulaValue = "(FoodAllowance / MonthDays) * DaysWorked",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1241,7 +1236,8 @@ namespace givPayroll.Data
          Source = "PersonnelOrder",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(JobAllowance / MonthDays) * DaysWorked"
+         FormulaValue = "(JobAllowance / MonthDays) * DaysWorked",
+         IsSystem = 1,
      },
 
      new SalaryItem
@@ -1254,20 +1250,34 @@ namespace givPayroll.Data
          Source = "PersonnelOrder",
          PlusMinus = 1,
          CalculationMode = "Formula",
-         FormulaValue = "(ResponsibilityAllowance / MonthDays) * DaysWorked"
+         FormulaValue = "(ResponsibilityAllowance / MonthDays) * DaysWorked",
+         IsSystem = 1,
      },
-
+          new SalaryItem
+          {
+              Id = 5,
+              Priority = 110,
+              SalaryItemName = "تعدیلات افزایش",
+              Label = "Bonus",
+              Unit = "Amount",
+              Source = "PayrollAdjustment",
+              PlusMinus = 1,
+              CalculationMode = "Manual",
+              FormulaValue = "",
+              IsSystem = 1,
+          },
      new SalaryItem
      {
          Id = 15,
          Priority = 111,
-         SalaryItemName = "جریمه",
+         SalaryItemName = "تعدیلات کاهشی",
          Label = "Penalty",
          Unit = "Amount",
          Source = "PayrollAdjustment",
          PlusMinus = -1,
          CalculationMode = "Manual",
-         FormulaValue = ""
+         FormulaValue = "",
+         IsSystem = 1,
      }
 
  );

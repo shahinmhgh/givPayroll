@@ -19,6 +19,11 @@ namespace givPayroll.Models
         [Display(Name = "حقوق")]
         public int PayrollId { get; set; }
 
+        [Display(Name = "فرمول")]
+        [Column(TypeName = "ntext")]
+        public string? FormulaValue { get; set; } = string.Empty;
+
+
         [Required]
         [Display(Name = "قلم حقوق")]
         public int SalaryItemId { get; set; }
@@ -36,8 +41,8 @@ namespace givPayroll.Models
         [ForeignKey(nameof(PayrollId))]
         public virtual Payroll? Payroll { get; set; }
 
-        [ForeignKey(nameof(SalaryItemId))]
-        public virtual SalaryItem? SalaryItem { get; set; }
+        [ForeignKey("SalaryItemId")]
+        public virtual SalaryItem SalaryItem { get; set; }
 
         [ForeignKey(nameof(PayrollAdjustmentId))]
         public virtual PayrollAdjustment? PayrollAdjustment { get; set; }

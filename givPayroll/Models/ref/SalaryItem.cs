@@ -34,6 +34,9 @@ namespace givPayroll.Models
         [Display(Name = "علامت")]
         public int PlusMinus { get; set; }
 
+        [Display(Name = "سیستمی")]
+        public int IsSystem { get; set; }
+
         [MaxLength(20)]
         [Display(Name = "روش محاسبه")]
         public string CalculationMode { get; set; } = string.Empty;

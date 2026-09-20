@@ -5,12 +5,21 @@
 namespace givPayroll.Migrations
 {
     /// <inheritdoc />
-    public partial class ini14 : Migration
+    public partial class ini17 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.AlterColumn<string>(
+name: "FormulaValue",
+schema: "ref",
+table: "SalaryItem",
+type: "nvarchar(max)",
+nullable: true,
+defaultValue: "",
+oldClrType: typeof(string),
+oldType: "ntext",
+oldDefaultValue: "");
         }
 
         /// <inheritdoc />

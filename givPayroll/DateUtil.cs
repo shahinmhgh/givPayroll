@@ -1,8 +1,10 @@
 ﻿using System.Globalization;
+using NPOI.HSSF.UserModel;
+using NPOI.XSSF.UserModel;
 
 namespace givPayroll
 {
-    public static class DateUtil
+    public static class AppUtil
     {
         public static String M2S(DateTime gregorianDate)
         {
@@ -44,12 +46,78 @@ namespace givPayroll
                     "بهمن",
                     "اسفند"
                 };
-            
+
 
             if (month < 1 || month > 12)
                 throw new ArgumentOutOfRangeException(nameof(month));
 
             return PersianMonths[month - 1];
+        }
+         
+        public static byte[] ConvertXlsToXlsx(Stream xlsStream)
+        {
+            // Read old .xls
+            var hssfWorkbook = new HSSFWorkbook(xlsStream);
+
+            // Create new .xlsx
+            var xssfWorkbook = new XSSFWorkbook();
+
+            for (int s = 0; s < hssfWorkbook.NumberOfSheets; s++)
+            {
+                var oldSheet = hssfWorkbook.GetSheetAt(s);
+                var newSheet = xssfWorkbook.CreateSheet(oldSheet.SheetName);
+
+                for (int r = oldSheet.FirstRowNum; r <= oldSheet.LastRowNum; r++)
+                {
+                    var oldRow = oldSheet.GetRow(r);
+
+                    if (oldRow == null)
+                        continue;
+
+                    var newRow = newSheet.CreateRow(r);
+
+                    for (int c = oldRow.FirstCellNum; c < oldRow.LastCellNum; c++)
+                    {
+                        if (c < 0)
+                            continue;
+
+                        var oldCell = oldRow.GetCell(c);
+
+                        if (oldCell == null)
+                            continue;
+
+                        var newCell = newRow.CreateCell(c);
+
+                        switch (oldCell.CellType)
+                        {
+                            case NPOI.SS.UserModel.CellType.String:
+                                newCell.SetCellValue(oldCell.StringCellValue);
+                                break;
+
+                            case NPOI.SS.UserModel.CellType.Numeric:
+                                newCell.SetCellValue(oldCell.NumericCellValue);
+                                break;
+
+                            case NPOI.SS.UserModel.CellType.Boolean:
+                                newCell.SetCellValue(oldCell.BooleanCellValue);
+                                break;
+
+                            case NPOI.SS.UserModel.CellType.Formula:
+                                newCell.SetCellFormula(oldCell.CellFormula);
+                                break;
+
+                            default:
+                                newCell.SetCellValue(oldCell.ToString());
+                                break;
+                        }
+                    }
+                }
+            }
+
+            using var output = new MemoryStream();
+            xssfWorkbook.Write(output, leaveOpen: true);
+
+            return output.ToArray();
         }
 
         internal static DateTime S2M(string theDate)

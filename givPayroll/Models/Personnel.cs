@@ -17,7 +17,10 @@ namespace givPayroll.Models
         [Display(Name = "نام")]
         public String FirstName { get; set; }
 
-
+        [MaxLength(11)]
+        [Required(ErrorMessage = "Mobiler Number is required.")]
+        [Display(Name = "موبایل")]
+        public String Mobile { get; set; } = string.Empty;
 
         [MaxLength(50)]
         [Required(ErrorMessage = "Last Name is required.")]
