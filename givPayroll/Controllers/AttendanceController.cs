@@ -75,13 +75,7 @@ namespace givPayroll.Controllers
             var personnels = await _context.PersonnelOrders
 
                 .Include(x => x.Personnel)
-                .Where(x => x.StartDate <= monthEndGregorian && x.IsActive &&
-                    (
-                        x.EndDate == null ||
-                        x.EndDate >= monthStartGregorian
-                    )
-                )
-
+                .Where(x => x.StartDate <= monthEndGregorian && x.IsActive )
                 .Select(x => new
                 {
                     PersonnelId = x.PersonnelId,

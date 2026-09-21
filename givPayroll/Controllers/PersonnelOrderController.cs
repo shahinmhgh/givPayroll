@@ -368,7 +368,7 @@ namespace givPayroll.Controllers
                     No = model.No,
                     IssueDate = model.IssueDate,
                     StartDate = model.StartDate,
-                    EndDate = model.EndDate,
+                    //EndDate = model.EndDate,
                     Description = model.Description,
                     IsActive = model.IsActive,
 
@@ -476,7 +476,7 @@ namespace givPayroll.Controllers
 
                 IssueDate = order.IssueDate,
                 StartDate = order.StartDate,
-                EndDate = order.EndDate,
+                //EndDate = order.EndDate,
                 JobId = order.JobId,
                 Description = order.Description,
 
@@ -591,7 +591,7 @@ namespace givPayroll.Controllers
 
                 order.IssueDate = model.IssueDate;
                 order.StartDate = model.StartDate;
-                order.EndDate = model.EndDate;
+                //order.EndDate = model.EndDate;
 
                 order.Description = model.Description;
                 order.PersonnelId = model.PersonnelId;

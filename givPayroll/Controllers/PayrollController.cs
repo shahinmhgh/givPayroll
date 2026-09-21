@@ -156,18 +156,18 @@ public class PayrollController : Controller
             })
             .FirstOrDefaultAsync();
 
-        SalaryItemRule? rulesHousing = new SalaryItemRule();
-        SalaryItemRule? rulesChild = new SalaryItemRule();
-        SalaryItemRule? rulesFood = new SalaryItemRule();
-        SalaryItemRule? rulesMarital = new SalaryItemRule();
-        SalaryItemRule? rulesSeniority = new SalaryItemRule();
+        //SalaryItemRule? rulesHousing = new SalaryItemRule();
+        //SalaryItemRule? rulesChild = new SalaryItemRule();
+        //SalaryItemRule? rulesFood = new SalaryItemRule();
+        //SalaryItemRule? rulesMarital = new SalaryItemRule();
+        //SalaryItemRule? rulesSeniority = new SalaryItemRule();
         //await _context.SalaryItemRules
         //          .Where(r => r.SalaryItem.Label == "MaritalAllowance").FirstOrDefaultAsync();
-        rulesMarital.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "MaritalAllowance").FirstOrDefault().Amount;
-        rulesHousing.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "HousingAllowance").FirstOrDefault().Amount;
-        rulesChild.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "ChildAllowance").FirstOrDefault().Amount;
-        rulesFood.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "FoodAllowance").FirstOrDefault().Amount;
-        rulesSeniority.Amount = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "SeniorityAllowance").FirstOrDefault().Amount;
+        decimal AmountMarital = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "MaritalAllowance").FirstOrDefault().Amount;
+        decimal AmountHousing  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "HousingAllowance").FirstOrDefault().Amount;
+        decimal AmountChild  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "ChildAllowance").FirstOrDefault().Amount;
+        decimal AmountFood  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "FoodAllowance").FirstOrDefault().Amount;
+        decimal AmountSeniority  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "SeniorityAllowance").FirstOrDefault().Amount;
 
         Personnel Person = await _context.Personnels.FindAsync(personnelId);
         var variables = new Dictionary<string, object>
@@ -179,11 +179,11 @@ public class PayrollController : Controller
             //coming from personnel
             ["ChildNo"] = Person.ChildNo,
             //coming from salaryItemRule
-            ["HousingAllowance"] = rulesHousing.Amount,
-            ["ChildAllowance"] = rulesChild.Amount,
-            ["FoodAllowance"] = rulesFood.Amount,
-            ["MaritalAllowance"] =    rulesMarital.Amount,
-            ["SeniorityAllowance"] = rulesSeniority?.Amount ?? 0,
+            ["HousingAllowance"]    = AmountHousing,
+            ["ChildAllowance"]      = AmountChild,
+            ["FoodAllowance"]       = AmountFood,
+            ["MaritalAllowance"]    = AmountMarital,
+            ["SeniorityAllowance"]  = AmountSeniority,
             //coming from personnelOrder
             ["JobAllowance"] = JobAllowance,
             ["ResponsibilityAllowance"] = ResponsibilityAllowance,
@@ -213,22 +213,26 @@ public class PayrollController : Controller
                 {
                     //add variable to dictionary
                     string label = salaryItem.Label;
+                    string source = salaryItem.Source;
                     // get it from salaryitemrules
-                    //var labelResult = await _context.SalaryItems
-                    //        .Join(
-                    //            _context.SalaryItemRules,
-                    //            salaryItem => salaryItem.Id,
-                    //            salaryItemRule => salaryItemRule.SalaryItemId,
-                    //            (salaryItem, salaryItemRule) => new
-                    //            {
-                    //                SalaryItem = salaryItem,
-                    //                Amount = salaryItemRule.Amount
-                    //            })
-                    //        .Where(x => x.SalaryItem.Label == label)
-                    //        .FirstOrDefaultAsync();
-
+                    decimal labelResult = 0;
+                    if (source != "PersonnelOrder")
+                        labelResult = await _context.SalaryItems
+                              .Join(
+                                  _context.SalaryItemRules,
+                                  salaryItem => salaryItem.Id,
+                                  salaryItemRule => salaryItemRule.SalaryItemId,
+                                  (salaryItem, salaryItemRule) => new
+                                  {
+                                      SalaryItem = salaryItem,
+                                      Amount = salaryItemRule.Amount
+                                  })
+                              .Where(x => x.SalaryItem.Label == label)
+                              .Select(x => x.Amount)
+                              .FirstOrDefaultAsync();
                     // get it from personnelorder
-                    var labelResult = await _context.PersonnelOrderDetails
+                    if (source == "PersonnelOrder")
+                        labelResult = await _context.PersonnelOrderDetails
                             .Join(
                                 _context.SalaryItems,
                                 detail => detail.SalaryItemId,

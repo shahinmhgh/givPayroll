@@ -268,16 +268,13 @@
 <script>
     function saveSalaryItem() {
 
-    var form =
-        $("#salaryItemForm");
+    var form = $("#salaryItemForm");
         var id = $("#Id").val();
-        alert(id);
+        
         if (!form.valid()) {
-
             return false;
         }
 
-         
         $("#btnSaveSalaryItem")
             .prop("disabled", true)
             .html(
@@ -288,52 +285,32 @@
 
         //alert($("#salaryItemRuleAmount").val());
 
-        $("#salaryItemLoading")
-            .show();
+        //$("#salaryItemLoading").show();
 
             var url = (id==0? "/SalaryItem/Create":"/SalaryItem/Edit");
 
         $.ajax({
-
-            url: url
-                ,
-
-            type:
-                "POST",
-
-            data:
-                form.serialize(),
-
-
+            url: url ,
+            type:"POST",
+            data: form.serialize(),
             success: function(result) {
-
                 if (result.success) {
+                    $("#salaryItemModal").modal("hide");
+                
 
-                    $("#salaryItemRuleModal")
-                        .modal("hide");
-
+                      
 
                     Swal.fire({
-
-                        icon:
-                            "success",
-
-                        title:
-                            "قوانین با موفقیت ذخیره شد",
-
-                        timer:
-                            1200,
-
-                        showConfirmButton:
-                            false
-
+                        icon: "success",
+                        title: "قوانین با موفقیت ذخیره شد",
+                        timer:  1200,
+                        showConfirmButton: false
                     });
 
                 }
                 else {
 
-                    $("#salaryItemRuleModalContent")
-                        .html(result);
+                    $("#salaryItemRuleModalContent").html(result);
 
 
                     $.validator.unobtrusive.parse(

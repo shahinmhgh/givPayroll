@@ -36,8 +36,8 @@ namespace givPayroll.Models
         [Display(Name = "تاریخ شروع")]
         public DateTime StartDate { get; set; }
 
-        [Display(Name = "تاریخ پایان")]
-        public DateTime? EndDate { get; set; }
+        //[Display(Name = "تاریخ پایان")]
+        //public DateTime? EndDate { get; set; }
 
         [Column(TypeName = "ntext")]
         [Display(Name = "توضیحات")]

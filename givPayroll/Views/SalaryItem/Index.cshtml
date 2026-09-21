@@ -158,15 +158,13 @@
                 '/SalaryItemRule/Edit?salaryItemId=' + salaryItemId,
                 function(data) {
 
-                    $("#salaryItemRuleModalContent")
-                        .html(data);
+                    $("#salaryItemRuleModalContent").html(data);
 
                     $.validator.unobtrusive.parse(
                         "#salaryItemRuleForm"
                     );
 
-                    $("#salaryItemRuleModal")
-                        .modal("show");
+                    $("#salaryItemRuleModal").modal("show");
                 }
             );
 
@@ -227,7 +225,7 @@
                         new bootstrap.Modal(
                             document.getElementById('salaryItemModal')
                         );
-
+                         
                     modal.show();
                 });
         }

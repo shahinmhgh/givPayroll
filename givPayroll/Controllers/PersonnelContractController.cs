@@ -563,8 +563,7 @@ namespace givPayroll.Controllers
                         JobId = model.JobId.GetValueOrDefault(),
                         DateCreated = DateTime.Now,
                         UserCreated = GetCurrentUserId(),
-                        StartDate = model.ContractStartDate,
-                        EndDate = model.ContractEndDate
+                        StartDate = model.ContractStartDate
                     };
 
                 var maxOrderNo = await _context.PersonnelOrders
@@ -792,7 +791,7 @@ namespace givPayroll.Controllers
             model.PersonnelOrder.No = personnelorder.Id;
             model.PersonnelOrder.IssueDate = personnelorder.IssueDate;
             model.PersonnelOrder.StartDate = personnelorder.StartDate;
-            model.PersonnelOrder.EndDate = personnelorder.EndDate;
+            //model.PersonnelOrder.EndDate = personnelorder.EndDate;
 
             model.PersonnelOrder.Description = personnelorder.Description;
             model.PersonnelOrder.IsActive = personnelorder.IsActive;
