@@ -19,6 +19,7 @@
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
 
+    
     <style>
 
             @@page {
@@ -80,6 +81,18 @@
                     font-weight: bold;
                 }
 
+                .salary-table tr {
+                    height: 25px !important;
+                }
+
+                .salary-table td {
+                    padding: 3px 8px !important;
+                    /* line-height: 1.1 !important; */
+                    height: 25px !important;
+                    vertical-align: middle;
+                }
+
+
             .total {
                 font-weight: bold;
                 font-size: 16px;
@@ -101,6 +114,7 @@
 
             tr {
                 page-break-inside: avoid;
+                height: 25px !important;
             }
 
             .no-print {
@@ -120,7 +134,7 @@
             <h2>فیش حقوقی</h2>
 
             <div>
-                  @ViewBag.YearMonthName
+                @ViewBag.YearMonthName
             </div>
 
         </div>
@@ -128,7 +142,7 @@
 
         <div class="employee-info">
 
-            <table class="table table-borderless">
+            <table class="table table-borderless payroll-table">
 
                 <tr>
 

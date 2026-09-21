@@ -2,7 +2,25 @@
 <!-- ================================================= -->
 <!-- HEADER -->
 <!-- ================================================= -->
+ 
+<style>
+        .payroll-table-container {
+            height: 500px;
+            overflow-y: auto;
+        }
 
+        .payroll-table tbody tr {
+            height: 25px!important;
+        }
+
+        .payroll-table tbody td {
+            padding: 3px 8px !important;
+            /* line-height: 1.1 !important; */
+            height: 25px !important;
+            vertical-align: middle;
+        }
+</style>
+ 
 <div class="modal-header">
 
     <h5 class="modal-title">
@@ -61,16 +79,16 @@
  *@
         <div class="card-body p-0">
 
-            <div class="table-responsive" style="height:500px;overflow-y:auto">
+            <div class="table-responsive payroll-table-container" >
 
                 <table class="table
                     table-bordered
                     table-hover
-                    mb-0">
+                     payroll-table">
 
                     <thead>
 
-                        <tr>
+                        <tr class="table-secondary">
 
                             <th style="width:80px">
                                 ردیف
@@ -93,7 +111,7 @@
                     </thead>
 
 
-                    <tbody style="height:500px;overflow-y:auto">
+                    <tbody >
                         @{
                             var row = 1;
                             decimal total = 0;
@@ -107,7 +125,7 @@
                                     total -= amount;
                             
 
-                                <tr>
+                                <tr style="height:25px!important;">
                                     <td style="width:80px">
                                         @row
                                     </td>
