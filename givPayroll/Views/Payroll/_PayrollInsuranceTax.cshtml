@@ -1,4 +1,4 @@
-﻿@model PayrollViewModel
+﻿@model List<InsuTaxViewModel>
 <!-- ================================================= -->
 <!-- HEADER -->
 <!-- ================================================= -->
@@ -25,7 +25,7 @@
 
     <h5 class="modal-title">
 
-        پیش نمایش حقوق
+        پیش نمایش 
 
     </h5>
 
@@ -116,7 +116,7 @@
                         @{
                             var row = 1;
                             decimal total = 0;
-                            foreach (PayrollItem item in Model.PayrollItems)
+                            foreach (InsuTaxViewModel item in Model)
                             {
                                 var amount = item.Amount;
 
@@ -133,7 +133,7 @@
                                             var desc1 = @item.SalaryItem.Label;
                                             if (desc1=="Insurance" || desc1=="Tax")
                                             {
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="alert('');">...</button>
+                                                <button type="button" class="btn btn-sm btn-primary">...</button>
                                             }
                                         }
                                     </td>
@@ -197,13 +197,7 @@
 <!-- ================================================= -->
 
 <div class="modal-footer">
-    <button type="button" style="fa fa-print" onclick="window.open('/payroll/SalaryPdf?id=@Model.PersonnelId&ym=1405/05', '_blank')"
-            class="btn btn-primary">
-
-            
-        چاپ
-
-    </button>
+    
 
 
     <button type="button"

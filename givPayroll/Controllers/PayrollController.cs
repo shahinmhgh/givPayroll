@@ -75,16 +75,26 @@ public class PayrollController : Controller
 
         return PartialView("_PayrollPreview", model);
     }
-    public async Task<IActionResult> PayrollInsuranceTaxPreview(int year, int month, int personnelId, int SalaryItemID)
+    public async Task<IActionResult> PayrollInsuranceTaxPreview(int insuranceTax)
     {
-        PayrollViewModel model = await GetPayrollData(year, month, personnelId);
+        List<InsuTaxViewModel> model = new List<InsuTaxViewModel>();
+        if (insuranceTax == 1)
+            model = lstInsurance;
+        if (insuranceTax ==2)
+            model = lstTax;
 
-        return PartialView("_PayrollPreview", model);
+        return PartialView("_PayrollInsuranceTax", model);
     }
+
+   
+    public static List<InsuTaxViewModel> lstInsurance = new List<InsuTaxViewModel>();
+    public static List<InsuTaxViewModel> lstTax = new List<InsuTaxViewModel>();
 
     private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)
     {
 
+        lstInsurance = new List<InsuTaxViewModel>();
+        lstTax = new List<InsuTaxViewModel>();
 
         string prefix = $"{year:0000}/{month:00}/";
 
@@ -107,7 +117,6 @@ public class PayrollController : Controller
         decimal BaseSalary = 0;
         decimal JobAllowance = 0;
         decimal ResponsibilityAllowance = 0;
-        decimal TechnicalAllowance = 0;
         decimal SeniorityAllowance = 0;
         int monthDays = GetPersianMonthDays(month);
 
@@ -121,8 +130,8 @@ public class PayrollController : Controller
                 JobAllowance = pOrderItem.Amount;
             if (pOrderItem.SalaryItem.Label == "ResponsibilityAllowance")
                 ResponsibilityAllowance = pOrderItem.Amount;
-            if (pOrderItem.SalaryItem.Label == "TechnicalAllowance")
-                TechnicalAllowance = pOrderItem.Amount;
+            //if (pOrderItem.SalaryItem.Label == "TechnicalAllowance")
+            //    TechnicalAllowance = pOrderItem.Amount;
             if (pOrderItem.SalaryItem.Label == "SeniorityAllowance")
                 SeniorityAllowance = pOrderItem.Amount;
 
@@ -283,7 +292,7 @@ public class PayrollController : Controller
             System.Diagnostics.Debug.Print(ex.Message);
         }
 
-        int c = 0;
+         
 
         #endregion
 
@@ -334,11 +343,6 @@ public class PayrollController : Controller
         foreach (PayrollItem item in model.PayrollItems)
             item.SalaryItem = _context.SalaryItems.Where(i => i.Id == item.SalaryItemId).FirstOrDefault();
 
-        foreach (var itemPayroll in model.PayrollItems)
-            if (insuranceRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
-                rule.IsInsuranceBase)
-                totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
-
         //// empoyee rate
         decimal employeeRate = await _context.PersonnelOrders
           .Where(po => po.IsActive && po.PersonnelId == personnelId)
@@ -350,6 +354,20 @@ public class PayrollController : Controller
           )
           .FirstOrDefaultAsync();
         employeeRate = employeeRate / 100;
+
+        foreach (var itemPayroll in model.PayrollItems)
+            if (insuranceRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
+                rule.IsInsuranceBase)
+            {
+                InsuTaxViewModel obj = new InsuTaxViewModel();
+                obj.SalaryItemId = itemPayroll.SalaryItemId;
+                obj.Amount = itemPayroll.Amount;
+                obj.AmountAfter = itemPayroll.Amount * employeeRate;
+                lstInsurance.Add(obj);
+
+                totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
+            }
+       
         decimal InsuranceAmount = totalInsuranceAmount * employeeRate;
 
         ////Insurance 
@@ -376,11 +394,21 @@ public class PayrollController : Controller
         foreach (var itemPayroll in model.PayrollItems)
             if (taxRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
                 rule.IsTaxBase)
+            {
+                InsuTaxViewModel obj = new InsuTaxViewModel();
+                obj.SalaryItemId = itemPayroll.SalaryItemId;
+                obj.Amount = itemPayroll.Amount;
+                obj.AmountAfter = 0;
+                lstTax.Add(obj);
+
                 totalTaxAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
-
-
+            }
         ////Tax 
         decimal TaxAmount = CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList());
+        lstTax[lstTax.Count - 1].AmountAfter = TaxAmount; 
+        // fill last item with total, when using remember
+        // to at first show the value and then make it zero
+
         SalaryItem itemSalary2 = _context.SalaryItems.Where(i => i.Label == "Tax").FirstOrDefault();
 
         PayrollItem itemTax = new PayrollItem();

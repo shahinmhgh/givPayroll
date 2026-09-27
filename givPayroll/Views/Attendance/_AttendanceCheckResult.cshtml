@@ -140,6 +140,36 @@
         });
     }
 
+  function PayrollInsuranceTaxProc(insuranceTax) {
+        // const select = document.querySelector('select[name="year"]');
+        // const year = select.options[select.selectedIndex].text;
+
+        // var month = $("#attendanceMonth").val();
+
+        $.ajax({
+            type: "GET",
+            url: "/Payroll/PayrollInsuranceTaxPreview",
+            data:
+            {
+                insuranceTax: insuranceTax,
+                
+            },
+
+            success: function(data) {
+
+              
+                $("#insuranceTaxModalContent")
+                    .html(data);
+
+ 
+
+                $("#insuranceTaxModal")
+                    .modal("show");
+            }
+
+        });
+    }
+
     function buttonProc(personnelId, correctErrText, hasWorkedText) {
 
          
