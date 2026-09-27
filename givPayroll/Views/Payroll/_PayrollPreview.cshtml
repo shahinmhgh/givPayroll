@@ -2,25 +2,25 @@
 <!-- ================================================= -->
 <!-- HEADER -->
 <!-- ================================================= -->
- 
+
 <style>
-        .payroll-table-container {
-            height: 500px;
-            overflow-y: auto;
-        }
+    .payroll-table-container {
+        height: 500px;
+        overflow-y: auto;
+    }
 
-        .payroll-table tbody tr {
-            height: 25px!important;
-        }
+    .payroll-table tbody tr {
+        height: 25px !important;
+    }
 
-        .payroll-table tbody td {
-            padding: 3px 8px !important;
-            /* line-height: 1.1 !important; */
-            height: 25px !important;
-            vertical-align: middle;
-        }
+    .payroll-table tbody td {
+        padding: 3px 8px !important;
+        /* line-height: 1.1 !important; */
+        height: 25px !important;
+        vertical-align: middle;
+    }
 </style>
- 
+
 <div class="modal-header">
 
     <h5 class="modal-title">
@@ -68,7 +68,7 @@
 
     <div class="card">
 
-    @*     <div class="card-header d-flex
+        @*     <div class="card-header d-flex
             justify-content-between
             align-items-center">
 
@@ -79,12 +79,12 @@
  *@
         <div class="card-body p-0">
 
-            <div class="table-responsive payroll-table-container" >
+            <div class="table-responsive payroll-table-container">
 
                 <table class="table
                     table-bordered
                     table-hover
-                     payroll-table">
+                    payroll-table">
 
                     <thead>
 
@@ -92,6 +92,7 @@
 
                             <th style="width:80px">
                                 ردیف
+
                             </th>
 
                             <th>
@@ -111,7 +112,7 @@
                     </thead>
 
 
-                    <tbody >
+                    <tbody>
                         @{
                             var row = 1;
                             decimal total = 0;
@@ -123,17 +124,24 @@
                                     total += amount;
                                 else
                                     total -= amount;
-                            
 
+                            
                                 <tr style="height:25px!important;">
                                     <td style="width:80px">
                                         @row
+                                        @{
+                                            var desc1 = @item.SalaryItem.Label;
+                                            if (desc1=="Insurance" || desc1=="Tax")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-primary">...</button>
+                                            }
+                                        }
                                     </td>
 
                                     <td>
                                         @{
                                             var desc = @item.SalaryItem.SalaryItemName;
-                                            if (!string.IsNullOrEmpty( @item.Description))
+                                            if (!string.IsNullOrEmpty(@item.Description))
                                             { desc += " - " + @item.Description; }
                                         }
                                         @desc
@@ -191,8 +199,8 @@
 <div class="modal-footer">
     <button type="button" style="fa fa-print" onclick="window.open('/payroll/SalaryPdf?id=@Model.PersonnelId&ym=1405/05', '_blank')"
             class="btn btn-primary">
-            
 
+            
         چاپ
 
     </button>

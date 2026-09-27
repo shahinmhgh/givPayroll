@@ -359,5 +359,34 @@
    
     <script src="~/js/attendance.js"></script>
 
-   
+ 
+    <script>
+   $(document).ready(function() {
+        
+           initContractSelect2();
+    });
+
+
+        function initContractSelect2() {
+           
+        //alert($('#personnelId').length );  alert($('#personnelId').is(':visible') );
+        if ($('#attendancePersonnel').length ) { //&& $('#personnelId').is(':visible')
+             alert('');
+            // Prevent duplicate initialization
+            // if ($('#attendancePersonnel').hasClass('select2-hidden-accessible')) {
+            //     $('#attendancePersonnel').select2('destroy');
+            // }
+
+            $('#attendancePersonnel').select2({
+                width: '100%',
+                dir: 'rtl',
+                placeholder: '-- انتخاب پرسنل --',
+                allowClear: false,
+                // dropdownParent: $('#personnelOrderModal')
+            });
+
+        }
+        
+    }
+        </script>
 }

@@ -1,4 +1,5 @@
-﻿using givPayroll.Data;
+﻿using DocumentFormat.OpenXml.Office2016.Excel;
+using givPayroll.Data;
 using givPayroll.Models;
 using givPayroll.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -137,7 +138,9 @@ namespace givPayroll.Controllers
                 AdjustmentCount = adjustment.AdjustmentCount,
                 AdjustmentTypeId = adjustment.AdjustmentTypeId,
                 Loan = adjustment.Loan,
-                TotalAmount = adjustment.TotalAmount
+                TotalAmount = adjustment.TotalAmount,
+                IsTaxBase=adjustment.IsTaxBase,
+                IsInsuranceBase = adjustment.IsInsuranceBase
             };
 
             model.Personnels = await _context.PayrollAdjustmentPersonnels
@@ -248,7 +251,8 @@ namespace givPayroll.Controllers
                 adjustment.Loan = model.Loan;
                 adjustment.TotalAmount = model.TotalAmount;
                 adjustment.SalaryItemId = model.AdjustmentTypeId;
-
+                adjustment.IsTaxBase = model.IsTaxBase;
+                adjustment.IsInsuranceBase = model.IsInsuranceBase;
                 await _context.SaveChangesAsync();
 
 

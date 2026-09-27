@@ -75,10 +75,16 @@ public class PayrollController : Controller
 
         return PartialView("_PayrollPreview", model);
     }
+    public async Task<IActionResult> PayrollInsuranceTaxPreview(int year, int month, int personnelId, int SalaryItemID)
+    {
+        PayrollViewModel model = await GetPayrollData(year, month, personnelId);
+
+        return PartialView("_PayrollPreview", model);
+    }
 
     private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)
     {
-         
+
 
         string prefix = $"{year:0000}/{month:00}/";
 
@@ -164,10 +170,10 @@ public class PayrollController : Controller
         //await _context.SalaryItemRules
         //          .Where(r => r.SalaryItem.Label == "MaritalAllowance").FirstOrDefaultAsync();
         decimal AmountMarital = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "MaritalAllowance").FirstOrDefault().Amount;
-        decimal AmountHousing  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "HousingAllowance").FirstOrDefault().Amount;
-        decimal AmountChild  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "ChildAllowance").FirstOrDefault().Amount;
-        decimal AmountFood  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "FoodAllowance").FirstOrDefault().Amount;
-        decimal AmountSeniority  = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "SeniorityAllowance").FirstOrDefault().Amount;
+        decimal AmountHousing = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "HousingAllowance").FirstOrDefault().Amount;
+        decimal AmountChild = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "ChildAllowance").FirstOrDefault().Amount;
+        decimal AmountFood = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "FoodAllowance").FirstOrDefault().Amount;
+        decimal AmountSeniority = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "SeniorityAllowance").FirstOrDefault().Amount;
 
         Personnel Person = await _context.Personnels.FindAsync(personnelId);
         var variables = new Dictionary<string, object>
@@ -179,11 +185,11 @@ public class PayrollController : Controller
             //coming from personnel
             ["ChildNo"] = Person.ChildNo,
             //coming from salaryItemRule
-            ["HousingAllowance"]    = AmountHousing,
-            ["ChildAllowance"]      = AmountChild,
-            ["FoodAllowance"]       = AmountFood,
-            ["MaritalAllowance"]    = AmountMarital,
-            ["SeniorityAllowance"]  = AmountSeniority,
+            ["HousingAllowance"] = AmountHousing,
+            ["ChildAllowance"] = AmountChild,
+            ["FoodAllowance"] = AmountFood,
+            ["MaritalAllowance"] = AmountMarital,
+            ["SeniorityAllowance"] = AmountSeniority,
             //coming from personnelOrder
             ["JobAllowance"] = JobAllowance,
             ["ResponsibilityAllowance"] = ResponsibilityAllowance,
@@ -206,10 +212,10 @@ public class PayrollController : Controller
         try
         {
             attendanceSalaryItems = _context.SalaryItems.Where(i => i.FormulaValue.Trim() != "").ToList();
-            
+
             foreach (var salaryItem in attendanceSalaryItems)
             {
-                if (salaryItem.IsSystem ==0)
+                if (salaryItem.IsSystem == 0)
                 {
                     //add variable to dictionary
                     string label = salaryItem.Label;
@@ -419,13 +425,13 @@ public class PayrollController : Controller
 
     public async Task<IActionResult> Salary(int id, string ym)
     {
-       
+
 
         Personnel person = _context.Personnels.Where(i => i.Id == id).FirstOrDefault();
-        int month = Convert.ToInt32( ym.Substring(5, 2));
+        int month = Convert.ToInt32(ym.Substring(5, 2));
         int year = Convert.ToInt32(ym.Substring(0, 4));
 
-         PayrollViewModel modelData = await  GetPayrollData(year, month, id);
+        PayrollViewModel modelData = await GetPayrollData(year, month, id);
 
         //var model = new SalaryReportViewModel
         //{
@@ -446,7 +452,7 @@ public class PayrollController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SalaryPdf(  int id, string ym,   CancellationToken cancellationToken)
+    public async Task<IActionResult> SalaryPdf(int id, string ym, CancellationToken cancellationToken)
     {
 
         var url =

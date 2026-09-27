@@ -428,20 +428,20 @@
 
 <script>
     function initContractSelect2() {
-
-        if ($('#PersonnelId').length && $('#PersonnelId').is(':visible')) {
-
+        //alert($('#personnelId').length );  alert($('#personnelId').is(':visible') );
+        if ($('#personnelId').length ) { //&& $('#personnelId').is(':visible')
+            
             // Prevent duplicate initialization
-            if ($('#PersonnelId').hasClass('select2-hidden-accessible')) {
-                $('#PersonnelId').select2('destroy');
+            if ($('#personnelId').hasClass('select2-hidden-accessible')) {
+                $('#personnelId').select2('destroy');
             }
 
-            $('#PersonnelId').select2({
+            $('#personnelId').select2({
                 width: '100%',
                 dir: 'rtl',
                 placeholder: '-- انتخاب پرسنل --',
                 allowClear: false,
-                dropdownParent: $('#contractModal')
+                dropdownParent: $('#personnelOrderModal')
             });
 
         }
@@ -493,9 +493,25 @@
         '#personnelOrderForm'
     );
 
+    // $('#personnelOrderModal').on('shown.bs.modal', function () {
+
+    //     console.log('modal visible:', $(this).is(':visible'));
+    //     console.log('personnel visible:', $('#personnelId').is(':visible'));
+    //     console.log('personnel disabled:', $('#personnelId').prop('disabled'));
+
+    //     initPersonnelOrderForm();
+
+    // });
+
+
     $(document).ready(function() {
         //initContractSelect2();
         //initContractDatePickers();
+
+// console.log("disabled:", $('#personnelId').prop('disabled'));
+// console.log("visible:", $('#personnelId').is(':visible'));
+// console.log("options:", $('#personnelId option').length);
+
     });
 
     let contractDatePickers = {};

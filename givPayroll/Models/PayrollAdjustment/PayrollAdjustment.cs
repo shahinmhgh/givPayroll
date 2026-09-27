@@ -57,5 +57,9 @@ namespace givPayroll.Models
         public virtual ICollection<PayrollItem> PayrollItems { get; set; }
      = new List<PayrollItem>();
 
+        public bool IsTaxBase { get; set; }
+
+        public bool IsInsuranceBase { get; set; }
+
     }
 }

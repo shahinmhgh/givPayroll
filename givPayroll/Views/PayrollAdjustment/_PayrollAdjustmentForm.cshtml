@@ -39,8 +39,8 @@
                 </label>
 
                 <input type="text" asp-for="Description"
-                          class="form-control">
-                />
+                       class="form-control">
+                
 
                 <span asp-validation-for="Description"
                       class="text-danger">
@@ -94,8 +94,8 @@
 
                 </div>
             </div>
-             
 
+             
             <!-- Count -->
 
             <div class="col-md-4 mb-3">
@@ -150,70 +150,70 @@
 
                 <input asp-for="
                        TotalAmount"
-                           class="form-control amount-input"
-                           type="text"
-                           dir="ltr"
-                           inputmode="numeric"
-                           autocomplete="off"
-                    value="@Model.TotalAmount.ToString("N0")" />
+       class="form-control amount-input"
+       type="text"
+       dir="ltr"
+       inputmode="numeric"
+       autocomplete="off"
+       value="@Model.TotalAmount.ToString("N0")" />
 
 
 
-                <span asp-validation-for="TotalAmount"
+<span asp-validation-for="TotalAmount"
                       class="text-danger">
                 </span>
 
             </div>
 
+
              
 
-   @*  <div class="mb-3">
+            <div class="mb-3">
 
-        <div class="form-check">
+                <div class="form-check">
 
-            <input asp-for="IsTaxBase"
-                   class="form-check-input"
-                   type="checkbox" />
+                    <input asp-for="IsTaxBase"
+                           class="form-check-input"
+                           type="checkbox" />
 
-            <label asp-for="IsTaxBase"
-                   class="form-check-label">
+                    <label asp-for="IsTaxBase"
+                           class="form-check-label">
 
-                مشمول مالیات
+                        مشمول مالیات
 
-            </label>
+                    </label>
 
-        </div>
+                </div>
 
-    </div>
+            </div>
 
 
-    <!-- =============================================
+            <!-- =============================================
          INSURANCE
          ============================================= -->
 
-    <div class="mb-3">
+            <div class="mb-3">
 
-        <div class="form-check">
+                <div class="form-check">
 
-            <input asp-for="IsInsuranceBase"
-                   class="form-check-input"
-                   type="checkbox" />
+                    <input asp-for="IsInsuranceBase"
+                           class="form-check-input"
+                           type="checkbox" />
 
-            <label asp-for="IsInsuranceBase"
-                   class="form-check-label">
+                    <label asp-for="IsInsuranceBase"
+                           class="form-check-label">
 
-                مشمول بیمه
+                        مشمول بیمه
 
-            </label>
+                    </label>
 
-        </div>
+                </div>
 
-    </div> *@
+            </div>
+
  
-
             <!-- Loan -->
-
-         @*    <div class="col-md-4 mb-3">
+            @*    <div class="col-md-4 mb-3">
 
                 <div class="form-check mt-4">
 
@@ -256,7 +256,7 @@
 
         <div style="height:200px;overflow-y:auto;">
             <table class="table table-bordered"
-                   id="selectedPersonnelTable" >
+                   id="selectedPersonnelTable">
 
                 <thead>
 
@@ -284,29 +284,29 @@
                     i < Model.Personnels.Count;
                     i++)
                     {
-                    <tr data-personnel-id="@Model.Personnels[i].PersonnelId">
+                        <tr data-personnel-id="@Model.Personnels[i].PersonnelId">
 
-                        <td>
-                            @(i + 1)
-                        </td>
+                            <td>
+                                @(i + 1)
+                            </td>
 
-                        <td>
-                            @Model.Personnels[i].PersonnelName
-                        </td>
+                            <td>
+                                @Model.Personnels[i].PersonnelName
+                            </td>
 
-                        <td>
+                            <td>
 
-                            <button type="button"
-                                    class="btn btn-sm btn-danger"
-                                    onclick="removeSelectedPersonnel(this)">
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="removeSelectedPersonnel(this)">
 
-                                حذف
+                                    حذف
 
-                            </button>
+                                </button>
 
-                        </td>
+                            </td>
 
-                    </tr>
+                        </tr>
                     }
 
                 </tbody>
@@ -361,7 +361,7 @@
     let contractDatePickers = {};
 
     function initContractDatePickers() {
- 
+
         initContractDatePicker(
             '@Model.StartDate.ToString("yyyy-MM-dd")',
             '#StartDateApp'

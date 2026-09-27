@@ -42,6 +42,10 @@ namespace givPayroll.ViewModels
 
         public List<PayrollAdjustmentPersonnelViewModel> Personnels { get; set; }
             = new();
+
+        public bool IsTaxBase { get; set; }
+
+        public bool IsInsuranceBase { get; set; }
     }
 
     public class PayrollAdjustmentPersonnelViewModel
