@@ -79,10 +79,18 @@ public class PayrollController : Controller
     {
         List<InsuTaxViewModel> model = new List<InsuTaxViewModel>();
         if (insuranceTax == 1)
+        {
+            ViewBag.Title = "بیمه";
             model = lstInsurance;
-        if (insuranceTax ==2)
+        }
+        if (insuranceTax == 2)
+        {
+            ViewBag.Title = "مالیات";
             model = lstTax;
-
+        }
+        ViewBag.insuranceTax = insuranceTax;
+        for (int i = 0; i < model.Count; i++)
+            model[i].SalaryItem = await _context.SalaryItems.FindAsync(   model[i].SalaryItemId);
         return PartialView("_PayrollInsuranceTax", model);
     }
 

@@ -131,9 +131,13 @@
                                         @row
                                         @{
                                             var desc1 = @item.SalaryItem.Label;
-                                            if (desc1=="Insurance" || desc1=="Tax")
+                                            if (desc1=="Insurance" )
+                                            { 
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="PayrollInsuranceTaxProc(1)">...</button>
+                                            }
+                                            if (desc1 == "Tax")
                                             {
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="alert('');">...</button>
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="PayrollInsuranceTaxProc(2)">...</button>
                                             }
                                         }
                                     </td>

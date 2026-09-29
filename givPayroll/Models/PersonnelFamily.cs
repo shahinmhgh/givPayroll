@@ -67,6 +67,8 @@ namespace givPayroll.Models
         [ForeignKey(nameof(GenderID))]
         public virtual Gender Gender { get; set; } = null!;
 
-  
+        [Display(Name = "سن")]
+        [NotMapped]
+        public int Age { get; set; }    
     }
 }

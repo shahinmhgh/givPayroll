@@ -28,8 +28,7 @@
         پیش نمایش 
 
     </h5>
-
-
+ 
     <button type="button"
             class="btn-close"
             data-bs-dismiss="modal">
@@ -54,13 +53,15 @@
         <div class="card-header">
 
             <strong>
-                @ViewBag.PersonnelYearMonthName
+                @ViewBag.Title
             </strong>
 
         </div>
 
     </div>
-
+    @{
+        var insuranceTax = @ViewBag.insuranceTax;
+    }
 
     <!-- ================================================= -->
     <!-- DETAILS -->
@@ -91,22 +92,22 @@
                         <tr class="table-secondary">
 
                             <th style="width:80px">
-                                ردیف
+                                ردیف  
 
                             </th>
 
-                            <th>
+                            <th style="width:180px!important;background-color:whitesmoke;">
                                 قلم حقوق
                             </th>
 
 
-                            <th style="width:50px">
-
-                            </th>
+                         
                             <th style="width:200px">
                                 مبلغ
                             </th>
-
+                            <th style="width:200px">
+                                مبلغ محاسبه
+                            </th>
                         </tr>
 
                     </thead>
@@ -115,30 +116,25 @@
                     <tbody>
                         @{
                             var row = 1;
+                            var Zero = 0;
                             decimal total = 0;
                             foreach (InsuTaxViewModel item in Model)
                             {
-                                var amount = item.Amount;
+                                var amount = item.AmountAfter;
 
-                                if (item.SalaryItem.PlusMinus == 1)
+                                // if (item.SalaryItem.PlusMinus == 1)
                                     total += amount;
-                                else
-                                    total -= amount;
+                                // else
+                                //     total -= amount;
 
                             
                                 <tr style="height:25px!important;">
                                     <td style="width:80px">
                                         @row
-                                        @{
-                                            var desc1 = @item.SalaryItem.Label;
-                                            if (desc1=="Insurance" || desc1=="Tax")
-                                            {
-                                                <button type="button" class="btn btn-sm btn-primary">...</button>
-                                            }
-                                        }
+                                      
                                     </td>
 
-                                    <td>
+                                    <td style="width:180px!important;background-color:whitesmoke;">
                                         @{
                                             var desc = @item.SalaryItem.SalaryItemName;
                                             if (!string.IsNullOrEmpty(@item.Description))
@@ -146,24 +142,19 @@
                                         }
                                         @desc
                                     </td>
-                                    <td class="text-center">
-
-                                        @if (@item.SalaryItem.PlusMinus == 1)
-                                        {
-                                            <span class="badge bg-success">
-                                                +
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger">
-                                                -
-                                            </span>
-                                        }
-
-                                    </td>
+                                     
                                     <td style="width:200px">
                                         @item.Amount.ToString("N0")
+                                    </td>
+                                    <td style="width:200px">
+                                        @if (@insuranceTax==2)
+                                        {
+                                            @Zero
+                                        }
+                                        @if (@insuranceTax == 1)
+                                        {
+                                            @item.AmountAfter.ToString("N0")
+                                        }
                                     </td>
                                 </tr>
                                 row++;
