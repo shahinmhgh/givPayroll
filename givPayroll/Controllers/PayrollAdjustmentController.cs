@@ -322,6 +322,7 @@ namespace givPayroll.Controllers
                                 PayrollAdjustmentDate =   currentDate,
                                 PayrollPersianYear = payrollPersianYear,
                                 PayrollPersianMonth = payrollPersianMonth,
+                                personnelId = personnelId,
 
                                 Amount =  amountPerInstallment
                             };

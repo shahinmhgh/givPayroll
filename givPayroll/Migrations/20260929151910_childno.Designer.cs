@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using givPayroll.Data;
 
@@ -11,9 +12,11 @@ using givPayroll.Data;
 namespace givPayroll.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260929151910_childno")]
+    partial class childno
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3232,9 +3235,6 @@ namespace givPayroll.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("PayrollPersianYear")
-                        .HasColumnType("int");
-
-                    b.Property<int>("personnelId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

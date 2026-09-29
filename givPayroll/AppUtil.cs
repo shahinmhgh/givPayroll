@@ -13,6 +13,35 @@ namespace givPayroll
 
             return $"{pc.GetYear(date):0000}/{pc.GetMonth(date):00}/{pc.GetDayOfMonth(date):00}";
         }
+
+        public static string CompleteAge(DateTime birthDate, ref int ageYears)
+        {
+
+            DateTime today = DateTime.Today;
+
+            int years = today.Year - birthDate.Year;
+            int months = today.Month - birthDate.Month;
+            int days = today.Day - birthDate.Day;
+
+            if (days < 0)
+            {
+                months--;
+
+                DateTime previousMonth = today.AddMonths(-1);
+                days += DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
+            }
+
+            if (months < 0)
+            {
+                years--;
+                months += 12;
+            }
+
+            string age = $"{years} سال, {months} ماه, {days} روز";
+            ageYears = years;
+            return age;
+        }
+
         private static readonly string[] PersianMonths =
   {
         "فروردین",

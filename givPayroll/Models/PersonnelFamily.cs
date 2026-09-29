@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DocumentFormat.OpenXml.Presentation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace givPayroll.Models
@@ -69,6 +70,28 @@ namespace givPayroll.Models
 
         [Display(Name = "سن")]
         [NotMapped]
-        public int Age { get; set; }    
+        public int Age
+        {
+            get
+            {
+                int ageYears = 0;
+                AppUtil.CompleteAge(BirthDate.GetValueOrDefault(), ref ageYears);
+                return ageYears;
+            }
+        }
+
+
+        [NotMapped]
+        public Boolean CanReceive
+        {
+            get
+            {
+                if (PersonnelRelationId != 1)
+                    return false;
+
+                bool can = (GenderID == 1 && Age < 18) || (GenderID == 2 && MaritalStatusId == 1);
+                return can;
+            }
+        }
     }
 }

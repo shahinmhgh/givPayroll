@@ -218,7 +218,7 @@ namespace givPayroll.Controllers
             if (!personnelExists)
                 return NotFound();
 
-            
+
             if (!ModelState.IsValid)
             {
                 await LoadFormData();
@@ -285,42 +285,16 @@ namespace givPayroll.Controllers
 
             ViewBag.Personnel = personnel;
 
-            int ageYears = 0;
-            string fullAge = CompleteAge(model.BirthDate.GetValueOrDefault(), ref ageYears);
-            model.Age = ageYears;
+            //int ageYears = 0;
+            //string fullAge = AppUtil.CompleteAge(model.BirthDate.GetValueOrDefault(), ref ageYears);
+            //model.Age = ageYears;
 
             return PartialView(
                 "_PersonnelFamilyForm",
                 model);
         }
 
-        private string CompleteAge(DateTime birthDate, ref int ageYears)
-        {
-            
-            DateTime today = DateTime.Today;
 
-            int years = today.Year - birthDate.Year;
-            int months = today.Month - birthDate.Month;
-            int days = today.Day - birthDate.Day;
-
-            if (days < 0)
-            {
-                months--;
-
-                DateTime previousMonth = today.AddMonths(-1);
-                days += DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
-            }
-
-            if (months < 0)
-            {
-                years--;
-                months += 12;
-            }
-
-            string age = $"{years} سال, {months} ماه, {days} روز";
-            ageYears = years;
-            return age;
-        }
 
 
         // ============================================================

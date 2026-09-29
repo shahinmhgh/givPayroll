@@ -67,13 +67,6 @@
 
                 </div>
 
-            </div>
-
-
-            <!-- Gender -->
-
-            <div class="col-md-6">
-
                 <div class="mb-3">
 
                     <label asp-for="GenderID"
@@ -100,13 +93,6 @@
 
                 </div>
 
-            </div>
-
-
-            <!-- First Name -->
-
-            <div class="col-md-6">
-
                 <div class="mb-3">
 
                     <label asp-for="FirstName"
@@ -124,13 +110,6 @@
                     </span>
 
                 </div>
-
-            </div>
-
-
-            <!-- Last Name -->
-
-            <div class="col-md-6">
 
                 <div class="mb-3">
 
@@ -150,38 +129,38 @@
 
                 </div>
 
-            </div>
-
-
-            <!-- National Code -->
-
-            <div class="col-md-6">
-
                 <div class="mb-3">
+                    <div id="BirthDateApp">
+                        <label class="form-label">
+                            تاریخ تولد
+                        </label>
+                        <date-picker v-model="persianDate"
+                                     format="jYYYY/jMM/jDD"
+                                     display-format="jYYYY/jMM/jDD"
+                                     color="#0d6efd"
+                                     :editable="true"
+                                     placeholder="تاریخ تولد">
+                        </date-picker>
 
-                    <label asp-for="NationalCode"
-                           class="form-label">
+                        <input type="hidden"
+                               name="BirthDate"
+                               :value="gregorianDate">
 
-                        کد ملی
+                    </div>
 
-                    </label>
-
-                    <input asp-for="NationalCode"
-                           class="form-control" />
-
-                    <span asp-validation-for="NationalCode"
-                          class="text-danger">
-                    </span>
-
+                    
                 </div>
 
             </div>
 
 
+            
+
+ 
+
             <!-- ID No -->
 
             <div class="col-md-6">
-
                 <div class="mb-3">
 
                     <label asp-for="IdNo"
@@ -196,13 +175,6 @@
 
                 </div>
 
-            </div>
-
-
-            <!-- Issue Place -->
-
-            <div class="col-md-6">
-
                 <div class="mb-3">
 
                     <label asp-for="IssuePlace"
@@ -216,13 +188,6 @@
                            class="form-control" />
 
                 </div>
-
-            </div>
-
-
-            <!-- Marriage Status -->
-
-            <div class="col-md-6">
 
                 <div class="mb-3">
 
@@ -246,44 +211,49 @@
 
                 </div>
 
-            </div>
-
-
-            <!-- Birth Date -->
-
-            <div class="col-md-6">
-
                 <div class="mb-3">
 
-                    <div id="BirthDateApp">
-                        <label class="form-label">
-                            تاریخ تولد
-                        </label>
-                        <date-picker v-model="persianDate"
-                                     format="jYYYY/jMM/jDD"
-                                     display-format="jYYYY/jMM/jDD"
-                                     color="#0d6efd"
-                                     :editable="true"
-                                     placeholder="تاریخ تولد">
-                        </date-picker>
+                    <label asp-for="NationalCode"
+                           class="form-label">
 
-                        <input type="hidden"
-                               name="BirthDate"
-                               :value="gregorianDate">
+                        کد ملی
 
-                    </div>
-                    <div>
-                        <label class="form-label">
-                            سن
-                        </label>
-                        <input readonly type="text" class="form-control"
-                               asp-for="Age" />
+                    </label>
 
-                    </div>
+                    <input asp-for="NationalCode"
+                           class="form-control" />
+
+                    <span asp-validation-for="NationalCode"
+                          class="text-danger">
+                    </span>
+
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        سن (سال)
+                    </label>
+                    <input readonly type="text" class="form-control"
+                           asp-for="Age" />
+
+                </div>
+                 
+                @{
+                    var alertClass = "alert-danger";
+                    var message = "واجد شرایط دریافت عائله مندی نیست";
+
+                    if (@Model.CanReceive)
+                    {
+                        message = "واجد شرایط دریافت عائله مندی ";
+                        alertClass = "alert-success";
+                    }
+                    <div class="alert  @alertClass" role="alert">
+                        @message
+                    </div>
+                }
+
               
             </div>
-
 
         </div>
 
@@ -376,19 +346,17 @@
 
     $(document).ready(function() {
         var BirthDate = '@Model.BirthDate';
-       
+
         initPersonnelDatePicker(BirthDate)
 
     });
 
-    function savePersonnelFamily()
-    {
+    function savePersonnelFamily() {
         const form =
             $("#personnelFamilyForm");
 
         console.log(form.serialize());
-        if (!form.valid())
-        {
+        if (!form.valid()) {
             alert('err');
             return false;
         }
@@ -413,10 +381,8 @@
             url: url,
             type: "POST",
             data: form.serialize(),
-            success: function(result)
-            {
-                if (result.success)
-                {
+            success: function(result) {
+                if (result.success) {
                     $("#personnelFamilyModal")
                         .modal("hide");
 
@@ -430,8 +396,7 @@
                         showConfirmButton: false
                     });
                 }
-                else
-                {
+                else {
                     $("#personnelFamilyModalContent")
                         .html(result);
 
@@ -441,23 +406,21 @@
                 }
             },
 
-            error: function(xhr)
-            {
+            error: function(xhr) {
                 console.log("Status:", xhr.status);
-    console.log("Status Text:", xhr.statusText);
-    console.log("Response:", xhr.responseText);
-    console.log("Response JSON:", xhr.responseJSON);
+                console.log("Status Text:", xhr.statusText);
+                console.log("Response:", xhr.responseText);
+                console.log("Response JSON:", xhr.responseJSON);
 
 
                 Swal.fire({
                     icon: "error",
-                    title:  "خطا",
-                    text:  "عملیات ثبت انجام نشد."
+                    title: "خطا",
+                    text: "عملیات ثبت انجام نشد."
                 });
             },
 
-            complete: function()
-            {
+            complete: function() {
                 $("#btnSavePersonnelFamily")
                     .prop("disabled", false)
                     .html("ثبت");

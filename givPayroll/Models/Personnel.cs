@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using Azure;
+using SQLitePCL;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -31,8 +33,8 @@ namespace givPayroll.Models
         [Display(Name = "وضعیت تاهل")]
         public int MaritalStatusId { get; set; }
 
-        [Display(Name = "تعداد بچه")]
-        public int ChildNo { get; set; }
+     
+         
 
         [ForeignKey(nameof(MaritalStatusId))]
         public MaritalStatus MaritalStatus { get; set; } = null!;
@@ -55,6 +57,39 @@ namespace givPayroll.Models
         public virtual Gender Gender { get; set; } = null!;
 
 
+        [Display(Name = "سن")]
+        [NotMapped]
+        public int Age
+        {
+            get
+            {
+                int ageYears = 0;
+                AppUtil.CompleteAge(BirthDate.GetValueOrDefault(), ref ageYears);
+                return ageYears;
+            }
+        }
+
+
+        [Display(Name = "تعداد بچه حائز شرایط")]
+        [NotMapped]
+        public int ChildNo
+        {
+            get
+            {
+                if (PersonnelFamilies.Count() == 0)
+                    return 0;
+
+                List<PersonnelFamily> lst = PersonnelFamilies.ToList();
+                int childNo = 0;
+                foreach (PersonnelFamily item in lst)
+                {
+                    if (item.CanReceive)
+                        childNo += 1;
+                }
+                return childNo;
+            }
+        }
+ 
 
         public virtual ICollection<PayrollAdjustmentPersonnel> PayrollAdjustmentPersonnels { get; set; }
     = new List<PayrollAdjustmentPersonnel>();

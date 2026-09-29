@@ -49,6 +49,6 @@ namespace givPayroll.Models
 
         [ForeignKey(nameof(PayrollAdjustmentId))]
         public virtual PayrollAdjustment PayrollAdjustment { get; set; }
-        
+        public int personnelId { get; internal set; }
     }
 }

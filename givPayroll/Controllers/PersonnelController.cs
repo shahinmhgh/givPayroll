@@ -211,7 +211,8 @@ namespace givPayroll.Controllers
             ViewBag.MaritalStatus = await GetMaritalStatus();
             ViewBag.Education = await GetEducation();
             var item = await _context.Personnels
-                .FindAsync(id);
+                .Include(p => p.PersonnelFamilies)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (item == null) return NotFound();
 

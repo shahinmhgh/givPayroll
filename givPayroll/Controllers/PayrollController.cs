@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Playwright;
 using NCalc;
 using NPOI.Util.Optional;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace givPayroll.Controllers;
 
@@ -192,15 +193,18 @@ public class PayrollController : Controller
         decimal AmountFood = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "FoodAllowance").FirstOrDefault().Amount;
         decimal AmountSeniority = activeOrderItem.Details.Where(i => i.SalaryItem.Label == "SeniorityAllowance").FirstOrDefault().Amount;
 
-        Personnel Person = await _context.Personnels.FindAsync(personnelId);
+        Personnel person = await _context.Personnels
+                .Include(p => p.PersonnelFamilies)
+                .FirstOrDefaultAsync(p => p.Id == personnelId);
+
         var variables = new Dictionary<string, object>
         {
             ["BaseSalary"] = BaseSalary,
             ["MonthDays"] = monthDays,
             ["DaysWorked"] = daysWorked,
-
+            
             //coming from personnel
-            ["ChildNo"] = Person.ChildNo,
+            ["ChildNo"] = person.ChildNo,
             //coming from salaryItemRule
             ["HousingAllowance"] = AmountHousing,
             ["ChildAllowance"] = AmountChild,
@@ -312,10 +316,11 @@ public class PayrollController : Controller
 
             var result3 = await _context.PayrollAdjustmentDetails
                 .Where(d =>
+                d.personnelId == personnelId &&
                     d.PayrollPersianYear == year &&
                     d.PayrollPersianMonth == month &&
-                    d.PayrollAdjustment.SalaryItem.Label == Label &&
-                    _context.PayrollAdjustmentPersonnels.Any(ap =>
+                    d.PayrollAdjustment.SalaryItem.Label == Label
+                    &&  _context.PayrollAdjustmentPersonnels.Any(ap =>
                         ap.PayrollAdjustmentId == d.PayrollAdjustmentId &&
                         ap.PersonnelId == personnelId))
                 .Select(d => new
@@ -375,12 +380,20 @@ public class PayrollController : Controller
 
                 totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
             }
-       
+        // add payrollAdjustment Records
+          
+        totalInsuranceAmount = 0; //694096261
+        foreach (InsuTaxViewModel item1 in lstInsurance)
+        {
+            item1.SalaryItem = _context.SalaryItems.FirstOrDefault(i => i.Id == item1.SalaryItemId);
+            totalInsuranceAmount += item1.Amount * item1.SalaryItem.PlusMinus;
+        }
         decimal InsuranceAmount = totalInsuranceAmount * employeeRate;
 
         ////Insurance 
         SalaryItem itemSalary1 = _context.SalaryItems.Where(i => i.Label == "Insurance").FirstOrDefault();
 
+        // add insurance record
         PayrollItem itemInsurance = new PayrollItem();
         itemInsurance.SalaryItemId = itemSalary1.Id;
         itemInsurance.Amount = Convert.ToDecimal(InsuranceAmount);
@@ -419,13 +432,14 @@ public class PayrollController : Controller
 
         SalaryItem itemSalary2 = _context.SalaryItems.Where(i => i.Label == "Tax").FirstOrDefault();
 
+        // add tax record
         PayrollItem itemTax = new PayrollItem();
         itemTax.SalaryItemId = itemSalary2.Id;
         itemTax.Amount = Convert.ToDecimal(TaxAmount);
         itemTax.FormulaValue = itemSalary2.FormulaValue;
         model.PayrollItems.Add(itemTax);
 
-        string PersonnelName = Person.FirstName + " " + Person.LastName;
+        string PersonnelName = person.FirstName + " " + person.LastName;
         ViewBag.PersonnelYearMonthName = AppUtil.GetPersianMonthName(month) + " " + year + " " + PersonnelName;
 
         foreach (PayrollItem item in model.PayrollItems)
@@ -436,6 +450,8 @@ public class PayrollController : Controller
             .ToList();
         return model;
     }
+
+    
 
     decimal CalculateTax(decimal amount, List<RuleTax> rules)
     {
