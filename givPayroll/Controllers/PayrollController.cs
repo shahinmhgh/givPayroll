@@ -91,11 +91,11 @@ public class PayrollController : Controller
         }
         ViewBag.insuranceTax = insuranceTax;
         for (int i = 0; i < model.Count; i++)
-            model[i].SalaryItem = await _context.SalaryItems.FindAsync(   model[i].SalaryItemId);
+            model[i].SalaryItem = await _context.SalaryItems.FindAsync(model[i].SalaryItemId);
         return PartialView("_PayrollInsuranceTax", model);
     }
 
-   
+
     public static List<InsuTaxViewModel> lstInsurance = new List<InsuTaxViewModel>();
     public static List<InsuTaxViewModel> lstTax = new List<InsuTaxViewModel>();
 
@@ -202,7 +202,7 @@ public class PayrollController : Controller
             ["BaseSalary"] = BaseSalary,
             ["MonthDays"] = monthDays,
             ["DaysWorked"] = daysWorked,
-            
+
             //coming from personnel
             ["ChildNo"] = person.ChildNo,
             //coming from salaryItemRule
@@ -304,7 +304,7 @@ public class PayrollController : Controller
             System.Diagnostics.Debug.Print(ex.Message);
         }
 
-         
+
 
         #endregion
 
@@ -320,7 +320,7 @@ public class PayrollController : Controller
                     d.PayrollPersianYear == year &&
                     d.PayrollPersianMonth == month &&
                     d.PayrollAdjustment.SalaryItem.Label == Label
-                    &&  _context.PayrollAdjustmentPersonnels.Any(ap =>
+                    && _context.PayrollAdjustmentPersonnels.Any(ap =>
                         ap.PayrollAdjustmentId == d.PayrollAdjustmentId &&
                         ap.PersonnelId == personnelId))
                 .Select(d => new
@@ -380,14 +380,43 @@ public class PayrollController : Controller
 
                 totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
             }
-        // add payrollAdjustment Records
-          
-        totalInsuranceAmount = 0; //694096261
-        foreach (InsuTaxViewModel item1 in lstInsurance)
+        // add payrollAdjustment Records about insurance
+        var payrollAdjustmentInsurance = _context.PayrollAdjustmentDetails
+            .Include(d => d.PayrollAdjustment)
+                .ThenInclude(a => a.SalaryItem)
+                .Where(d =>
+                    d.PayrollAdjustment.IsInsuranceBase &&
+                    d.PayrollPersianYear == year &&
+                    d.personnelId == personnelId &&
+                    d.PayrollPersianMonth == month
+                )
+                .Select(d => new PayrollItem
+                {
+                    SalaryItemId = d.PayrollAdjustment.SalaryItemId,
+                    Amount = d.Amount
+                })
+                .ToList();
+
+        foreach (PayrollItem itemPayroll in payrollAdjustmentInsurance)
         {
-            item1.SalaryItem = _context.SalaryItems.FirstOrDefault(i => i.Id == item1.SalaryItemId);
-            totalInsuranceAmount += item1.Amount * item1.SalaryItem.PlusMinus;
+            InsuTaxViewModel obj = new InsuTaxViewModel();
+            obj.SalaryItemId = itemPayroll.SalaryItemId;
+            obj.Amount = itemPayroll.Amount;
+            obj.AmountAfter = itemPayroll.Amount * employeeRate;
+            lstInsurance.Add(obj);
+
+            totalInsuranceAmount += itemPayroll.Amount;
         }
+        //        totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
+        //    }
+
+
+        //totalInsuranceAmount = 0; //694096261
+        //foreach (InsuTaxViewModel item1 in lstInsurance)
+        //{
+        //    item1.SalaryItem = _context.SalaryItems.FirstOrDefault(i => i.Id == item1.SalaryItemId);
+        //    totalInsuranceAmount += item1.Amount * item1.SalaryItem.PlusMinus;
+        //}
         decimal InsuranceAmount = totalInsuranceAmount * employeeRate;
 
         ////Insurance 
@@ -422,11 +451,39 @@ public class PayrollController : Controller
                 obj.AmountAfter = 0;
                 lstTax.Add(obj);
 
-                totalTaxAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
+                totalTaxAmount += itemPayroll.Amount ;//* itemPayroll.SalaryItem.PlusMinus
             }
-        ////Tax 
+        // add payrollAdjustment Records about insurance
+        var payrollAdjustmentTax = _context.PayrollAdjustmentDetails
+            .Include(d => d.PayrollAdjustment)
+                .ThenInclude(a => a.SalaryItem)
+                .Where(d =>
+                    d.PayrollAdjustment.IsTaxBase &&
+                    d.PayrollPersianYear == year &&
+                    d.personnelId == personnelId &&
+                    d.PayrollPersianMonth == month
+                )
+                .Select(d => new PayrollItem
+                {
+                    SalaryItemId = d.PayrollAdjustment.SalaryItemId,
+                    Amount = d.Amount
+                })
+                .ToList();
+
+        foreach (PayrollItem itemPayroll in payrollAdjustmentTax)
+        {
+            InsuTaxViewModel obj = new InsuTaxViewModel();
+            obj.SalaryItemId = itemPayroll.SalaryItemId;
+            obj.Amount = itemPayroll.Amount;
+            obj.AmountAfter = 0;
+            lstTax.Add(obj);
+
+            totalTaxAmount += itemPayroll.Amount;
+        }
+
+        ////Tax 787348161
         decimal TaxAmount = CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList());
-        lstTax[lstTax.Count - 1].AmountAfter = TaxAmount; 
+        lstTax[lstTax.Count - 1].AmountAfter = TaxAmount;
         // fill last item with total, when using remember
         // to at first show the value and then make it zero
 
@@ -451,7 +508,7 @@ public class PayrollController : Controller
         return model;
     }
 
-    
+
 
     decimal CalculateTax(decimal amount, List<RuleTax> rules)
     {
