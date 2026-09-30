@@ -33,8 +33,16 @@ namespace givPayroll.Models
         [Display(Name = "وضعیت تاهل")]
         public int MaritalStatusId { get; set; }
 
-     
-         
+
+        [MaxLength(50)]
+        [Required(ErrorMessage = "شماره بیمه is required.")]
+        [Display(Name = "شماره بیمه")]
+        public String InsuranceNo { get; set; } = string.Empty;
+
+        [MaxLength(50)]
+        [Required(ErrorMessage = "کد کارمندی is required.")]
+        [Display(Name = "کد کارمندی")]
+        public String PersonnelNo { get; set; } = string.Empty;
 
         [ForeignKey(nameof(MaritalStatusId))]
         public MaritalStatus MaritalStatus { get; set; } = null!;
@@ -76,6 +84,7 @@ namespace givPayroll.Models
         {
             get
             {
+                if (PersonnelFamilies == null) return 0;
                 if (PersonnelFamilies.Count() == 0)
                     return 0;
 
@@ -89,7 +98,7 @@ namespace givPayroll.Models
                 return childNo;
             }
         }
- 
+
 
         public virtual ICollection<PayrollAdjustmentPersonnel> PayrollAdjustmentPersonnels { get; set; }
     = new List<PayrollAdjustmentPersonnel>();

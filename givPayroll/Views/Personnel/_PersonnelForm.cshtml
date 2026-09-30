@@ -37,6 +37,11 @@
                     <input asp-for="LastName" class="form-control" />
                 </div>
                 <div class="mb-3">
+                    <label>@Html.DisplayNameFor(m => m.PersonnelNo)</label>
+                    <input asp-for="PersonnelNo" class="form-control" />
+                </div>
+
+                <div class="mb-3">
                     <label>@Html.DisplayNameFor(m => m.Mobile)</label>
                     <input asp-for="Mobile" type="number" class="form-control" />
                 </div>
@@ -51,6 +56,11 @@
                 
             </div>
             <div class="col-md-6">
+                <div class="mb-3">
+                    <label>@Html.DisplayNameFor(m => m.InsuranceNo)</label>
+                    <input asp-for="InsuranceNo" class="form-control" />
+                </div>
+
                 <div class="mb-3" style="width:200px;">
                     <label>@Html.DisplayNameFor(m => m.ChildNo)</label>
                     <input readonly asp-for="ChildNo" type="number" class="form-control bg-light" />
@@ -63,22 +73,24 @@
                     </select>
                 </div>
 
-                <div id="BirthDateApp">
-                    <label class="form-label">
-                        تاریخ تولد
-                    </label>
-                    <date-picker v-model="persianDate"
-                                 format="jYYYY/jMM/jDD"
-                                 display-format="jYYYY/jMM/jDD"
-                                 color="#0d6efd"
-                                 :editable="true"
-                                 placeholder="تاریخ تولد">
-                    </date-picker>
+                <div class="mb-3">
+                    <div id="BirthDateApp">
+                        <label class="form-label">
+                            تاریخ تولد
+                        </label>
+                        <date-picker v-model="persianDate"
+                                     format="jYYYY/jMM/jDD"
+                                     display-format="jYYYY/jMM/jDD"
+                                     color="#0d6efd"
+                                     :editable="true"
+                                     placeholder="تاریخ تولد">
+                        </date-picker>
 
-                    <input type="hidden"
-                           name="BirthDate"
-                           :value="gregorianDate">
+                        <input type="hidden"
+                               name="BirthDate"
+                               :value="gregorianDate">
 
+                    </div>
                 </div>
 
                 <div class="mb-3">
