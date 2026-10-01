@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Drawing.Charts;
 using givPayroll.Data;
 using givPayroll.Models;
+using givPayroll.Models.DTO;
 using givPayroll.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -69,15 +70,19 @@ public class PayrollController : Controller
 
         throw new ArgumentOutOfRangeException(nameof(month));
     }
-
+    public static List<CalculateTaxDetail> TaxDetail = null;
     public async Task<IActionResult> PayrollPreview(int year, int month, int personnelId)
     {
+        TaxDetail = new List<CalculateTaxDetail>();
         PayrollViewModel model = await GetPayrollData(year, month, personnelId);
+        //decimal totalAmount = TaxDetail.Sum(x => x.Amount);
+        ViewBag.TaxDetail = TaxDetail;
 
         return PartialView("_PayrollPreview", model);
     }
     public async Task<IActionResult> PayrollInsuranceTaxPreview(int insuranceTax)
     {
+        ViewBag.TaxDetail = TaxDetail;
         List<InsuTaxViewModel> model = new List<InsuTaxViewModel>();
         if (insuranceTax == 1)
         {
@@ -493,8 +498,12 @@ public class PayrollController : Controller
         }
 
         ////Tax 787348161
-        decimal TaxAmount = CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList());
+        decimal TaxAmount = 0;
+         TaxDetail =  CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList(), ref  TaxAmount);
         lstTax[lstTax.Count - 1].AmountAfter = TaxAmount;
+        //
+        
+
         // fill last item with total, when using remember
         // to at first show the value and then make it zero
 
@@ -519,10 +528,11 @@ public class PayrollController : Controller
         return model;
     }
 
-
-
-    decimal CalculateTax(decimal amount, List<RuleTax> rules)
+ 
+    public List<CalculateTaxDetail> CalculateTax(decimal amount, List<RuleTax> rules, ref decimal TaxAmount)
     {
+        List<CalculateTaxDetail> ret = new List<CalculateTaxDetail>();
+
         decimal tax = 0;
         decimal previousLimit = 0;
 
@@ -531,18 +541,24 @@ public class PayrollController : Controller
             if (amount <= previousLimit)
                 break;
 
-            decimal taxableAmount =
-                Math.Min(amount, rule.Amount) - previousLimit;
+            decimal taxableAmount =   Math.Min(amount, rule.Amount) - previousLimit;
 
             if (taxableAmount > 0)
             {
                 decimal taxItem = taxableAmount * rule.Rate / 100m;
+                CalculateTaxDetail obj = new CalculateTaxDetail();
+                obj.Amount = taxItem;
+                obj.Title = rule.Amount.ToString("N0");
+                ret.Add(obj);
+
                 tax += taxItem;
             }
             previousLimit = rule.Amount;
         }
+        decimal totalAmount = ret.Sum(x => x.Amount);
 
-        return tax;
+        TaxAmount = tax;
+        return ret;
     }
 
     public async Task<IActionResult> Salary(int id, string ym)

@@ -1,4 +1,5 @@
-﻿@model List<InsuTaxViewModel>
+﻿@using givPayroll.Models.DTO
+@model List<InsuTaxViewModel>
 <!-- ================================================= -->
 <!-- HEADER -->
 <!-- ================================================= -->
@@ -123,7 +124,7 @@
                         @{
                             var row = 1;
                             var Zero = 0;
-                            decimal totalAfter = 0; decimal total  = 0;
+                            decimal totalAfter = 0; decimal total = 0;
                             foreach (InsuTaxViewModel item in Model)
                             {
                                 var amount = item.Amount;
@@ -131,13 +132,15 @@
                                 int PlusMinus = item.PlusMinus;
                                 //if (item.SalaryItem.PlusMinus == 1)
                                 if (@insuranceTax == 1)
-                                    {
-                                        totalAfter += amountAfter * item.SalaryItem.PlusMinus;
-                                        total  += amount  * item.SalaryItem.PlusMinus;
-                                    }
+                                {
+                                    totalAfter += amountAfter * item.SalaryItem.PlusMinus;
+                                    total += amount * item.SalaryItem.PlusMinus;
+                                }
                                 if (@insuranceTax == 2)
+                                {
+                                    total += amount * item.SalaryItem.PlusMinus;
                                     totalAfter += amountAfter;
-
+                                }
                                 //else
                                 //   total -= amount;
 
@@ -184,12 +187,9 @@
                                 row++;
                             }
                         }
-
-                    </tbody>
-                    <tfoot>
-                        <tr class="table-secondary fw-bold">
-                            @if (@insuranceTax == 1)
-                            {
+                        @if (@insuranceTax == 1)
+                        {
+                            <tr class="table-secondary fw-bold" style="height:25px!important;">
                                 <td colspan="3" class="text-end">
                                     جمع
                                 </td>
@@ -199,18 +199,45 @@
                                 <td style="width:200px">
                                     @totalAfter.ToString("N0")
                                 </td>
-                            }
-                            @if (@insuranceTax == 2)
-                            {
+                            </tr>
+                        }
+                        @if (@insuranceTax == 2)
+                        {
+                            <tr class="table-secondary fw-bold" style="height: 25px!important; line-height: 25px!important;">
                                 <td colspan="3" class="text-end">
                                     جمع
                                 </td>
-                                <td class="payroll-table">
-                                    @totalAfter.ToString("N0")
+                                <td style="width:200px">
+                                    @total.ToString("N0")
                                 </td>
-                            }
 
-                        </tr>
+                            </tr>
+
+                            List<CalculateTaxDetail> TaxDetail = (List<CalculateTaxDetail>)ViewBag.TaxDetail;
+                            decimal totAmount = TaxDetail.Sum(x => x.Amount);
+                            @foreach (var item in TaxDetail)
+                            {
+                                <tr class="table-secondary fw-bold" style="height:25px!important;">
+                                    <td colspan="3" class="text-end">
+                                        @item.Title
+                                    </td>
+                                    <td class="payroll-table">
+                                        @item.Amount.ToString("N0")
+                                    </td>
+                                </tr>
+                            }
+                            <tr class="table-secondary fw-bold" style="height:25px!important;">
+                                <td colspan="3" class="text-end">
+                                    جمع مالیات
+                                </td>
+                                <td class="payroll-table">
+                                    @totAmount.ToString("N0")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        
                     </tfoot>
                 </table>
 
