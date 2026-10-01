@@ -6,6 +6,22 @@ namespace givPayroll
 {
     public static class AppUtil
     {
+        public enum enumMaritalStatus
+        {
+            Single = 1,
+            Married = 2
+        }
+        public enum enumFamilyRelation
+        {
+            Child = 1,
+            Spouse=2
+        }
+        public enum enumGender
+        {
+            Man = 1,
+            Woman= 2
+        }
+
         public static String M2S(DateTime gregorianDate)
         {
             var pc = new PersianCalendar();

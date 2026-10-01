@@ -296,17 +296,14 @@
             success: function(result) {
                 if (result.success) {
                     $("#salaryItemModal").modal("hide");
-                
-
-                      
-
+                 
                     Swal.fire({
                         icon: "success",
                         title: "قوانین با موفقیت ذخیره شد",
                         timer:  1200,
                         showConfirmButton: false
                     });
-
+                    loadSalaryItems();
                 }
                 else {
 

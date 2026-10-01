@@ -446,7 +446,7 @@ namespace givPayroll.Controllers
             existing.LeaveNormalMinute = 0;
             existing.LeaveWithoutSalaryMinute = 0;
             existing.LeaveSickMinute = 0;
-            existing.AbsenceMinute = existing.WorkingExpectedMinute;
+            existing.AbsenceMinute = 0; // existing.WorkingExpectedMinute;
             existing.MissionMinute = 0;
             existing.Status = 0;
 

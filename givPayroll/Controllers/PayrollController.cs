@@ -326,7 +326,8 @@ public class PayrollController : Controller
                 .Select(d => new
                 {
                     Amount = d.Amount,
-                    Description = d.PayrollAdjustment.Description
+                    Description = d.PayrollAdjustment.Description,
+                    PlusMinus = d.PayrollAdjustment.SalaryItem.PlusMinus,
                 })
                 .FirstOrDefaultAsync();
 
@@ -335,6 +336,7 @@ public class PayrollController : Controller
                 PayrollItem item = new PayrollItem();
                 item.SalaryItemId = itemSalary3.Id;
                 item.Amount = Convert.ToDecimal(result3.Amount);
+                item.PlusMinus = result3.PlusMinus;
                 item.Description = result3.Description;
                 item.FormulaValue = itemSalary3.FormulaValue;
                 model.PayrollItems.Add(item);
@@ -374,6 +376,7 @@ public class PayrollController : Controller
             {
                 InsuTaxViewModel obj = new InsuTaxViewModel();
                 obj.SalaryItemId = itemPayroll.SalaryItemId;
+                obj.PlusMinus = itemPayroll.PlusMinus;
                 obj.Amount = itemPayroll.Amount;
                 obj.AmountAfter = itemPayroll.Amount * employeeRate;
                 lstInsurance.Add(obj);
@@ -393,7 +396,8 @@ public class PayrollController : Controller
                 .Select(d => new PayrollItem
                 {
                     SalaryItemId = d.PayrollAdjustment.SalaryItemId,
-                    Amount = d.Amount
+                    Amount = d.Amount,
+                    PlusMinus = d.PayrollAdjustment.SalaryItem.PlusMinus
                 })
                 .ToList();
 
@@ -402,10 +406,11 @@ public class PayrollController : Controller
             InsuTaxViewModel obj = new InsuTaxViewModel();
             obj.SalaryItemId = itemPayroll.SalaryItemId;
             obj.Amount = itemPayroll.Amount;
+            obj.PlusMinus = itemPayroll.PlusMinus;
             obj.AmountAfter = itemPayroll.Amount * employeeRate;
             lstInsurance.Add(obj);
 
-            totalInsuranceAmount += itemPayroll.Amount;
+            totalInsuranceAmount += itemPayroll.Amount * itemPayroll.PlusMinus;
         }
         //        totalInsuranceAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
         //    }
@@ -449,9 +454,13 @@ public class PayrollController : Controller
                 obj.SalaryItemId = itemPayroll.SalaryItemId;
                 obj.Amount = itemPayroll.Amount;
                 obj.AmountAfter = 0;
+                obj.PlusMinus = itemPayroll.SalaryItem.PlusMinus;
+                //if (itemPayroll.SalaryItem.PlusMinus < 0)
+                //    System.Diagnostics.Debugger.Break();
+
                 lstTax.Add(obj);
 
-                totalTaxAmount += itemPayroll.Amount ;//* itemPayroll.SalaryItem.PlusMinus
+                totalTaxAmount += itemPayroll.Amount * itemPayroll.SalaryItem.PlusMinus;
             }
         // add payrollAdjustment Records about insurance
         var payrollAdjustmentTax = _context.PayrollAdjustmentDetails
@@ -466,7 +475,8 @@ public class PayrollController : Controller
                 .Select(d => new PayrollItem
                 {
                     SalaryItemId = d.PayrollAdjustment.SalaryItemId,
-                    Amount = d.Amount
+                    Amount = d.Amount,
+                    PlusMinus = d.PayrollAdjustment.SalaryItem.PlusMinus
                 })
                 .ToList();
 
@@ -474,11 +484,12 @@ public class PayrollController : Controller
         {
             InsuTaxViewModel obj = new InsuTaxViewModel();
             obj.SalaryItemId = itemPayroll.SalaryItemId;
+            obj.PlusMinus = itemPayroll.PlusMinus;
             obj.Amount = itemPayroll.Amount;
             obj.AmountAfter = 0;
             lstTax.Add(obj);
 
-            totalTaxAmount += itemPayroll.Amount;
+            totalTaxAmount += itemPayroll.Amount * itemPayroll.PlusMinus;
         }
 
         ////Tax 787348161
@@ -524,8 +535,10 @@ public class PayrollController : Controller
                 Math.Min(amount, rule.Amount) - previousLimit;
 
             if (taxableAmount > 0)
-                tax += taxableAmount * rule.Rate / 100m;
-
+            {
+                decimal taxItem = taxableAmount * rule.Rate / 100m;
+                tax += taxItem;
+            }
             previousLimit = rule.Amount;
         }
 

@@ -86,10 +86,13 @@ namespace givPayroll.Models
         {
             get
             {
-                if (PersonnelRelationId != 1)
+                if (PersonnelRelationId !=  (int) AppUtil.enumFamilyRelation.Child)
                     return false;
 
-                bool can = (GenderID == 1 && Age < 18) || (GenderID == 2 && MaritalStatusId == 1);
+                bool can = (GenderID == (int) AppUtil.enumGender.Man &&
+                    Age < 18) || 
+                    (GenderID == (int)AppUtil.enumGender.Woman  && 
+                    MaritalStatusId == (int) AppUtil.enumMaritalStatus.Single);
                 return can;
             }
         }

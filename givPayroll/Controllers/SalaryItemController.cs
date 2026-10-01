@@ -26,8 +26,8 @@ namespace givPayroll.Controllers
             string sortDirection = "asc")
         {
             var query = _context.SalaryItems
-                .Include(i=>i.SalaryItemRules)
-                 .Where(i=>i.Label!= "Bonus" && i.Label != "Penalty")
+                .Include(i => i.SalaryItemRules)
+                 .Where(i => i.Label != "Bonus" && i.Label != "Penalty")
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -114,7 +114,7 @@ namespace givPayroll.Controllers
         public async Task<IActionResult> Create()
         {
             SalaryItem model = new SalaryItem();
-          
+
 
             return PartialView("_SalaryItemForm", model);
         }
@@ -143,7 +143,7 @@ namespace givPayroll.Controllers
                 return PartialView("_SalaryItemForm", model);
             }
 
-           
+
 
             model.SalaryItemName = model.SalaryItemName.Trim();
             model.Label ??= "";
@@ -152,7 +152,7 @@ namespace givPayroll.Controllers
             model.CalculationMode ??= "";
             model.FormulaValue ??= "";
 
-            if (model.Id==0)
+            if (model.Id == 0)
             {
                 var maxId = await _context.SalaryItems
                   .Select(x => (int?)x.Id)
@@ -245,8 +245,22 @@ namespace givPayroll.Controllers
             }
 
             _context.SalaryItems.Remove(entity);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                string mess = ex.Message;
+                if (ex.Message == "An error occurred while saving the entity changes. See the inner exception for details.")
+                    mess = "حذف امکان پذیر نیست";
 
-            await _context.SaveChangesAsync();
+                return Json(new
+                {
+                    success = false,
+                    message = mess
+                });
+            }
 
             return Json(new
             {

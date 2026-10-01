@@ -8,4 +8,5 @@ public class InsuTaxViewModel
 
     public decimal AmountAfter { get; set; }
     public string Description { get; internal set; }
+    public int PlusMinus { get; internal set; }
 }

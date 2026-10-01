@@ -106,7 +106,9 @@
                             <th style="width:200px">
                                 مبلغ
                             </th>
+                            <th style="width:50px">
 
+                            </th>
                         </tr>
 
                     </thead>
@@ -129,17 +131,7 @@
                                 <tr style="height:25px!important;">
                                     <td style="width:80px">
                                         @row
-                                        @{
-                                            var desc1 = @item.SalaryItem.Label;
-                                            if (desc1=="Insurance" )
-                                            { 
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="PayrollInsuranceTaxProc(1)">...</button>
-                                            }
-                                            if (desc1 == "Tax")
-                                            {
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="PayrollInsuranceTaxProc(2)">...</button>
-                                            }
-                                        }
+
                                     </td>
 
                                     <td>
@@ -150,17 +142,17 @@
                                         }
                                         @desc
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" style="width:50px">
 
                                         @if (@item.SalaryItem.PlusMinus == 1)
                                         {
-                                            <span class="badge bg-success">
+                                            <span class="badge bg-success" style="width:25px;">
                                                 +
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger">
+                                            <span class="badge bg-danger" style="width:25px;">
                                                 -
                                             </span>
                                         }
@@ -168,6 +160,19 @@
                                     </td>
                                     <td style="width:200px">
                                         @item.Amount.ToString("N0")
+                                    </td>
+                                    <td style="width:50px">
+                                        @{
+                                            var desc1 = @item.SalaryItem.Label;
+                                            if (desc1 == "Insurance")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="PayrollInsuranceTaxProc(1)">...</button>
+                                            }
+                                            if (desc1 == "Tax")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="PayrollInsuranceTaxProc(2)">...</button>
+                                            }
+                                        }
                                     </td>
                                 </tr>
                                 row++;
@@ -182,6 +187,9 @@
                             </td>
                             <td style="width:200px">
                                 @total.ToString("N0")
+                            </td>
+                            <td>
+                                 
                             </td>
                         </tr>
                     </tfoot>
