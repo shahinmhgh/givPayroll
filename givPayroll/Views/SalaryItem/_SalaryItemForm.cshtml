@@ -93,8 +93,7 @@
 
 
             <!-- Unit -->
-
-            <div class="col-md-3">
+            @* <div class="col-md-3">
 
                 <label asp-for="Unit"
                        class="form-label">
@@ -111,20 +110,26 @@
 
                 </select>
 
-            </div>
+            </div> *@
 
 
             <!-- Source -->
-
             <div class="col-md-3">
 
                 <label asp-for="Source"
                        class="form-label">
                 </label>
 
-                <input asp-for="Source"
-                       class="form-control"
-                       dir="ltr" />
+                <select asp-for="Source"
+                        class="form-select">
+
+                    <option value="">-- انتخاب --</option>
+                    <option value="PersonnelOrder">حکم پرسنلی</option>   <!--    Formula -->
+                    <option value="Attendance">حضور و غیاب</option>      <!--    Formula -->
+                    <option value="RuleInsurance">قوانین بیمه</option>   <!-- No Formula -->
+                    <option value="RuleTax">قوانین مالیات</option>       <!-- No Formula -->
+                    <option value="SalaryItemRule">مولفه آزاد</option>   <!--    Formula -->
+                </select>
 
             </div>
 
@@ -154,8 +159,7 @@
 
 
             <!-- CalculationMode -->
-
-            <div class="col-md-3">
+            @*  <div class="col-md-3">
 
                 <label asp-for="CalculationMode"
                        class="form-label">
@@ -172,7 +176,7 @@
 
                 </select>
 
-            </div>
+            </div> *@
 
 
             <!-- Formula -->
@@ -239,8 +243,8 @@
         </button>
 
         <button type="button"
-                onclick="saveSalaryItem()" 
-            class="btn btn-primary">
+                onclick="saveSalaryItem()"
+                class="btn btn-primary">
 
             <i class="bi bi-check-lg"></i>
 
@@ -266,11 +270,16 @@
 </div>
 
 <script>
+ $(document).ready(function() {
+        
+          alert('ready');
+    });
+
     function saveSalaryItem() {
 
-    var form = $("#salaryItemForm");
+        var form = $("#salaryItemForm");
         var id = $("#Id").val();
-        
+
         if (!form.valid()) {
             return false;
         }
@@ -287,20 +296,20 @@
 
         //$("#salaryItemLoading").show();
 
-            var url = (id==0? "/SalaryItem/Create":"/SalaryItem/Edit");
+        var url = (id == 0 ? "/SalaryItem/Create" : "/SalaryItem/Edit");
 
         $.ajax({
-            url: url ,
-            type:"POST",
+            url: url,
+            type: "POST",
             data: form.serialize(),
             success: function(result) {
                 if (result.success) {
                     $("#salaryItemModal").modal("hide");
-                 
+
                     Swal.fire({
                         icon: "success",
                         title: "قوانین با موفقیت ذخیره شد",
-                        timer:  1200,
+                        timer: 1200,
                         showConfirmButton: false
                     });
                     loadSalaryItems();

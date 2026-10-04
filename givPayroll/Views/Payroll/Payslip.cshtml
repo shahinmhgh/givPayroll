@@ -1,0 +1,203 @@
+﻿@{
+    Layout = null;
+}
+<title>فیش حقوقی کارکنان شرکت کشواد رایان افزار</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 25px;
+        /* background: #fff; */
+        font-family: Arial, "B Nazanin", Tahoma, sans-serif;
+        color: #000;
+        direction: rtl;
+    }
+    .pay-slip {
+        width: 900px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    td {
+        border: 1px solid #000;
+        height: 31px;
+        padding: 4px 6px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 15px;
+        font-weight: bold;
+        /* background: #c0c0c0; */
+    }
+    .title {
+        height: 35px;
+        font-size: 17px;
+        /* background: #fff; */
+    }
+    .section {
+        height: 38px;
+        font-size: 17px;
+        /* background: #c0c0c0; */
+    }
+    .label {
+        font-family: Arial, Tahoma, sans-serif;
+    }
+    .value {
+        font-family: "B Nazanin", Tahoma, Arial, sans-serif;
+        font-size: 16px;
+    }
+    .total {
+        font-size: 16px;
+    }
+    .net {
+        height: 40px;
+        font-size: 17px;
+    }
+    .editable {
+        cursor: text;
+    }
+    .editable:focus {
+        outline: 2px solid #777;
+        /* background: #eee; */
+    }
+    @@media print {
+        body { padding: 0; }
+        .pay-slip { width: 100%; }
+        @@page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+    }
+</style>
+  <body>
+<div class="pay-slip">
+<table>
+    <colgroup>
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+        <col style="width: 12.5%">
+    </colgroup>
+
+    <tr>
+        <td colspan="8" class="title">فیش حقوقی کارکنان شرکت کشواد رایان افزار</td>
+    </tr>
+
+    <tr>
+        <td colspan="8" class="section">مشخصات کارمند</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">شماره کارمندی</td>
+        <td colspan="2" class="value">5001</td>
+        <td colspan="2">تاریخ صدور</td>
+        <td colspan="2" class="value">بهمن&nbsp;&nbsp;ماه&nbsp;&nbsp;1403</td>
+    </tr>
+
+    <tr>
+        <td>نام</td>
+        <td class="value">هادی</td>
+        <td>سمت</td>
+        <td class="value">مدیر فروش</td>
+        <td>وضعیت تأهل</td>
+        <td class="value">متاهل</td>
+        <td>کد گروه شغلی</td>
+        <td class="value">98002</td>
+    </tr>
+
+    <tr>
+        <td>نام خانوادگی</td>
+        <td class="value">نیشابوری</td>
+        <td>شماره بیمه</td>
+        <td class="value">0022472561</td>
+        <td>تعداد فرزند</td>
+        <td class="value">1</td>
+        <td></td>
+        <td></td>
+    </tr>
+
+    <tr>
+        <td colspan="4" class="section">دریافتی ها:</td>
+        <td colspan="4" class="section">کسورات:</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">پایه حقوق</td>
+        <td colspan="2" class="value" data-type="number">130,671,720</td>
+        <td colspan="2">بیمه بازنشستگی</td>
+        <td colspan="2" class="value" data-type="number">0</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">فوق العاده شغل</td>
+        <td colspan="2" class="value" data-type="number">0</td>
+        <td colspan="2">بیمه تامین اجتماعی</td>
+        <td colspan="2" class="value" data-type="number">11,107,020</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">حق اولاد</td>
+        <td colspan="2" class="value" data-type="number">7,166,000</td>
+        <td colspan="2">مالیات</td>
+        <td colspan="2" class="value" data-type="number">3,473,070</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">حق تاهل</td>
+        <td colspan="2" class="value" data-type="number">5,000,000</td>
+        <td colspan="2">قسط وام</td>
+        <td colspan="2" class="value" data-type="number">0</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">حق مسکن</td>
+        <td colspan="2" class="value" data-type="number">9,000,000</td>
+        <td colspan="2">کسر حقوق</td>
+        <td colspan="2" class="value" data-type="number">0</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">حق بن و خواربار</td>
+        <td colspan="2" class="value" data-type="number">14,000,000</td>
+        <td colspan="2">پس انداز</td>
+        <td colspan="2" class="value" data-type="number">0</td>
+    </tr>
+
+    <tr>
+        <td colspan="2">پاداش</td>
+        <td colspan="2" class="value" data-type="number">0</td>
+        <td colspan="2">سایر</td>
+        <td colspan="2" class="value" data-type="number"></td>
+    </tr>
+
+    <tr>
+        <td colspan="2">ماموریت</td>
+        <td colspan="2" class="value">0</td>
+        <td colspan="2"></td>
+        <td colspan="2" class="value" data-type="number"></td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="total">جمع دریافتی</td>
+        <td colspan="2" class="value total" id="totalIncome">165,837,720</td>
+        <td colspan="2" class="total">جمع کسورات</td>
+        <td colspan="2" class="value total" id="totalDeduction">14,580,090</td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="net">مبلغ خالص پرداختی:</td>
+        <td colspan="6" class="value net" id="netPay">151,257,630</td>
+    </tr>
+</table>
+</div>
+ 
+</body>
+
+</html>

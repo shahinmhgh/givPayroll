@@ -589,16 +589,57 @@ public class PayrollController : Controller
         return View(modelData);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> SalaryPdf(int id, string ym, CancellationToken cancellationToken)
+    public async Task<IActionResult> Payslip(int id, string ym)
     {
+ 
+        Personnel person = _context.Personnels.Where(i => i.Id == id).FirstOrDefault();
+        int month = Convert.ToInt32(ym.Substring(5, 2));
+        int year = Convert.ToInt32(ym.Substring(0, 4));
 
-        var url =
+        PayrollViewModel modelData = await GetPayrollData(year, month, id);
+
+        //var model = new SalaryReportViewModel
+        //{
+        //    PersonnelId = id,
+        //    PersonnelCode = "1001",
+        //    FirstName = person.FirstName,
+        //    LastName = person.LastName,
+        //    NationalCode = "1234567890",
+        //    PayrollMonth = year + " " +  DateUtil.GetPersianMonthName(month),
+        //    BasicSalary = 150000000,
+        //    HousingAllowance = 9000000,
+        //    FoodAllowance = 14000000,
+        //    Overtime = 12000000,
+        //    Deductions = 18000000
+        //};
+        ViewBag.YearMonthName = AppUtil.GetPersianMonthName(modelData.PayrollMonth) + " " + year;
+        return View(modelData);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SalaryPdf(int id, string ym, string layout, CancellationToken cancellationToken)
+    {
+        var url = "";
+        if (layout.ToLower() == "salary")
+        {
+           url =
             Url.Action(
                 nameof(Salary),
                 "Payroll",
                 new { id, ym },
                 Request.Scheme)!;
+        }
+        if (layout.ToLower() == "payslip")
+        {
+           url =
+            Url.Action(
+                nameof(Payslip),
+                "Payroll",
+                new { id, ym },
+                Request.Scheme)!;
+        }
+
+       
 
         var pdf = await _pdfService.GeneratePdfFromUrlAsync(
             url,
