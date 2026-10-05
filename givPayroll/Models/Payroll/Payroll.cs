@@ -13,6 +13,20 @@ namespace givPayroll.Models
         [Display(Name = "شناسه")]
         public int Id { get; set; }
 
+        [Display(Name = "تاریخ صدور")]
+        [NotMapped]
+        public string IssueDatePersian
+        {
+            get
+            {
+                return AppUtil.M2S(IssueDate.GetValueOrDefault());
+            }
+        }
+
+        [DataType(DataType.Date)]
+        [Display(Name = "تاریخ صدور")]
+        public DateTime? IssueDate { get; set; }
+
         [Required]
         [Display(Name = "پرسنل")]
         public int PersonnelId { get; set; }

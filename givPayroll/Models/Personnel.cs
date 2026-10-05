@@ -33,6 +33,7 @@ namespace givPayroll.Models
         [Display(Name = "وضعیت تاهل")]
         public int MaritalStatusId { get; set; }
 
+        
 
         [MaxLength(50)]
         [Required(ErrorMessage = "شماره بیمه is required.")]
@@ -54,6 +55,9 @@ namespace givPayroll.Models
         [ForeignKey(nameof(EducationID))]
         public Education Education { get; set; } = null!;
 
+  
+
+
         [Display(Name = "تاریخ تولد")]
         [DataType(DataType.Date)]
         public DateTime? BirthDate { get; set; }
@@ -64,6 +68,7 @@ namespace givPayroll.Models
         [ForeignKey(nameof(GenderID))]
         public virtual Gender Gender { get; set; } = null!;
 
+        
 
         [Display(Name = "سن")]
         [NotMapped]

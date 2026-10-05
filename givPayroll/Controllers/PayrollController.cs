@@ -71,13 +71,19 @@ public class PayrollController : Controller
         throw new ArgumentOutOfRangeException(nameof(month));
     }
     public static List<CalculateTaxDetail> TaxDetail = null;
+    public static List<CalculateTaxDetail> PlusList = null;
+public static List<CalculateTaxDetail> MinusList = null;
+
     public async Task<IActionResult> PayrollPreview(int year, int month, int personnelId)
     {
         TaxDetail = new List<CalculateTaxDetail>();
+        PlusList = new List<CalculateTaxDetail>();
+        MinusList = new List<CalculateTaxDetail>();
+
         PayrollViewModel model = await GetPayrollData(year, month, personnelId);
         //decimal totalAmount = TaxDetail.Sum(x => x.Amount);
         ViewBag.TaxDetail = TaxDetail;
-
+ 
         return PartialView("_PayrollPreview", model);
     }
     public async Task<IActionResult> PayrollInsuranceTaxPreview(int insuranceTax)
@@ -114,10 +120,12 @@ public class PayrollController : Controller
 
         //1 find active personnellorder - detail 
         PayrollViewModel model = new PayrollViewModel();
+        model.IssueDate = DateTime.Now.Date;
         model.PersonnelId = personnelId;
         model.PayrollYear = year;
         model.PayrollMonth = month;
-        model.Personnel = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
+        model.Personnel = _context.Personnels.Include(x=>x.PersonnelFamilies).Include(i=>i.MaritalStatus).Where(i => i.Id == personnelId).FirstOrDefault();
+        model.PersonnelOrder = _context.PersonnelOrders.Include("Details").Where(i => i.Id == personnelId && i.IsActive).FirstOrDefault();
 
         #region PersonnelOrder
         //List<SalaryItem> lst1 = _context.SalaryItems.Where(i => i.Source == "PersonnelOrder").ToList();
@@ -308,8 +316,6 @@ public class PayrollController : Controller
         {
             System.Diagnostics.Debug.Print(ex.Message);
         }
-
-
 
         #endregion
 
@@ -503,7 +509,6 @@ public class PayrollController : Controller
         lstTax[lstTax.Count - 1].AmountAfter = TaxAmount;
         //
         
-
         // fill last item with total, when using remember
         // to at first show the value and then make it zero
 
@@ -525,6 +530,25 @@ public class PayrollController : Controller
         model.PayrollItems = model.PayrollItems
             .OrderBy(item => item.SalaryItem.Priority)
             .ToList();
+
+        PlusList = model.PayrollItems
+            .Where(x => x.SalaryItem != null && x.SalaryItem.PlusMinus == 1)
+            .Select(x => new CalculateTaxDetail
+            {
+                Amount = x.Amount,
+                Title = x.SalaryItem.SalaryItemName
+            })
+            .ToList();
+
+        MinusList = model.PayrollItems
+           .Where(x => x.SalaryItem != null && x.SalaryItem.PlusMinus == -1)
+           .Select(x => new CalculateTaxDetail
+           {
+               Amount = x.Amount,
+               Title = x.SalaryItem.SalaryItemName
+           })
+           .ToList();
+
         return model;
     }
 
@@ -592,11 +616,18 @@ public class PayrollController : Controller
     public async Task<IActionResult> Payslip(int id, string ym)
     {
  
-        Personnel person = _context.Personnels.Where(i => i.Id == id).FirstOrDefault();
+        Personnel? person = _context.Personnels
+            .Include(x => x.PersonnelFamilies)
+                .ThenInclude(x => x.MaritalStatus)
+            .Where(i => i.Id == id).FirstOrDefault();
+
         int month = Convert.ToInt32(ym.Substring(5, 2));
         int year = Convert.ToInt32(ym.Substring(0, 4));
 
         PayrollViewModel modelData = await GetPayrollData(year, month, id);
+        ViewBag.PlusList = PlusList;
+        ViewBag.MinusList = MinusList;
+
 
         //var model = new SalaryReportViewModel
         //{
@@ -613,7 +644,7 @@ public class PayrollController : Controller
         //    Deductions = 18000000
         //};
         ViewBag.YearMonthName = AppUtil.GetPersianMonthName(modelData.PayrollMonth) + " " + year;
-        return View(modelData);
+        return View("Payslip", modelData);
     }
 
     [HttpGet]

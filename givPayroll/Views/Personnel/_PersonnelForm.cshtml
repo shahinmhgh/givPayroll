@@ -93,6 +93,9 @@
                     </div>
                 </div>
 
+
+                 
+
                 <div class="mb-3">
                     <label>@Html.DisplayNameFor(m => m.Age)</label>
                     <input readonly asp-for="Age" class="form-control bg-light" />
@@ -186,9 +189,10 @@
     $(document).ready(function() {
 
         var BirthDate = '@Model.BirthDate';
+       
 
         initPersonnelDatePicker(BirthDate, "#BirthDateApp")
-
+      
     });
 
     function savePersonnel() {
