@@ -270,9 +270,41 @@
 </div>
 
 <script>
- $(document).ready(function() {
+    $(document).ready(function() {
         
-          alert('ready');
+        
+
+        var source = $("#Source").val();
+        // <option value="PersonnelOrder">حکم پرسنلی</option>   <!--    Formula -->
+        // <option value="Attendance">حضور و غیاب</option>      <!--    Formula -->
+        // <option value="RuleInsurance">قوانین بیمه</option>   <!-- No Formula -->
+        // <option value="RuleTax">قوانین مالیات</option>       <!-- No Formula -->
+        // <option value="SalaryItemRule">مولفه آزاد</option>   <!--    Formula -->
+       switch (source) {
+            case "PersonnelOrder":
+                $("#FormulaValue").prop("readonly", false);
+                break;
+
+            case "Attendance":
+                $("#FormulaValue").prop("readonly", false);
+                break;
+
+            case "RuleInsurance":
+                $("#FormulaValue").prop("readonly", true);
+                break;
+            case "RuleTax":
+                $("#FormulaValue").prop("readonly", true);
+                break;
+
+            case "SalaryItemRule":
+                $("#FormulaValue").prop("readonly", false);
+                break;
+
+            default:
+                 
+                break;
+        }
+            
     });
 
     function saveSalaryItem() {

@@ -13,10 +13,13 @@
     }
 
     body {
+        font-family: Shabnam;
+        font-size: 13px;
+        text-align: right;
         margin: 0;
         padding: 25px;
         /* background: #fff; */
-        font-family: Arial, "B Nazanin", Tahoma, sans-serif;
+        /* font-family: Arial, "B Nazanin", Tahoma, sans-serif; */
         color: #000;
         direction: rtl;
     }
@@ -46,32 +49,38 @@
 
     .title {
         height: 35px;
-        font-size: 17px;
+        font-family: 'Shabnam';
+        font-size: 25px;
         /* background: #fff; */
     }
 
     .section {
         height: 38px;
-        font-size: 17px;
-        /* background: #c0c0c0; */
+        font-size: 21px;
+          background: whitesmoke;  
     }
-
-    .label {
-        font-family: Arial, Tahoma, sans-serif;
-    }
+     
+     .label {
+        font-size: 20px;
+        font-family: 'Shabnam';
+        }
 
     .value {
-        font-family: "B Nazanin", Tahoma, Arial, sans-serif;
-        font-size: 16px;
+        /* font-family: "B Nazanin", Tahoma, Arial, sans-serif; */
+        font-size: 20px;
+        font-family: 'Shabnam';
+        text-align: right;
     }
 
     .total {
-        font-size: 16px;
+        font-size: 22px;
+        font-family: 'Shabnam';
     }
 
     .net {
         height: 40px;
-        font-size: 17px;
+        font-size: 22px;
+        background-color:whitesmoke;
     }
 
     .editable {
@@ -113,7 +122,9 @@
             </colgroup>
 
             <tr>
-                <td colspan="8" class="title">فیش حقوقی کارکنان شرکت کشواد رایان افزار</td>
+                <td colspan="8" class="title">
+                    فیش حقوقی کارکنان شرکت کشواد رایان افزار
+                </td>
             </tr>
 
             <tr>
@@ -131,11 +142,11 @@
                 <td>نام</td>
                 <td class="value">@Model.Personnel.FirstName</td>
                 <td>سمت</td>
-                <td class="value">مدیر فروش</td>
+                <td class="value"></td>
                 <td>وضعیت تأهل</td>
                 <td class="value">@Model.Personnel.MaritalStatus.MaritalStatusName</td>
                 <td>کد گروه شغلی</td>
-                <td class="value">98002</td>
+                <td class="value"></td>
             </tr>
 
             <tr>
@@ -162,8 +173,8 @@
                     <tr>
                         @if (i < plusList.Count)
                         {
-                            <td colspan="2">@plusList[i].Title</td>
-                            <td colspan="2" class="value" data-type="number">@plusList[i].Amount.ToString("#,###")</td>
+                            <td colspan="2" class="label">@plusList[i].Title</td>
+                            <td colspan="2" class="value" data-type="number">@plusList[i].Amount.ToString("N0").ToPersianDigits()</td>
                         }
                         else
                         {
@@ -173,8 +184,8 @@
 
                         @if (i < minusList.Count)
                         {
-                            <td colspan="2">@minusList[i].Title</td>
-                            <td colspan="2" class="value" data-type="number">@minusList[i].Amount.ToString("#,###")</td>
+                            <td colspan="2" class="label">@minusList[i].Title</td>
+                            <td colspan="2" class="value" data-type="number">@minusList[i].Amount.ToString("N0").ToPersianDigits()</td>
                         }
                         else
                         {
@@ -240,17 +251,21 @@
                 <td colspan="2"></td>
                 <td colspan="2" class="value" data-type="number"></td>
             </tr> *@
-
+            @{
+                var plusSum = @plusList.Sum(x => x.Amount);
+                var minusSum = @minusList.Sum(x => x.Amount);
+                var remainSum = plusSum - minusSum;
+            }
             <tr>
                 <td colspan="2" class="total">جمع دریافتی</td>
-                <td colspan="2" class="value total" id="totalIncome">165,837,720</td>
+                <td colspan="2" class="value total" id="totalIncome">@plusSum.ToString("N0").ToPersianDigits()</td>
                 <td colspan="2" class="total">جمع کسورات</td>
-                <td colspan="2" class="value total" id="totalDeduction">14,580,090</td>
+                <td colspan="2" class="value total" id="totalDeduction">@minusSum.ToString("N0").ToPersianDigits()</td>
             </tr>
 
             <tr>
                 <td colspan="2" class="net">مبلغ خالص پرداختی:</td>
-                <td colspan="6" class="value net" id="netPay">151,257,630</td>
+                <td colspan="6" class="value net" id="netPay">@remainSum.ToString("N0").ToPersianDigits()</td>
             </tr>
         </table>
     </div>
