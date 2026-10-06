@@ -169,6 +169,21 @@ namespace givPayroll.Controllers
             });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetFormulaDictionary()
+        {
+            var formulas = await _context.SalaryItems
+                .Where(x => !string.IsNullOrWhiteSpace(x.FormulaValue))
+                .Select(x => x.FormulaValue)
+                .ToListAsync();
+
+            var words =AppUtil.ExtractFormulaWords(formulas);
+
+            return Json(words);
+        }
+
+     
+
         // GET: SalaryItem/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int id)

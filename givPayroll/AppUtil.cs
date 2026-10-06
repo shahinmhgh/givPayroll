@@ -1,6 +1,7 @@
-﻿using System.Globalization;
-using NPOI.HSSF.UserModel;
+﻿using NPOI.HSSF.UserModel;
 using NPOI.XSSF.UserModel;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace givPayroll
 {
@@ -14,12 +15,12 @@ namespace givPayroll
         public enum enumFamilyRelation
         {
             Child = 1,
-            Spouse=2
+            Spouse = 2
         }
         public enum enumGender
         {
             Man = 1,
-            Woman= 2
+            Woman = 2
         }
 
         public static String M2S(DateTime gregorianDate)
@@ -98,7 +99,7 @@ namespace givPayroll
 
             return PersianMonths[month - 1];
         }
-         
+
         public static byte[] ConvertXlsToXlsx(Stream xlsStream)
         {
             // Read old .xls
@@ -193,6 +194,39 @@ namespace givPayroll
             var pc = new PersianCalendar();
 
             return pc.ToDateTime(year, month, day, 0, 0, 0, 0);
+        }
+        
+        public static List<string> ExtractFormulaWords(IEnumerable<string> formulas)
+        {
+            var words = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var formula in formulas)
+            {
+                if (string.IsNullOrWhiteSpace(formula))
+                    continue;
+
+                // Extract words/identifiers such as:
+                // BaseSalary
+                // DaysWorked
+                // HousingAllowance
+                // MonthDays
+                //
+                // Ignores:
+                // + - * / ( ) 220 1.2 etc.
+                var matches = Regex.Matches(
+                    formula,
+                    @"[A-Za-z_][A-Za-z0-9_]*"
+                );
+
+                foreach (Match match in matches)
+                {
+                    words.Add(match.Value);
+                }
+            }
+
+            return words
+                .OrderBy(x => x)
+                .ToList();
         }
     }
 }

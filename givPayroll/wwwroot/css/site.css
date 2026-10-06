@@ -107,4 +107,9 @@ body {
     direction: rtl;
     text-align: right;
 }
+
+.form-control[readonly] {
+    background-color: #f0f0f0;
+}
+
 /*===========================================================*/

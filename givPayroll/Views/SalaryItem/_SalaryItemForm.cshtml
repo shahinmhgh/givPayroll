@@ -235,6 +235,13 @@
 
 
     <div class="modal-footer">
+         
+        <button type="button"
+                class="btn btn-secondary me-auto"
+                onclick="ListWords()">
+            راهنما
+        </button>
+    
 
         <button type="button"
                 class="btn btn-secondary"
@@ -270,11 +277,22 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        
-        
+     let formulaDictionary = [];
 
-        var source = $("#Source").val();
+     function ListWords()
+     {
+          $.get('/SalaryItem/GetFormulaDictionary')
+        .done(function (data) {
+
+            formulaDictionary = data;
+
+            alert(formulaDictionary.join("\n"));
+        });
+     }
+
+     function LoadForm()
+     {
+         var source = $("#Source").val();
         // <option value="PersonnelOrder">حکم پرسنلی</option>   <!--    Formula -->
         // <option value="Attendance">حضور و غیاب</option>      <!--    Formula -->
         // <option value="RuleInsurance">قوانین بیمه</option>   <!-- No Formula -->
@@ -304,7 +322,10 @@
                  
                 break;
         }
-            
+     }
+
+    $(document).ready(function() {
+          
     });
 
     function saveSalaryItem() {
