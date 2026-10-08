@@ -207,8 +207,12 @@ function previousPersonnel() {
     }
 }
 
-
-
+function SavePayroll() {
+    alert('SavePayroll');
+}
+function SavePayrollPersonnel(id) {
+    alert(id);
+}
 function nextPersonnel() {
     let select =
         $("#attendancePersonnel");

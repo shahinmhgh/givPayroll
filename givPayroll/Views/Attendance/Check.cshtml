@@ -17,8 +17,7 @@
 
         <div class="card-body">
 
-            <form method="get"
-                  class="row g-3 mb-4">
+            @* <form method="get"  class="row g-3 mb-4">
 
                 <div class="col-md-3">
 
@@ -26,7 +25,7 @@
                         سال
                     </label>
 
-                    <select id="attendanceYear" 
+                    <select id="attendanceYear"
                             name="year"
                             class="form-select">
 
@@ -55,11 +54,7 @@
 
                 </div>
 
-           <div class="col-md-4">
-
-                    <label class="form-label">
-                          
-                    </label>
+                <div class="col-md-4">
 
                     <button type="button" style="margin-top:7px;"
                             class="btn btn-primary "
@@ -69,9 +64,7 @@
                         بررسی
 
                     </button>
-                    <label class="form-label">
-                          
-                    </label>
+
                     <button type="button" style="margin-top:7px;"
                             class="btn btn-info "
                             onclick="SavePayroll()">
@@ -82,9 +75,66 @@
                     </button>
 
                 </div>
-              
-            </form>
 
+            </form> *@
+            <form method="get" class="row g-3 mb-4 align-items-end">
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        سال
+                    </label>
+
+                    <select id="attendanceYear"
+                            name="year"
+                            class="form-select">
+
+                        @for (int year = 1400; year <= 1410; year++)
+                        {
+                            <option value="@year"
+                                    selected="@(ViewBag.Year == year)">
+                                @year
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+                        ماه
+                    </label>
+
+                    <select id="attendanceMonth"
+                            class="form-select"
+                            asp-items="Model.Months">
+                    </select>
+
+                </div>
+
+                <div class="col-md-4 d-flex gap-2">
+
+                    <button type="button"
+                            class="btn btn-primary" onclick="checkAttendance()">
+
+                        <i class="fa fa-search"></i>
+                        بررسی
+
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-info" onclick="SavePayroll()">
+
+                        <i class="fa fa-search"></i>
+                        ثبت حقوق
+
+                    </button>
+
+                </div>
+
+            </form>
 
             <div id="attendanceResult">
                 @if (Model.Check != null && Model.Check.Any())
@@ -109,7 +159,7 @@
 
 </div>
 
- <div class="modal fade"
+<div class="modal fade"
      id="attendanceModal" style="z-index: 1060 !important;">
 
     <div class="modal-dialog modal-xl">
@@ -122,7 +172,7 @@
 
 </div>
 
- <div class="modal fade"
+<div class="modal fade"
      id="insuranceTaxModal" style="z-index: 1070 !important;">
 
     <div class="modal-dialog ">
@@ -161,13 +211,13 @@
     <script src="~/lib/sweetalert2/sweetalert2.esm.js"></script>
     <script src="~/lib/sweetalert2/sweetalert2.min.js"></script>
     <script src="~/lib/sweetalert2/sweetalert2.js"></script>
-<script src="~/js/attendance.js"></script>
+    <script src="~/js/attendance.js"></script>
     <script>
         function editAttendance(id) {
             $.get(
                 "/Attendance/Edit/" + id,
 
-                function (data) {
+                function(data) {
                     $("#attendanceModalContent")
                         .html(data);
 
@@ -185,53 +235,53 @@
 
     </script>
 
-   <script>
-    function checkAttendance() {
+    <script>
+        function checkAttendance() {
 
-        const year = $('select[name="year"]').val();
-        //const month = $('select[name="month"]').val();
-        let month =
-            $("#attendanceMonth").val();
+            const year = $('select[name="year"]').val();
+            //const month = $('select[name="month"]').val();
+            let month =
+                $("#attendanceMonth").val();
 
-        const button = $('button[onclick="checkAttendance()"]');
+            const button = $('button[onclick="checkAttendance()"]');
 
-        button.prop('disabled', true);
+            button.prop('disabled', true);
 
-        button.html(
-            '<i class="fa fa-spinner fa-spin"></i> در حال بررسی...'
-        );
+            button.html(
+                '<i class="fa fa-spinner fa-spin"></i> در حال بررسی...'
+            );
 
-        $.ajax({
-            url: '@Url.Action("Check", "Attendance")',
-            type: 'GET',
-            data: {
-                year: year,
-                month: month
-            },
-            success: function(result) {
+            $.ajax({
+                url: '@Url.Action("Check", "Attendance")',
+                type: 'GET',
+                data: {
+                    year: year,
+                    month: month
+                },
+                success: function(result) {
 
-                $('#attendanceResult').html(result);
-            },
-            error: function(xhr) {
+                    $('#attendanceResult').html(result);
+                },
+                error: function(xhr) {
 
-                console.error(xhr);
+                    console.error(xhr);
 
-                $('#attendanceResult').html(`
-                            <div class="alert alert-danger">
-                                خطا در بررسی کارکرد پرسنل.
-                            </div>
-                        `);
-            },
-            complete: function() {
+                    $('#attendanceResult').html(`
+                                    <div class="alert alert-danger">
+                                        خطا در بررسی کارکرد پرسنل.
+                                    </div>
+                                `);
+                },
+                complete: function() {
 
-                button.prop('disabled', false);
+                    button.prop('disabled', false);
 
-                button.html(
-                    '<i class="fa fa-search"></i> بررسی'
-                );
-            }
-        });
-    }
-</script>
+                    button.html(
+                        '<i class="fa fa-search"></i> بررسی'
+                    );
+                }
+            });
+        }
+    </script>
 }
 

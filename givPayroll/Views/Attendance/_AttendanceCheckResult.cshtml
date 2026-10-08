@@ -7,18 +7,11 @@
     <table class="table table-bordered table-hover align-middle">
 
         <thead class="table-light">
-
             <tr>
-
-               
                 <th>پرسنل</th>
-
-                <th style="width:300px;">عملیات</th>
-
-               
-
+                 <th>وضعیت</th>
+                <th style="width:360px;">عملیات</th>
             </tr>
-
         </thead>
 
         <tbody>
@@ -35,7 +28,9 @@
                     <td>
                         @row.PersonnelName
                     </td>
-
+                     <td>
+                         
+                    </td>
                     <td class="text-center">
 
                         @if (row.Status == AttendanceWorkStatus.Incorrect)
@@ -61,12 +56,14 @@
                             </button>
                             <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
                                 <i class="fa fa-exclamation-triangle"></i>
-                                محاسبه
+                               پیش نمایش
                             </button>
-                            <button type="button" class="btn  btn-info tooltip-btn" onclick="PayrollSaveProc(@row.PersonnelId);">
+
+                            <button type="button" class="btn  btn-info tooltip-btn" onclick="SavePayrollPersonnel(@row.PersonnelId);">
                                 <i class="fa fa-save"></i>
-                                <span class="tooltip-text">
-                                        ثبت محاسبه
+                                <span class="tooltip-text"  >
+                                        ثبت حقوق
+                                   
                                     </span>
                             </button>
                         }
