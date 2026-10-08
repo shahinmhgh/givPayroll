@@ -1,6 +1,7 @@
 ﻿@using static AttendanceCheckViewModel
 @model CalculateViewModel
-
+<link rel="stylesheet"
+      href="~/pages/css/tooltip.css" />
 <div class="table-responsive" >
 
     <table class="table table-bordered table-hover align-middle">
@@ -61,6 +62,12 @@
                             <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
                                 <i class="fa fa-exclamation-triangle"></i>
                                 محاسبه
+                            </button>
+                            <button type="button" class="btn  btn-info tooltip-btn" onclick="PayrollSaveProc(@row.PersonnelId);">
+                                <i class="fa fa-save"></i>
+                                <span class="tooltip-text">
+                                        ثبت محاسبه
+                                    </span>
                             </button>
                         }
 

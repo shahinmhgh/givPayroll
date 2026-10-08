@@ -235,14 +235,14 @@
 
 
     <div class="modal-footer">
-         
+
         <button type="button"
                 class="btn btn-secondary me-auto"
                 onclick="ListWords()">
             راهنما
         </button>
-    
 
+    
         <button type="button"
                 class="btn btn-secondary"
                 data-bs-dismiss="modal">
@@ -277,28 +277,30 @@
 </div>
 
 <script>
-     let formulaDictionary = [];
+    let formulaDictionary = [];
 
-     function ListWords()
-     {
-          $.get('/SalaryItem/GetFormulaDictionary')
-        .done(function (data) {
+    function ListWords(silent) {
+        $.get('/SalaryItem/GetFormulaDictionary')
+            .done(function(data) {
 
-            formulaDictionary = data;
+                formulaDictionary = data;
+                console.log(formulaDictionary);
 
-            alert(formulaDictionary.join("\n"));
-        });
-     }
+                if (!silent)
+                    alert(formulaDictionary.join("\n"));
+            });
+    }
 
-     function LoadForm()
-     {
-         var source = $("#Source").val();
+    function LoadForm() {
+        ListWords(true);
+
+        var source = $("#Source").val();
         // <option value="PersonnelOrder">حکم پرسنلی</option>   <!--    Formula -->
         // <option value="Attendance">حضور و غیاب</option>      <!--    Formula -->
         // <option value="RuleInsurance">قوانین بیمه</option>   <!-- No Formula -->
         // <option value="RuleTax">قوانین مالیات</option>       <!-- No Formula -->
         // <option value="SalaryItemRule">مولفه آزاد</option>   <!--    Formula -->
-       switch (source) {
+        switch (source) {
             case "PersonnelOrder":
                 $("#FormulaValue").prop("readonly", false);
                 break;
@@ -319,14 +321,60 @@
                 break;
 
             default:
-                 
+
                 break;
         }
-     }
+    }
 
     $(document).ready(function() {
-          
+
     });
+
+    function validateFormula() {
+        console.log(formulaDictionary);
+
+         
+        const formula = $("#FormulaValue").val().trim();
+        
+        if (!formula) {
+            return {
+                valid: true,
+                invalidWords: []
+            };
+        }
+
+        // Get words/identifiers from formula
+        // Supports English letters, numbers and underscore
+        const words = formula.match(/[A-Za-z_][A-Za-z0-9_]*/g) || [];
+
+        // Remove duplicates
+        const uniqueWords = [...new Set(words)];
+
+        // Dictionary comparison
+        const dictionarySet = new Set(
+            formulaDictionary.map(x => x.toLowerCase())
+        );
+        console.log(uniqueWords);
+        console.log(formula);
+        console.log(dictionarySet);
+
+        const invalidWords = uniqueWords.filter(word =>
+            !dictionarySet.has(word.toLowerCase())
+        );
+
+        if (invalidWords == $('#Label').val())
+        {
+            return {
+                valid: true,
+                invalidWords: []
+            };
+        }
+
+        return {
+            valid: invalidWords.length === 0,
+            invalidWords: invalidWords
+        };
+    }
 
     function saveSalaryItem() {
 
@@ -334,6 +382,24 @@
         var id = $("#Id").val();
 
         if (!form.valid()) {
+            return false;
+        }
+
+        const formulaResult = validateFormula();
+
+        if (!formulaResult.valid) {
+
+            Swal.fire({
+                icon: "warning",
+                title: "فرمول نامعتبر است",
+                html:
+                    "کلمات زیر در فرهنگ لغات فرمول وجود ندارند:<br><br>" +
+                    "<b>" +
+                    formulaResult.invalidWords.join(" ، ") +
+                    "</b>",
+                confirmButtonText: "متوجه شدم"
+            });
+
             return false;
         }
 

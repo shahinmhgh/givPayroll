@@ -75,7 +75,7 @@ namespace givPayroll.Controllers
             var personnels = await _context.PersonnelOrders
 
                 .Include(x => x.Personnel)
-                .Where(x => x.StartDate <= monthEndGregorian && x.IsActive )
+                .Where(x => x.StartDate <= monthEndGregorian && x.IsActive)
                 .Select(x => new
                 {
                     PersonnelId = x.PersonnelId,
@@ -466,6 +466,75 @@ namespace givPayroll.Controllers
             });
         }
 
+        [HttpPost]
+        ////[ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckFile(
+             AttendanceImportViewModel model)
+        {
+            if (model.File == null ||
+                model.File.Length == 0)
+            {
+                ModelState.AddModelError(
+                    "File",
+                    "لطفاً فایل Excel را انتخاب کنید.");
+
+                FillImportYears(model);
+                FillMonths(model);
+
+                return PartialView(
+                    "_AttendanceImport",
+                    model);
+            }
+
+
+            var extension =
+                Path.GetExtension(
+                    model.File.FileName)
+                .ToLowerInvariant();
+
+
+
+            if (extension != ".xlsx" && extension != ".xls")
+            {
+                ModelState.AddModelError(
+                    "File",
+                    "فقط فایل Excel با پسوند xlsx مجاز است.");
+
+                FillImportYears(model);
+                FillMonths(model);
+
+                return PartialView(
+                    "_AttendanceImport",
+                    model);
+            }
+
+            try
+            {
+                var (imported, updated, correctDate, ym) =
+                    await ImportExcel(
+                        model.File,
+                        model.Year,
+                        model.Month, model.File.FileName);
+
+                return Json(new
+                {
+                    success = true,
+                    imported = imported,
+                    updated = updated,
+                    ym = ym,
+                    correctDate = correctDate,
+                    skipped = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
 
         // =========================================================
         // IMPORT EXCEL - GET
@@ -536,7 +605,7 @@ namespace givPayroll.Controllers
 
             try
             {
-                var (imported, updated) =
+                var (imported, updated, correctDate, ym) =
                     await ImportExcel(
                         model.File,
                         model.Year,
@@ -573,19 +642,21 @@ namespace givPayroll.Controllers
         // EXCEL IMPORT
         // =========================================================
 
-        private async Task<(int imported, int updated)> ImportExcel(
+        private async Task<(int imported, int updated, bool correctDate, string ym)> ImportExcel(
             IFormFile file,
             int year,
             int month,
             string filename)
         {
-            string mobile = Path.GetFileNameWithoutExtension(filename)
-                   .TakeLast(11)
-                   .Aggregate("", (s, c) => s + c);
+            var match = Regex.Match(filename, @"(?<!\d)09\d{9}(?!\d)");
+            string mobile = match.Value;
+            //string mobile = Path.GetFileNameWithoutExtension(filename)
+            //       .TakeLast(11)
+            //       .Aggregate("", (s, c) => s + c);
 
             Personnel personnel = _context.Personnels.Where(i => i.Mobile == mobile).FirstOrDefault();
-            if (personnel==null)
-                return (-1, -1);
+            if (personnel == null)
+                return (-1, -1, false, "");
             int personnelid = personnel.Id;
 
             MemoryStream stream = new MemoryStream();
@@ -621,6 +692,8 @@ namespace givPayroll.Controllers
 
             int imported = 0;
             int updated = 0;
+            bool correctDate = true;
+            string ym = "";
 
             foreach (var row in rows)
             {
@@ -633,7 +706,7 @@ namespace givPayroll.Controllers
                 if (!isValid)
                     continue;
 
-                var attendance =new Attendance();
+                var attendance = new Attendance();
 
                 /*
                  Excel columns:
@@ -655,11 +728,18 @@ namespace givPayroll.Controllers
                  O = HasWorked
                 */
                 attendance.Id = nextId++;
+                //correctDate
+                string AttendancePersianDate = row.Cell(1).GetString().Replace("-", "/").Trim();
+                  ym = AttendancePersianDate.Substring(0, 7);
+                if (AttendancePersianDate.Substring(0, 7) != year + @"/" + month.ToString("00"))
+                {
+                    return (imported, updated, correctDate, ym);
+                }
 
-                attendance.AttendancePersianDate = row.Cell(1).GetString().Replace("-", "/").Trim();
+                attendance.AttendancePersianDate = AttendancePersianDate;
                 attendance.AttendanceDate = AppUtil.S2M(attendance.AttendancePersianDate);
                 attendance.PersonnelId = personnelid; // row.Cell(2).GetValue<int>();
-                attendance.ShiftMinute =hourToMinute( row.Cell(8).GetString());
+                attendance.ShiftMinute = hourToMinute(row.Cell(8).GetString());
                 attendance.WorkingExpectedMinute = hourToMinute(row.Cell(9).GetString());
                 attendance.WorkingMinute = hourToMinute(row.Cell(10).GetString());
                 attendance.ExtraMinute = hourToMinute(row.Cell(11).GetString());
@@ -672,7 +752,7 @@ namespace givPayroll.Controllers
                 attendance.AbsenceMinute = hourToMinute(row.Cell(16).GetString());
                 attendance.MissionMinute = hourToMinute(row.Cell(17).GetString());
                 string stat = row.Cell(21).GetString();
-                attendance.Status = stat == "صحیح"?1:0;
+                attendance.Status = stat == "صحیح" ? 1 : 0;
 
                 //attendance.HasWorked = row.Cell(15).GetValue<bool>();
 
@@ -769,7 +849,7 @@ namespace givPayroll.Controllers
 
             await _context.SaveChangesAsync();
 
-            return (imported, updated);
+            return (imported, updated, correctDate, ym);
         }
 
 

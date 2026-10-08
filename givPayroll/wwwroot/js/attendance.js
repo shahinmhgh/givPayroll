@@ -241,6 +241,48 @@ $("#btnImportAttendance").click(function () {
     $("#importAttendanceModal").modal("show");
 });
 
+$("#attendanceExcel").on("change", function () {
+     
+    var file = this.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    // let year =  $("#attendanceYear").val();
+    // let month =   $("#attendanceMonth").val();
+    let year =  $("#importYear").val();
+    let month = $("#importMonth").val();
+
+    var formData = new FormData();
+    formData.append("File", file);
+    formData.append("Year", year);
+    formData.append("Month", month);
+
+    //alert('/Attendance/CheckFile');
+    $.ajax({
+        url: '/Attendance/CheckFile',
+        type: 'POST',
+        data: formData,
+         processData: false,
+         contentType: false,
+        success: function (response) {
+
+            console.log(response);
+
+            // Do whatever you need after controller action
+          
+            if (response.correctData==false) {
+                alert("File is for " + response.ym);
+            }
+        },
+        error: function (xhr) {
+            console.log(xhr);
+            alert("Error checking file.");
+        }
+    });
+});
+
 
 function importAttendanceExcel() {
     let file =
@@ -290,7 +332,7 @@ function importAttendanceExcel() {
     $.ajax({
 
         url:
-            "/Attendance/Import",
+            "/Attendance/CheckFile",
 
         type:
             "POST",
