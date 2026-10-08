@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Playwright;
 using NPOI.HSSF.UserModel;
 using Org.BouncyCastle.Security;
+using Parlot.Fluent;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using static AttendanceCheckViewModel;
@@ -39,7 +40,7 @@ namespace givPayroll.Controllers
             ViewBag.Month = currentMonth;
             ViewBag.Searched = year.HasValue && month.HasValue;
 
-            var result = new CalculateViewModel();
+            CalculateViewModel result = new CalculateViewModel();
             FillMonths(result);
             if (!year.HasValue || !month.HasValue)
             {
@@ -128,7 +129,7 @@ namespace givPayroll.Controllers
                     .ToList();
 
                 bool hasWorked = true; string errWorked = "";
-                bool isCorrect = true; string errisCorrect = "";
+                bool isCorrect = true; string errCorrect = "";
                 List<AttendanceCheckViewModel> lst = new List<AttendanceCheckViewModel>();
                 foreach (Attendance x in attendance)
                 {
@@ -147,7 +148,7 @@ namespace givPayroll.Controllers
                     bool iscorrect = total >= Required;
                     if (!iscorrect)
                     {
-                        errisCorrect += x.AttendancePersianDate + ", ";
+                        errCorrect += x.AttendancePersianDate + ", ";
                         isCorrect = false;
                     }
                     if (!x.HasWorked)
@@ -156,13 +157,23 @@ namespace givPayroll.Controllers
                         hasWorked = false;
                     }
                 }
-                AttendanceWorkStatus status = AttendanceWorkStatus.None;
+
+                AppUtil.enumAttendanceWorkStatus status = AppUtil.enumAttendanceWorkStatus.None;
                 if (isCorrect == false)
-                    status = AttendanceWorkStatus.Incorrect;
+                    status = AppUtil.enumAttendanceWorkStatus.Incorrect;
                 else if (hasWorked == false)
-                    status = AttendanceWorkStatus.Incomplete;
+                    status = AppUtil.enumAttendanceWorkStatus.Incomplete;
                 else
-                    status = AttendanceWorkStatus.Complete;
+                {
+                    status = AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert;
+                    Payroll pay = _context.Payrolls.Where(i => i.PersonnelId == personnel.PersonnelId && i.PayrollYear == year && i.PayrollMonth == month).FirstOrDefault();
+                    if (pay != null)
+                    {
+                        status = AppUtil.enumAttendanceWorkStatus.PayrollInserted;
+                        if (pay.PayrollStatusID==(int)AppUtil.enumPayrollStatus.Confirmed)
+                            status = AppUtil.enumAttendanceWorkStatus.PayrollConfirmed;
+                    }
+                }
 
                 var model = new AttendanceCheckViewModel
                 {
@@ -171,11 +182,16 @@ namespace givPayroll.Controllers
                     Status = status,
                     //IsCorrect = isCorrect, // کارکرد درست / کارکرد نادرست
                     //hasWorked = hasWorked, // کارکرد کامل / کارکرد ناقص
-                    IsCorrectErrText = errisCorrect,
+                    IsCorrectErrText = errCorrect,
                     hasWorkedErrText = errWorked,
                 };
 
                 result.Check.Add(model);
+            }
+            if (attendances.Count == 0)
+            {
+                result = new CalculateViewModel();
+                result.Check = new List<AttendanceCheckViewModel>();
             }
             // 
             return PartialView("_AttendanceCheckResult", result);
@@ -730,7 +746,7 @@ namespace givPayroll.Controllers
                 attendance.Id = nextId++;
                 //correctDate
                 string AttendancePersianDate = row.Cell(1).GetString().Replace("-", "/").Trim();
-                  ym = AttendancePersianDate.Substring(0, 7);
+                ym = AttendancePersianDate.Substring(0, 7);
                 if (AttendancePersianDate.Substring(0, 7) != year + @"/" + month.ToString("00"))
                 {
                     return (imported, updated, correctDate, ym);

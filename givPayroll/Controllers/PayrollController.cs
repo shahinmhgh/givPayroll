@@ -72,7 +72,47 @@ public class PayrollController : Controller
     }
     public static List<CalculateTaxDetail> TaxDetail = null;
     public static List<CalculateTaxDetail> PlusList = null;
-public static List<CalculateTaxDetail> MinusList = null;
+    public static List<CalculateTaxDetail> MinusList = null;
+    public async Task<IActionResult> SavePayroll(int year, int month, int personnelId)
+    {
+        PayrollViewModel model = await GetPayrollData(year, month, personnelId);
+        UpdatePayroll(personnelId, year, month);
+
+        return Json(new
+        {
+            success = true
+        });
+    }
+
+   
+
+
+    private bool UpdatePayroll(int personnelId, int year, int month)
+    {
+        Payroll pay = _context.Payrolls.Where(i => i.PayrollYear == year && i.PayrollMonth == month && i.PersonnelId == personnelId).FirstOrDefault();
+        if (pay == null)
+        {
+            // insert payroll
+            pay.PayrollYear = year;
+            pay.PayrollMonth = month;
+            pay.IssueDate = DateTime.Now;
+
+            var maxId =   _context.Payrolls
+                .Select(x => (int?)x.Id)
+                .Max();
+
+            pay.Id = (maxId ?? 0) + 1;
+            pay.PayrollStatusID = (int)AppUtil.enumPayrollStatus.None;
+            
+            return true;
+        }
+        else
+        { 
+            // update payroll
+
+        }
+        return true;
+    }
 
     public async Task<IActionResult> PayrollPreview(int year, int month, int personnelId)
     {
@@ -83,7 +123,7 @@ public static List<CalculateTaxDetail> MinusList = null;
         PayrollViewModel model = await GetPayrollData(year, month, personnelId);
         //decimal totalAmount = TaxDetail.Sum(x => x.Amount);
         ViewBag.TaxDetail = TaxDetail;
- 
+
         return PartialView("_PayrollPreview", model);
     }
     public async Task<IActionResult> PayrollInsuranceTaxPreview(int insuranceTax)
@@ -124,7 +164,7 @@ public static List<CalculateTaxDetail> MinusList = null;
         model.PersonnelId = personnelId;
         model.PayrollYear = year;
         model.PayrollMonth = month;
-        model.Personnel = _context.Personnels.Include(x=>x.PersonnelFamilies).Include(i=>i.MaritalStatus).Where(i => i.Id == personnelId).FirstOrDefault();
+        model.Personnel = _context.Personnels.Include(x => x.PersonnelFamilies).Include(i => i.MaritalStatus).Where(i => i.Id == personnelId).FirstOrDefault();
         model.PersonnelOrder = _context.PersonnelOrders.Include("Details").Where(i => i.Id == personnelId && i.IsActive).FirstOrDefault();
 
         #region PersonnelOrder
@@ -505,10 +545,10 @@ public static List<CalculateTaxDetail> MinusList = null;
 
         ////Tax 787348161
         decimal TaxAmount = 0;
-         TaxDetail =  CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList(), ref  TaxAmount);
+        TaxDetail = CalculateTax(totalTaxAmount, _context.RuleTaxes.ToList(), ref TaxAmount);
         lstTax[lstTax.Count - 1].AmountAfter = TaxAmount;
         //
-        
+
         // fill last item with total, when using remember
         // to at first show the value and then make it zero
 
@@ -552,7 +592,7 @@ public static List<CalculateTaxDetail> MinusList = null;
         return model;
     }
 
- 
+
     public List<CalculateTaxDetail> CalculateTax(decimal amount, List<RuleTax> rules, ref decimal TaxAmount)
     {
         List<CalculateTaxDetail> ret = new List<CalculateTaxDetail>();
@@ -565,7 +605,7 @@ public static List<CalculateTaxDetail> MinusList = null;
             if (amount <= previousLimit)
                 break;
 
-            decimal taxableAmount =   Math.Min(amount, rule.Amount) - previousLimit;
+            decimal taxableAmount = Math.Min(amount, rule.Amount) - previousLimit;
 
             if (taxableAmount > 0)
             {
@@ -615,7 +655,7 @@ public static List<CalculateTaxDetail> MinusList = null;
 
     public async Task<IActionResult> Payslip(int id, string ym)
     {
- 
+
         Personnel? person = _context.Personnels
             .Include(x => x.PersonnelFamilies)
                 .ThenInclude(x => x.MaritalStatus)
@@ -653,24 +693,24 @@ public static List<CalculateTaxDetail> MinusList = null;
         var url = "";
         if (layout.ToLower() == "salary")
         {
-           url =
-            Url.Action(
-                nameof(Salary),
-                "Payroll",
-                new { id, ym },
-                Request.Scheme)!;
+            url =
+             Url.Action(
+                 nameof(Salary),
+                 "Payroll",
+                 new { id, ym },
+                 Request.Scheme)!;
         }
         if (layout.ToLower() == "payslip")
         {
-           url =
-            Url.Action(
-                nameof(Payslip),
-                "Payroll",
-                new { id, ym },
-                Request.Scheme)!;
+            url =
+             Url.Action(
+                 nameof(Payslip),
+                 "Payroll",
+                 new { id, ym },
+                 Request.Scheme)!;
         }
 
-       
+
 
         var pdf = await _pdfService.GeneratePdfFromUrlAsync(
             url,

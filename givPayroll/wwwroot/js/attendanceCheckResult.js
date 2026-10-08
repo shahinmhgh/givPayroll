@@ -29,6 +29,31 @@
 //     });
 // }
 
+function SavePayroll(personnelId) {
+    const select = document.querySelector('select[name="year"]');
+    const year = select.options[select.selectedIndex].text;
+
+    var month = $("#attendanceMonth").val();
+
+    $.ajax({
+        type: "GET",
+        url: "/Payroll/SavePayroll",
+        data:
+        {
+            year: year,
+            month: month,
+            personnelId: personnelId
+        },
+
+        success: function (data) {
+            if (result.success) {
+                alert('ثبت حقوق انجام شد')
+            }
+        }
+
+    });
+}
+
 function PayrollProc(personnelId) {
     const select = document.querySelector('select[name="year"]');
     const year = select.options[select.selectedIndex].text;

@@ -1,3 +1,4 @@
+using givPayroll;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class AttendanceCheckViewModel
@@ -6,7 +7,7 @@ public class AttendanceCheckViewModel
         = new();
 
     public int PersonnelId { get; set; }
-
+   
     public string PersonnelName { get; set; } = "";
 
     public string PersonnelCode { get; set; } = "";
@@ -30,25 +31,22 @@ public class AttendanceCheckViewModel
     public string  IsCorrectErrText { get; set; }
     public string  hasWorkedErrText { get; set; }
 
-    public AttendanceWorkStatus Status { get; set; }
+    public AppUtil.enumAttendanceWorkStatus Status { get; set; }
 
     public string StatusText => Status switch
     {
-        AttendanceWorkStatus.Incorrect => "نادرست",
-        AttendanceWorkStatus.Incomplete => "کارکرد ناقص",
-        AttendanceWorkStatus.Complete => "کارکرد کامل",
+        AppUtil.enumAttendanceWorkStatus.Incorrect => "نادرست",
+        AppUtil.enumAttendanceWorkStatus.Incomplete => "کارکرد ناقص",
+        AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert => "آماده ثبت حقوق",
+        AppUtil.enumAttendanceWorkStatus.PayrollInserted => "ثبت حقوق انجام شده",
+        AppUtil.enumAttendanceWorkStatus.PayrollConfirmed => "ثبت حقوق تایید شده",
         _ => ""
     };
 
     public bool CanPreviewPayroll =>
-        Status == AttendanceWorkStatus.Complete;
+        Status == AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert;
 
-    public enum AttendanceWorkStatus
-    {
-        None, 
-        Incorrect,
-        Incomplete,
-        Complete
-    }
+   
 
+   
 }

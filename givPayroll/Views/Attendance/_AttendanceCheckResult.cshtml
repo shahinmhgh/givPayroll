@@ -2,14 +2,16 @@
 @model CalculateViewModel
 <link rel="stylesheet"
       href="~/pages/css/tooltip.css" />
-<div class="table-responsive" >
+
+ 
+<div class="table-responsive">
 
     <table class="table table-bordered table-hover align-middle">
 
         <thead class="table-light">
             <tr>
                 <th>پرسنل</th>
-                 <th>وضعیت</th>
+                <th>وضعیت</th>
                 <th style="width:360px;">عملیات</th>
             </tr>
         </thead>
@@ -20,7 +22,7 @@
             {
 
                 var errClass = "";
-                if (row.Status == AttendanceWorkStatus.Incorrect || row.Status == AttendanceWorkStatus.Incomplete)
+                if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect || row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
                 { errClass = "table-danger"; }
 
                 <tr class="@errClass">
@@ -28,19 +30,18 @@
                     <td>
                         @row.PersonnelName
                     </td>
-                     <td>
-                         
+                    <td>
                     </td>
                     <td class="text-center">
 
-                        @if (row.Status == AttendanceWorkStatus.Incorrect)
+                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect)
                         {
                             <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-times-circle"></i>
                                 کارکرد نادرست
                             </button>
                         }
-                        else if (row.Status == AttendanceWorkStatus.Incomplete)
+                        else if (row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
                         {
                             <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-times-circle"></i>
@@ -50,27 +51,43 @@
                         else
                         {
                             <button type="button" class="btn btn-primary" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
-
                                 <i class="fa fa-check-circle"></i>
                                 کارکرد صحیح
                             </button>
                             <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
                                 <i class="fa fa-exclamation-triangle"></i>
-                               پیش نمایش
+                                پیش نمایش
                             </button>
 
-                            <button type="button" class="btn  btn-info tooltip-btn" onclick="SavePayrollPersonnel(@row.PersonnelId);">
-                                <i class="fa fa-save"></i>
-                                <span class="tooltip-text"  >
+                            @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert)
+                            {
+                                <button type="button" class="btn  btn-info tooltip-btn" onclick="SavePayrollPersonnel(@row.PersonnelId);">
+                                    <i class="fa fa-save"></i>
+                                    <span class="tooltip-text">
                                         ثبت حقوق
-                                   
                                     </span>
-                            </button>
+                                </button>
+                            }
+                            @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollInserted)
+                            {
+                                <button type="button" disabled class="btn  btn-info tooltip-btn" onclick="PayrollSaved(@row.PersonnelId);">
+                                    <i class="fa fa-save"></i>
+                                    حقوق ماه ثبت شده
+                                </button>
+                            }
+                            @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                            {
+                                <button type="button" disabled class="btn  btn-info tooltip-btn" onclick="PayrollSaved(@row.PersonnelId);">
+                                    <i class="fa fa-save"></i>
+                                    ثبت حقوق تایید شده
+                                </button>
+                            }
+
                         }
 
                     </td>
 
-                     
+
                 </tr>
             }
 

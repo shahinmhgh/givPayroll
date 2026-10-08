@@ -27,6 +27,8 @@ namespace givPayroll.Models
         [Display(Name = "تاریخ صدور")]
         public DateTime? IssueDate { get; set; }
 
+       
+
         [Required]
         [Display(Name = "پرسنل")]
         public int PersonnelId { get; set; }
@@ -43,6 +45,9 @@ namespace givPayroll.Models
 
         [Display(Name = "وضعیت حقوق")]
         public int PayrollStatusID { get; set; }
+        // 0 inserted
+        // 1 confirmed
+        // 2 Voucher inserted
 
         // Navigation properties
         [ForeignKey(nameof(PersonnelId))]

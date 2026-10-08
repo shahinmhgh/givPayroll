@@ -208,10 +208,16 @@ function previousPersonnel() {
 }
 
 function SavePayroll() {
-    alert('SavePayroll');
+    var attendanceYear = $("#attendanceYear").val();
+    var attendanceMonth = $("#attendanceMonth").val();
+
+    alert("SavePayroll" + " " +  attendanceYear + "" + attendanceMonth);
 }
 function SavePayrollPersonnel(id) {
-    alert(id);
+    var attendanceYear = $("#attendanceYear").val();
+    var attendanceMonth = $("#attendanceMonth").val();
+
+    alert("SavePayrollPersonnel" + " " + id + " " + attendanceYear + "" + attendanceMonth);
 }
 function nextPersonnel() {
     let select =

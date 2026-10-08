@@ -7,6 +7,23 @@ namespace givPayroll
 {
     public static class AppUtil
     {
+        public   enum enumAttendanceWorkStatus
+        {
+            None,
+            Incorrect,
+            Incomplete,
+            PayrollReadyForInsert,
+            PayrollInserted,
+            PayrollConfirmed
+        }
+
+        public   enum enumPayrollStatus
+        {
+            None,
+            Confirmed,
+            Vouchered,
+        }
+
         public enum enumMaritalStatus
         {
             Single = 1,
