@@ -100,7 +100,7 @@ public class PayrollController : Controller
             var maxId =   _context.Payrolls
                 .Select(x => (int?)x.Id)
                 .Max();
-
+             
             pay.Id = (maxId ?? 0) + 1;
             pay.PayrollStatusID = (int)AppUtil.enumPayrollStatus.None;
             
