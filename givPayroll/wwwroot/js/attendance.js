@@ -1,5 +1,5 @@
 ﻿function loadAttendance() {
-   
+
     let year =
         $("#attendanceYear").val();
 
@@ -9,13 +9,13 @@
     let personnelId =
         $("#attendancePersonnel").val();
 
-     
+
     if (!personnelId) {
         $("#attendanceTable").html("");
 
         return;
     }
-   
+
 
     $.ajax({
 
@@ -211,13 +211,42 @@ function SavePayroll() {
     var attendanceYear = $("#attendanceYear").val();
     var attendanceMonth = $("#attendanceMonth").val();
 
-    alert("SavePayroll" + " " +  attendanceYear + "" + attendanceMonth);
+    alert("SavePayroll" + " " + attendanceYear + "" + attendanceMonth);
+
+
+
 }
 function SavePayrollPersonnel(id) {
     var attendanceYear = $("#attendanceYear").val();
     var attendanceMonth = $("#attendanceMonth").val();
+    alert(id);
+    //alert("SavePayrollPersonnel" + " " + id + " " + attendanceYear + "" + attendanceMonth);
 
-    alert("SavePayrollPersonnel" + " " + id + " " + attendanceYear + "" + attendanceMonth);
+    $.ajax({
+        url: '/payroll/savepayrollpersonnel',
+        type: 'GET',
+        data: {
+            year: attendanceYear,
+            month: attendanceMonth,
+            personnelid: id,
+        },
+        success: function (result) {
+
+            alert(result.message);
+
+
+        },
+        error: function (xhr) {
+
+            console.error(xhr);
+
+        },
+        complete: function () {
+
+
+        }
+    });
+
 }
 function nextPersonnel() {
     let select =
@@ -252,7 +281,7 @@ $("#btnImportAttendance").click(function () {
 });
 
 $("#attendanceExcel").on("change", function () {
-     
+
     var file = this.files[0];
 
     if (!file) {
@@ -261,7 +290,7 @@ $("#attendanceExcel").on("change", function () {
 
     // let year =  $("#attendanceYear").val();
     // let month =   $("#attendanceMonth").val();
-    let year =  $("#importYear").val();
+    let year = $("#importYear").val();
     let month = $("#importMonth").val();
 
     var formData = new FormData();
@@ -274,15 +303,15 @@ $("#attendanceExcel").on("change", function () {
         url: '/Attendance/CheckFile',
         type: 'POST',
         data: formData,
-         processData: false,
-         contentType: false,
+        processData: false,
+        contentType: false,
         success: function (response) {
 
             console.log(response);
 
             // Do whatever you need after controller action
-          
-            if (response.correctData==false) {
+
+            if (response.correctData == false) {
                 alert("File is for " + response.ym);
             }
         },

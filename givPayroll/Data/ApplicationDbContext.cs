@@ -525,7 +525,7 @@ namespace givPayroll.Data
 
             builder.Entity<PayrollItem>()
                 .HasOne(x => x.Payroll)
-                .WithMany(x => x.Items)
+                .WithMany(x => x.PayrollItems)
                 .HasForeignKey(x => x.PayrollId)
                 .OnDelete(DeleteBehavior.Cascade);
 

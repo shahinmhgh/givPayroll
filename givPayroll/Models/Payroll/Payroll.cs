@@ -56,7 +56,7 @@ namespace givPayroll.Models
         [ForeignKey(nameof(PayrollStatusID))]
         public virtual PayrollStatus? PayrollStatus { get; set; }
 
-        public virtual ICollection<PayrollItem> Items { get; set; }
+        public virtual ICollection<PayrollItem> PayrollItems { get; set; }
     = new List<PayrollItem>();
 
     }

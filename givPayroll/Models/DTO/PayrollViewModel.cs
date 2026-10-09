@@ -38,6 +38,7 @@ namespace givPayroll.Models
         [Range(1, 12, ErrorMessage = "ماه حقوق باید بین 1 تا 12 باشد.")]
         [Display(Name = "ماه")]
         public int PayrollMonth { get; set; }
+        
 
         public virtual PersonnelOrder? PersonnelOrder { get; set; }
 

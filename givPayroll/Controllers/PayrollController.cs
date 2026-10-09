@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Playwright;
 using NCalc;
+using NPOI.POIFS.Crypt.Dsig.Facets;
 using NPOI.Util.Optional;
 using System.Runtime.InteropServices.Marshalling;
 
@@ -19,14 +20,16 @@ public class PayrollController : Controller
     private readonly IPdfService _pdfService;
     private readonly ApplicationDbContext _context;
     private readonly IPayrollFormulaService _payrollFormulaService;
+    private readonly ILogger<PayrollController> _logger;
 
     public PayrollController(IPdfService pdfService,
         ApplicationDbContext context,
-        IPayrollFormulaService payrollFormulaService)
+        IPayrollFormulaService payrollFormulaService, ILogger<PayrollController> logger)
     {
         _pdfService = pdfService;
         _context = context;
         _payrollFormulaService = payrollFormulaService;
+        _logger = logger;
     }
 
     // Personnel
@@ -73,46 +76,182 @@ public class PayrollController : Controller
     public static List<CalculateTaxDetail> TaxDetail = null;
     public static List<CalculateTaxDetail> PlusList = null;
     public static List<CalculateTaxDetail> MinusList = null;
-    public async Task<IActionResult> SavePayroll(int year, int month, int personnelId)
+    public async Task<IActionResult> SavePayrollPersonnel(int year, int month, int personnelId)
     {
         PayrollViewModel model = await GetPayrollData(year, month, personnelId);
-        UpdatePayroll(personnelId, year, month);
+        string err = UpdatePayroll(model, personnelId, year, month);
 
-        return Json(new
-        {
-            success = true
-        });
-    }
-
-   
-
-
-    private bool UpdatePayroll(int personnelId, int year, int month)
-    {
-        Payroll pay = _context.Payrolls.Where(i => i.PayrollYear == year && i.PayrollMonth == month && i.PersonnelId == personnelId).FirstOrDefault();
-        if (pay == null)
-        {
-            // insert payroll
-            pay.PayrollYear = year;
-            pay.PayrollMonth = month;
-            pay.IssueDate = DateTime.Now;
-
-            var maxId =   _context.Payrolls
-                .Select(x => (int?)x.Id)
-                .Max();
-             
-            pay.Id = (maxId ?? 0) + 1;
-            pay.PayrollStatusID = (int)AppUtil.enumPayrollStatus.None;
-            
-            return true;
-        }
+        if (err == "")
+            return Json(new
+            {
+                success = true,
+                message = "ثبت حقوق موفقیت آمیر انجام شد"
+            });
         else
-        { 
-            // update payroll
-
+        {
+             _logger.LogError(err, "Error updating payroll.");
+            return Json(new
+            {
+                success = false,
+                message = err,
+            });
         }
-        return true;
     }
+    private string UpdatePayroll(
+    PayrollViewModel model,
+    int personnelId,
+    int year,
+    int month)
+    {
+        using var transaction = _context.Database.BeginTransaction();
+
+        try
+        {
+            Payroll pay = _context.Payrolls
+                .FirstOrDefault(p =>
+                    p.PayrollYear == year &&
+                    p.PayrollMonth == month &&
+                    p.PersonnelId == personnelId);
+
+            if (pay == null)
+            {
+                var maxPayrollId = _context.Payrolls
+                    .Select(p => (int?)p.Id)
+                    .Max() ?? 0;
+
+                pay = new Payroll
+                {
+                    Id = maxPayrollId + 1,
+                    PayrollYear = year,
+                    PayrollMonth = month,
+                    IssueDate = DateTime.Now,
+                    PersonnelId = personnelId,
+                    PayrollStatusID = (int)AppUtil.enumPayrollStatus.None
+                };
+
+                _context.Payrolls.Add(pay);
+            }
+
+            // Load existing items as tracked entities.
+            var payrollItems = _context.PayrollItems
+                .Where(i => i.PayrollId == pay.Id)
+                .ToList();
+
+            int maxItemId = _context.PayrollItems
+                .Select(i => (int?)i.Id)
+                .Max() ?? 0;
+
+            foreach (PayrollItem item in model.PayrollItems)
+            {
+                // Match existing items by their database ID.
+                PayrollItem payItem = payrollItems
+                    .FirstOrDefault(i => i.Id == item.Id);
+
+                if (payItem == null)
+                {
+                    // Create a new item.
+                    payItem = new PayrollItem
+                    {
+                        Id = ++maxItemId,
+                        PayrollId = pay.Id
+                    };
+
+                    _context.PayrollItems.Add(payItem);
+                }
+
+                // Update properties.
+                payItem.PayrollAdjustmentId = item.PayrollAdjustmentId;
+                payItem.SalaryItemId = item.SalaryItemId;
+                payItem.Amount = item.Amount;
+                payItem.PlusMinus = item.PlusMinus;
+                payItem.Description = item.Description;
+                payItem.FormulaValue = item.FormulaValue;
+            }
+
+            _context.SaveChanges();
+            transaction.Commit();
+
+            return "";
+        }
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            return ex.Message;
+        }
+    }
+    //private string UpdatePayroll(PayrollViewModel model, int personnelId, int year, int month)
+    //{
+    //    var payrollItems = _context.Payrolls.AsNoTracking()
+    //         .Where(p => p.PersonnelId == personnelId && p.PayrollYear == year && p.PayrollMonth== month)
+    //         .SelectMany(p => p.PayrollItems)
+    //         .ToList();
+    //    int? maxItemId = _context.PayrollItems
+    //                .Select(x => (int?)x.Id)
+    //                .Max();
+    //    //maxItemId = (maxItemId ?? 0) + 1;
+
+    //    using var transaction = _context.Database.BeginTransaction();
+    //    try
+    //    {
+    //        Payroll pay = _context.Payrolls.Where(
+    //        i => i.PayrollYear == year &&
+    //        i.PayrollMonth == month &&
+    //        i.PersonnelId == personnelId)
+    //        .FirstOrDefault();
+
+    //        if (pay == null)
+    //        {
+    //            pay = new Payroll();
+    //            // insert payroll
+    //            pay.PayrollYear = year;
+    //            pay.PayrollMonth = month;
+    //            pay.IssueDate = DateTime.Now;
+    //            pay.PersonnelId = personnelId;
+    //            var maxId = _context.Payrolls
+    //                .Select(x => (int?)x.Id)
+    //                .Max();
+    //            pay.Id = (maxId ?? 0) + 1;
+    //            pay.PayrollStatusID = (int)AppUtil.enumPayrollStatus.None;
+    //            _context.Payrolls.Add(pay);
+    //        }
+
+    //        foreach (PayrollItem item in model.PayrollItems)
+    //        {
+
+    //            PayrollItem payItem = payrollItems.Where(i => i.Id == item.Id).FirstOrDefault();
+
+    //            if (payItem == null)
+    //            {
+    //                // Add new item
+    //                payItem = new PayrollItem();
+    //                payItem.PayrollId = pay.Id;
+    //                payItem.Id = maxItemId.GetValueOrDefault();  
+
+    //                maxItemId++;
+    //                _context.PayrollItems.Add(payItem);
+    //            }
+
+    //            // Update properties (for both new and existing items)
+
+    //            payItem.PayrollAdjustmentId = item.PayrollAdjustmentId;
+    //            payItem.SalaryItemId = item.SalaryItemId;
+    //            payItem.Amount = item.Amount;
+    //            payItem.PlusMinus = item.PlusMinus;
+    //            payItem.Description = item.Description;
+    //        }
+
+    //        _context.SaveChanges();
+    //        transaction.Commit();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        transaction.Rollback();
+    //        return ex.Message;
+
+    //    }
+
+    //    return "";
+    //}
 
     public async Task<IActionResult> PayrollPreview(int year, int month, int personnelId)
     {
@@ -197,6 +336,7 @@ public class PayrollController : Controller
             if (pOrderItem.SalaryItem.Label == "SeniorityAllowance")
                 SeniorityAllowance = pOrderItem.Amount;
 
+            item.FormulaValue = pOrderItem.SalaryItem.FormulaValue;
             item.Amount = pOrderItem.Amount;
             //model.PayrollItems.Add(item);
         }
@@ -348,6 +488,7 @@ public class PayrollController : Controller
                 {
                     SalaryItemId = salaryItem.Id,
                     PlusMinus = salaryItem.PlusMinus,
+                    FormulaValue = salaryItem.FormulaValue,
                     Amount = amount
                 });
             }
@@ -379,6 +520,7 @@ public class PayrollController : Controller
                     Amount = d.Amount,
                     Description = d.PayrollAdjustment.Description,
                     PlusMinus = d.PayrollAdjustment.SalaryItem.PlusMinus,
+                    formulavalue = ""
                 })
                 .FirstOrDefaultAsync();
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using givPayroll.Data;
 using givPayroll.Models;
 using givPayroll.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,17 @@ options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddErrorDescriber<CustomIdentityErrorDescriber>();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "Logs/payroll-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IPdfService, PlaywrightPdfService>();
