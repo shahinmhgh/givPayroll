@@ -12,7 +12,13 @@
             <tr>
                 <th>پرسنل</th>
                 <th>وضعیت</th>
-                <th style="width:360px;">عملیات</th>
+
+                <th>کارکرد</th>
+                <th>پیش نمایش</th>
+                <th>ثبت حقوق</th>
+                <th>تایید حقوق</th>
+                <th>فیش حقوقی</th>
+                <th>ثبت در حسابداری</th>
             </tr>
         </thead>
 
@@ -24,7 +30,7 @@
                 var errClass = "";
                 if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect || row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
                 { errClass = "table-danger"; }
-
+                var ym = ViewBag.ym;
                 <tr class="@errClass">
 
                     <td>
@@ -33,66 +39,76 @@
                     <td>
                         @row.StatusText
                     </td>
-                    <td class="text-center">
 
+                    <td>
                         @if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect)
                         {
                             <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-times-circle"></i>
-                                کارکرد نادرست
+                                 نادرست
                             </button>
                         }
                         else if (row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
                         {
                             <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-times-circle"></i>
-                                کارکرد ناقص
+                                 ناقص
                             </button>
                         }
                         else
                         {
                             <button type="button" class="btn btn-primary" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
                                 <i class="fa fa-check-circle"></i>
-                                کارکرد صحیح
+                                 صحیح
                             </button>
-                            <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
-                                <i class="fa fa-exclamation-triangle"></i>
-                                پیش نمایش
+                        }
+                    </td>
+                    <td>
+                        <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            پیش نمایش
+                        </button>
+                    </td>
+                    <td>
+                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert)
+                        {
+                            <button type="button" class="btn  btn-info tooltip-btn" onclick="SavePayrollPersonnel(@row.PersonnelId);">
+                                <i class="fa fa-save"></i>
+                                <span class="tooltip-text">
+                                    ثبت حقوق
+                                </span>
                             </button>
-
-                            @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert)
-                            {
-                                <button type="button" class="btn  btn-info tooltip-btn" onclick="SavePayrollPersonnel(@row.PersonnelId);">
-                                    <i class="fa fa-save"></i>
-                                    <span class="tooltip-text">
-                                        ثبت حقوق
-                                    </span>
-                                </button>
-                            }
-                            @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollInserted)
-                            {
-
-                                var ym = ViewBag.ym;
-                              
-
-                                <button type="button" class="btn  btn-info tooltip-btn" onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@row.PersonnelId&ym=@ym', '_blank')">
-                                    <i class="fa fa-save"></i>
-                                    فیش حقوقی
-                                </button>
-                            }
-                            @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
-                            {
-                                <button type="button" disabled class="btn  btn-info tooltip-btn" onclick="PayrollSaved(@row.PersonnelId);">
-                                    <i class="fa fa-lock"></i>
-                                    ثبت حقوق تایید شده
-                                </button>
-                            }
-
                         }
 
                     </td>
-
-
+                    <td>
+                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollInserted)
+                        {
+                            <button type="button" class="btn  btn-warning tooltip-btn" onclick="confirmPayroll(@ym);">
+                                <i class="fa fa-check"></i>
+                                تایید حقوق
+                            </button>
+                        }
+                    </td>
+                    <td>
+                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                        {
+                            
+                            <button type="button" class="btn  btn-info tooltip-btn" onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@row.PersonnelId&ym=@ym', '_blank')">
+                                <i class="fa fa-save"></i>
+                                فیش حقوقی
+                            </button>
+                        }
+                    </td>
+                 
+                    <td>
+                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                        {
+                            <button type="button" class="btn  btn-warning tooltip-btn" onclick="alert('payroll accouting');">
+                                <i class="fa fa-bank"></i>
+                            </button>
+                        }
+                    </td>
                 </tr>
             }
 

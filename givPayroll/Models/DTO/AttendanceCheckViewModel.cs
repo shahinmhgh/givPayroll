@@ -35,7 +35,7 @@ public class AttendanceCheckViewModel
 
     public string StatusText => Status switch
     {
-        AppUtil.enumAttendanceWorkStatus.Incorrect => "نادرست",
+        AppUtil.enumAttendanceWorkStatus.Incorrect => "کارکرد نادرست",
         AppUtil.enumAttendanceWorkStatus.Incomplete => "کارکرد ناقص",
         AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert => "آماده ثبت حقوق",
         AppUtil.enumAttendanceWorkStatus.PayrollInserted => "ثبت حقوق انجام شده",
