@@ -14,7 +14,8 @@ namespace givPayroll
             Incomplete,
             PayrollReadyForInsert,
             PayrollInserted,
-            PayrollConfirmed
+            PayrollConfirmed,
+            PayrollVouchered
         }
 
         public   enum enumPayrollStatus

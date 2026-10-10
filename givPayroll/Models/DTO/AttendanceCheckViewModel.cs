@@ -40,6 +40,7 @@ public class AttendanceCheckViewModel
         AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert => "آماده ثبت حقوق",
         AppUtil.enumAttendanceWorkStatus.PayrollInserted => "ثبت حقوق انجام شده",
         AppUtil.enumAttendanceWorkStatus.PayrollConfirmed => "ثبت حقوق تایید شده",
+        AppUtil.enumAttendanceWorkStatus.PayrollVouchered => "ثبت حقوق سند حسابداری دارد",
         _ => ""
     };
 

@@ -170,7 +170,7 @@ namespace givPayroll.Controllers
                     if (pay != null)
                     {
                         status = AppUtil.enumAttendanceWorkStatus.PayrollInserted;
-                        if (pay.PayrollStatusID==(int)AppUtil.enumPayrollStatus.Confirmed)
+                        if (pay.PayrollStatusID == (int)AppUtil.enumPayrollStatus.Confirmed)
                             status = AppUtil.enumAttendanceWorkStatus.PayrollConfirmed;
                     }
                 }
@@ -193,7 +193,9 @@ namespace givPayroll.Controllers
                 result = new CalculateViewModel();
                 result.Check = new List<AttendanceCheckViewModel>();
             }
-            // 
+            //     
+            ViewBag.ym = year + @"/" + month.GetValueOrDefault().ToString("00");
+
             return PartialView("_AttendanceCheckResult", result);
         }
 
