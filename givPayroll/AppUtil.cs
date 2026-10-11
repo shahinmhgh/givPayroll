@@ -7,18 +7,18 @@ namespace givPayroll
 {
     public static class AppUtil
     {
-        public   enum enumAttendanceWorkStatus
+        public enum enumAttendanceWorkStatus
         {
             None,
-            Incorrect,
-            Incomplete,
-            PayrollReadyForInsert,
-            PayrollInserted,
-            PayrollConfirmed,
-            PayrollVouchered
+            Incorrect = 1,
+            Incomplete = 100,
+            PayrollReadyForInsert = 200,
+            PayrollInserted = 220,
+            PayrollConfirmed = 300,
+            PayrollVouchered = 350
         }
 
-        public   enum enumPayrollStatus
+        public enum enumPayrollStatus
         {
             None,
             Confirmed,
@@ -213,7 +213,7 @@ namespace givPayroll
 
             return pc.ToDateTime(year, month, day, 0, 0, 0, 0);
         }
-        
+
         public static List<string> ExtractFormulaWords(IEnumerable<string> formulas)
         {
             var words = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

@@ -212,8 +212,32 @@ function SavePayroll() {
     var attendanceMonth = $("#attendanceMonth").val();
 
     alert("SavePayroll" + " " + attendanceYear + "" + attendanceMonth);
+}
+function confirmPayroll(id, ym) {
+    $.ajax({
+        url: '/payroll/confirmPayroll',
+        type: 'GET',
+        data: {
+            ym: ym,
+            personnelid: id,
+        },
+        success: function (result) {
+           
+            Swal.fire({
+                icon: "information",
+                title: result.message
+            });
+
+        },
+        error: function (xhr) {
+            console.error(xhr);
+
+        },
+        complete: function () {
 
 
+        }
+    });
 
 }
 function SavePayrollPersonnel(id) {

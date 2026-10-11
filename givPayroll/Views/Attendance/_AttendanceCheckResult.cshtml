@@ -3,7 +3,9 @@
 <link rel="stylesheet"
       href="~/pages/css/tooltip.css" />
 
- 
+ @{
+    var ym = ViewBag.ym;
+ }
 <div class="table-responsive">
 
     <table class="table table-bordered table-hover align-middle">
@@ -30,11 +32,11 @@
                 var errClass = "";
                 if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect || row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
                 { errClass = "table-danger"; }
-                var ym = ViewBag.ym;
+                
                 <tr class="@errClass">
 
                     <td>
-                        @row.PersonnelName
+                        @row.PersonnelName  
                     </td>
                     <td>
                         @row.StatusText
@@ -84,13 +86,14 @@
                     <td>
                         @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollInserted)
                         { 
-                            <button type="button" class="btn  btn-warning tooltip-btn" onclick="confirmPayroll(@ym);">
+                            <button type="button" class="btn  btn-warning tooltip-btn" onclick=" confirmPayroll(@row.PersonnelId, '@ym');">
                                 <i class="fa fa-check"></i>
                                 تایید حقوق
                             </button>
                         }
                     </td>
                     <td>
+                        
                         @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
                         {
                             

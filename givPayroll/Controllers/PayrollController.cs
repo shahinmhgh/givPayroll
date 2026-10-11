@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Playwright;
 using NCalc;
+using NPOI.OpenXmlFormats.Wordprocessing;
 using NPOI.POIFS.Crypt.Dsig.Facets;
 using NPOI.Util.Optional;
 using System.Runtime.InteropServices.Marshalling;
@@ -89,7 +90,7 @@ public class PayrollController : Controller
             });
         else
         {
-             _logger.LogError(err, "Error updating payroll.");
+            _logger.LogError(err, "Error updating payroll.");
             return Json(new
             {
                 success = false,
@@ -284,7 +285,43 @@ public class PayrollController : Controller
             model[i].SalaryItem = await _context.SalaryItems.FindAsync(model[i].SalaryItemId);
         return PartialView("_PayrollInsuranceTax", model);
     }
-
+    public  async Task<ActionResult> confirmPayroll(int personnelId, string ym)
+    {//1405/05
+        int year = Convert.ToInt16(ym.Substring(0, 4));
+        int month = Convert.ToInt16(ym.Substring(5, 2));
+        Payroll? pay =await  _context.Payrolls.Where(i => i.PersonnelId == personnelId &&
+                        i.PayrollYear == year && i.PayrollMonth == month).FirstOrDefaultAsync();
+        if (pay==null)
+            return Json(new
+            {
+                success = false,
+                message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
+            });
+        else
+        {
+            try
+            {
+                Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
+                pay.PayrollStatusID =(int) AppUtil.enumAttendanceWorkStatus.PayrollConfirmed;
+                await _context.SaveChangesAsync();
+                return Json(new
+                {
+                    success = true,
+                    message = "حقوق " + person.FirstName + " " + person.LastName +  " در سال و ماه " + ym + " تایید گردید"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
+                }); 
+                 
+            }
+        }
+       
+    }
 
     public static List<InsuTaxViewModel> lstInsurance = new List<InsuTaxViewModel>();
     public static List<InsuTaxViewModel> lstTax = new List<InsuTaxViewModel>();

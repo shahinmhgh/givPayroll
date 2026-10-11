@@ -60,38 +60,30 @@ namespace givPayroll.Data
         {
             base.OnModelCreating(builder);
 
+            //None,
+            //Incorrect,
+            //Incomplete,
+            //PayrollReadyForInsert,
+            //PayrollInserted,
+            //PayrollConfirmed,
+            //PayrollVouchered
+
             builder.Entity<PayrollStatus>().HasData(
-        new PayrollStatus
-        {
-            Id = 0,
-            StatusName = "جدید"
-        },
-        new PayrollStatus
-        {
-            Id = 1,
-            StatusName = "حضور و غیاب ناقص"
-        },
-        new PayrollStatus
-        {
-            Id = 100,
-            StatusName = "آماده محاسبه"
-        },
-        new PayrollStatus
-        {
-            Id = 200,
-            StatusName = "محاسبه شده"
-        },
-        new PayrollStatus
-        {
-            Id = 220,
-            StatusName = "تایید شده"
-        },
-        new PayrollStatus
-        {
-            Id = 300,
-            StatusName = "ارسال به حسابداری"
-        }
-    );
+            new PayrollStatus
+            { Id = 0, StatusName = "" },
+            new PayrollStatus
+            { Id = 1, StatusName = "حضور و غیاب اشتباه" },
+            new PayrollStatus
+            { Id = 100, StatusName = "حضور و غیاب ناقص" },
+            new PayrollStatus
+            { Id = 200, StatusName = "محاسبه شده" },
+            new PayrollStatus
+            { Id = 220, StatusName = "ثبت شده" },
+            new PayrollStatus
+            { Id = 300, StatusName = "تایید شده" },
+            new PayrollStatus
+            { Id = 350, StatusName = "ارسال به حسابداری" }
+        );
 
             builder.Entity<Gender>().HasData(
                   new Gender
