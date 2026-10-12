@@ -85,18 +85,13 @@
                                 ثبت حقوق
                             </span>
                         </button>
-                        @{
-                            switch (row.Status)
-                            {
-                                case AppUtil.enumAttendanceWorkStatus.PayrollInserted:
-                                case AppUtil.enumAttendanceWorkStatus.PayrollConfirmed:
-                                case AppUtil.enumAttendanceWorkStatus.PayrollVouchered:
-                                    <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
-                                    break;
-                                default:
-                                    <i class="fa-solid fa-circle-xmark text-danger"></i>
-                                    break;
-                            }
+                        @if (row.Inserted)
+                        {
+                            <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-circle-xmark text-danger"></i>
                         }
                         
 
@@ -104,13 +99,13 @@
                     <td>
                         @* تایید حقوق *@
 
-                        <button type="button" class="btn  btn-warning tooltip-btn" onclick=" confirmPayroll(@row.PersonnelId, '@ym');">
+                        <button type="button" class="btn  btn-warning tooltip-btn" onclick=" confirmPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
                             <i class="fa fa-clipboard-check"> </i>
                             <span class="tooltip-text">
                                 تایید حقوق
                             </span>
                         </button>
-                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                        @if ( row.Confirmed)
                         {
                             <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
                         }
@@ -121,6 +116,7 @@
                     </td>
                     <td>
                         @* فیش حقوقی *@
+                         
                         @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
                         {
 
@@ -132,20 +128,22 @@
                     </td>
 
                     <td>
+                            @* ثبت حسابداری *@
+                       @*  @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                        { *@
+                            <button type="button" class="btn  btn-warning tooltip-btn" onclick=" VoucherPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
+                                <i class="fa fa-bank"></i>
+                            </button>
+                            @if (row.Vouchered)
+                            {
+                                <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
+                            }
+                            else
+                            {
 
-                        @* ثبت حسابداری *@
-                        <button type="button" class="btn  btn-warning tooltip-btn" onclick=" VoucherPayroll(@row.PersonnelId, '@ym');">
-                            <i class="fa fa-bank"></i>
-                        </button>
-                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollVouchered)
-                        {
-                            <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
-                        }
-                        else
-                        {
-
-                            <i class="fa-solid fa-circle-xmark text-danger"></i>
-                        }
+                                <i class="fa-solid fa-circle-xmark text-danger"></i>
+                            }
+                         
                     </td>
                 </tr>
             }

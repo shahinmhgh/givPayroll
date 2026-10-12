@@ -295,6 +295,7 @@ public class PayrollController : Controller
         if (pay == null)
             return Json(new
             {
+                icon= "error",
                 success = false,
                 message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
             });
@@ -303,6 +304,7 @@ public class PayrollController : Controller
             if (pay.Vouchered)
                 return Json(new
                 {
+                    icon = "error",
                     success = false,
                     message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " ثبت حسابداری شده است"
                 });
@@ -322,6 +324,7 @@ public class PayrollController : Controller
 
                 return Json(new
                 {
+                    icon = "information",
                     success = true,
                     message = mess
                 });
@@ -330,6 +333,7 @@ public class PayrollController : Controller
             {
                 return Json(new
                 {
+                    icon = "error",
                     success = false,
                     message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
                 });
@@ -353,12 +357,17 @@ public class PayrollController : Controller
             });
         else
         {
-           
+           if (!pay.Confirmed)
+                return Json(new
+                {
+                    success = false,
+                    message = "تایید اطلاعات حقوق برای این فرد در تاریخ " + ym + " انجام نشده"
+                });
 
             try
             {
                 Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
-                bool iniConfirmed = pay.Confirmed;
+                bool iniVouchered = pay.Vouchered;
 
                 if (pay.Vouchered)
                     pay.Vouchered = false;
@@ -366,7 +375,7 @@ public class PayrollController : Controller
                     pay.Vouchered = true;
 
                 await _context.SaveChangesAsync();
-                string mess = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + (iniConfirmed ? " ثبت حسابداری برداشته شد" : " ثبت حسابداری گردید");
+                string mess = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + (iniVouchered ? " ثبت حسابداری برداشته شد" : " ثبت حسابداری گردید");
 
                 return Json(new
                 {
@@ -412,6 +421,26 @@ public class PayrollController : Controller
             .Where(i => i.PayrollId == pay.Id).ToList();
         model.PayrollItems = pay.PayrollItems.ToList();
 
+        PlusList = model.PayrollItems
+           .Where(x => x.SalaryItem != null && x.SalaryItem.PlusMinus == 1)
+           .Select(x => new CalculateTaxDetail
+           {
+               Amount = x.Amount,
+               Title = x.SalaryItem.SalaryItemName
+           })
+           .ToList();
+
+        MinusList = model.PayrollItems
+           .Where(x => x.SalaryItem != null && x.SalaryItem.PlusMinus == -1)
+           .Select(x => new CalculateTaxDetail
+           {
+               Amount = x.Amount,
+               Title = x.SalaryItem.SalaryItemName
+           })
+           .ToList();
+
+        ViewBag.PlusList = PlusList;
+        ViewBag.MinusList = MinusList;
         return model;
     }
     private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)

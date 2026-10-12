@@ -158,6 +158,7 @@ namespace givPayroll.Controllers
                     }
                 }
 
+                Payroll? pay = null;
                 AppUtil.enumAttendanceWorkStatus status = AppUtil.enumAttendanceWorkStatus.None;
                 if (isCorrect == false)
                     status = AppUtil.enumAttendanceWorkStatus.Incorrect;
@@ -166,10 +167,10 @@ namespace givPayroll.Controllers
                 else
                 {
                     //status = AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert;
-                    Payroll? pay = _context.Payrolls
-                        .Where(i => i.PersonnelId == personnel.PersonnelId &&
-                        i.PayrollYear == year &&
-                        i.PayrollMonth == month).FirstOrDefault();
+                    pay = _context.Payrolls
+                      .Where(i => i.PersonnelId == personnel.PersonnelId &&
+                      i.PayrollYear == year &&
+                      i.PayrollMonth == month).FirstOrDefault();
                     if (pay == null)
                     {
                         //status = AppUtil.enumAttendanceWorkStatus.PayrollInserted;
@@ -190,7 +191,7 @@ namespace givPayroll.Controllers
                 //{
                 //    case AppUtil.enumAttendanceWorkStatus.PayrollConfirmed:
                 //        break;
- 
+
                 //}
 
                 var model = new AttendanceCheckViewModel
@@ -201,6 +202,9 @@ namespace givPayroll.Controllers
                     //IsCorrect = isCorrect, // کارکرد درست / کارکرد نادرست
                     //hasWorked = hasWorked, // کارکرد کامل / کارکرد ناقص
                     IsCorrectErrText = errCorrect,
+                    Inserted = pay != null,
+                    Confirmed = pay == null ? false : pay.Confirmed,
+                    Vouchered = pay == null ? false : pay.Vouchered,
                     hasWorkedErrText = errWorked,
                 };
 

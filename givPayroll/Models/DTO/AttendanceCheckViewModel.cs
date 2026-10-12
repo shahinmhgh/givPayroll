@@ -16,6 +16,9 @@ public class AttendanceCheckViewModel
 
     public int Work { get; set; }
 
+    public bool Inserted { get; set; }
+    public bool Confirmed { get; set; }
+    public bool Vouchered { get; set; }
 
     public int Leave { get; set; }
     public int LeaveSickMinute { get; set; }
