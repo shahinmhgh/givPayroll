@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Office2019.Drawing.Model3D;
 using givPayroll.Data;
 using givPayroll.Models;
 using givPayroll.Models.DTO;
@@ -127,7 +128,7 @@ public class PayrollController : Controller
                     PayrollMonth = month,
                     IssueDate = DateTime.Now,
                     PersonnelId = personnelId,
-                    PayrollStatusID = (int)AppUtil.enumPayrollStatus.None
+                    //PayrollStatusID = (int)AppUtil.enumPayrollStatus.None
                 };
 
                 _context.Payrolls.Add(pay);
@@ -285,13 +286,13 @@ public class PayrollController : Controller
             model[i].SalaryItem = await _context.SalaryItems.FindAsync(model[i].SalaryItemId);
         return PartialView("_PayrollInsuranceTax", model);
     }
-    public  async Task<ActionResult> confirmPayroll(int personnelId, string ym)
+    public async Task<ActionResult> confirmPayroll(int personnelId, string ym)
     {//1405/05
         int year = Convert.ToInt16(ym.Substring(0, 4));
         int month = Convert.ToInt16(ym.Substring(5, 2));
-        Payroll? pay =await  _context.Payrolls.Where(i => i.PersonnelId == personnelId &&
+        Payroll? pay = await _context.Payrolls.Where(i => i.PersonnelId == personnelId &&
                         i.PayrollYear == year && i.PayrollMonth == month).FirstOrDefaultAsync();
-        if (pay==null)
+        if (pay == null)
             return Json(new
             {
                 success = false,
@@ -302,12 +303,12 @@ public class PayrollController : Controller
             try
             {
                 Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
-                pay.PayrollStatusID =(int) AppUtil.enumAttendanceWorkStatus.PayrollConfirmed;
+                pay.Confirmed = true;
                 await _context.SaveChangesAsync();
                 return Json(new
                 {
                     success = true,
-                    message = "حقوق " + person.FirstName + " " + person.LastName +  " در سال و ماه " + ym + " تایید گردید"
+                    message = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + " تایید گردید"
                 });
             }
             catch (Exception ex)
@@ -316,16 +317,40 @@ public class PayrollController : Controller
                 {
                     success = false,
                     message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
-                }); 
-                 
+                });
+
             }
         }
-       
+
     }
 
     public static List<InsuTaxViewModel> lstInsurance = new List<InsuTaxViewModel>();
     public static List<InsuTaxViewModel> lstTax = new List<InsuTaxViewModel>();
 
+    private async Task<PayrollViewModel> GetPayrollInsertedData(int year, int month, int personnelId)
+    {
+        PayrollViewModel model = new PayrollViewModel();
+        model.PayrollMonth = month;
+        model.PayrollYear = year;
+        model.PersonnelId = personnelId;
+
+        Payroll? pay = _context.Payrolls
+                .FirstOrDefault(p =>
+                    p.PayrollYear == year &&
+                    p.PayrollMonth == month &&
+                    p.PersonnelId == personnelId);
+
+        model.IssueDate = DateTime.Now;
+        model.Personnel = _context.Personnels.Include(x => x.PersonnelFamilies).Include(i => i.MaritalStatus).Where(i => i.Id == personnelId).FirstOrDefault();
+        model.PersonnelOrder = _context.PersonnelOrders.Include("Details").Where(i => i.Id == personnelId && i.IsActive).FirstOrDefault();
+
+        pay.PayrollItems = _context.PayrollItems
+            .Include(i=>i.SalaryItem).Include("PayrollAdjustment")
+            .Where(i => i.PayrollId == pay.Id).ToList();
+        model.PayrollItems = pay.PayrollItems.ToList();
+       
+        return model;
+    }
     private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)
     {
 
@@ -843,7 +868,7 @@ public class PayrollController : Controller
         int month = Convert.ToInt32(ym.Substring(5, 2));
         int year = Convert.ToInt32(ym.Substring(0, 4));
 
-        PayrollViewModel modelData = await GetPayrollData(year, month, id);
+        PayrollViewModel modelData = await GetPayrollInsertedData(year, month, id);
         ViewBag.PlusList = PlusList;
         ViewBag.MinusList = MinusList;
 

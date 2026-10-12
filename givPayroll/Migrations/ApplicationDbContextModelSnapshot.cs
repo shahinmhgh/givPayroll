@@ -3146,13 +3146,16 @@ namespace givPayroll.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Confirmed")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("IssueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("PayrollMonth")
                         .HasColumnType("int");
 
-                    b.Property<int>("PayrollStatusID")
+                    b.Property<int?>("PayrollStatusId")
                         .HasColumnType("int");
 
                     b.Property<int>("PayrollYear")
@@ -3161,9 +3164,12 @@ namespace givPayroll.Migrations
                     b.Property<int>("PersonnelId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Vouchered")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("PayrollStatusID");
+                    b.HasIndex("PayrollStatusId");
 
                     b.HasIndex("PersonnelId");
 
@@ -3324,17 +3330,17 @@ namespace givPayroll.Migrations
                         new
                         {
                             Id = 0,
-                            StatusName = "جدید"
+                            StatusName = ""
                         },
                         new
                         {
                             Id = 1,
-                            StatusName = "حضور و غیاب ناقص"
+                            StatusName = "حضور و غیاب اشتباه"
                         },
                         new
                         {
                             Id = 100,
-                            StatusName = "آماده محاسبه"
+                            StatusName = "حضور و غیاب ناقص"
                         },
                         new
                         {
@@ -3344,11 +3350,16 @@ namespace givPayroll.Migrations
                         new
                         {
                             Id = 220,
-                            StatusName = "تایید شده"
+                            StatusName = "ثبت شده"
                         },
                         new
                         {
                             Id = 300,
+                            StatusName = "تایید شده"
+                        },
+                        new
+                        {
+                            Id = 350,
                             StatusName = "ارسال به حسابداری"
                         });
                 });
@@ -4133,19 +4144,15 @@ namespace givPayroll.Migrations
 
             modelBuilder.Entity("givPayroll.Models.Payroll", b =>
                 {
-                    b.HasOne("givPayroll.Models.PayrollStatus", "PayrollStatus")
+                    b.HasOne("givPayroll.Models.PayrollStatus", null)
                         .WithMany("Payrolls")
-                        .HasForeignKey("PayrollStatusID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PayrollStatusId");
 
                     b.HasOne("givPayroll.Models.Personnel", "Personnel")
                         .WithMany()
                         .HasForeignKey("PersonnelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PayrollStatus");
 
                     b.Navigation("Personnel");
                 });

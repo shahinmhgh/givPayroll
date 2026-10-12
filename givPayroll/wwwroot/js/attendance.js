@@ -243,7 +243,7 @@ function confirmPayroll(id, ym) {
 function SavePayrollPersonnel(id) {
     var attendanceYear = $("#attendanceYear").val();
     var attendanceMonth = $("#attendanceMonth").val();
-    alert(id);
+    
     //alert("SavePayrollPersonnel" + " " + id + " " + attendanceYear + "" + attendanceMonth);
 
     $.ajax({

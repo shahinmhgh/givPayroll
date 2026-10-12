@@ -43,18 +43,19 @@ namespace givPayroll.Models
         [Display(Name = "ماه")]
         public int PayrollMonth { get; set; }
 
-        [Display(Name = "وضعیت حقوق")]
-        public int PayrollStatusID { get; set; }
+     
         // 0 inserted
         // 1 confirmed
         // 2 Voucher inserted
+        public bool Confirmed { get; set; }
+        public bool Vouchered { get; set; }
 
         // Navigation properties
         [ForeignKey(nameof(PersonnelId))]
         public virtual Personnel? Personnel { get; set; }
 
-        [ForeignKey(nameof(PayrollStatusID))]
-        public virtual PayrollStatus? PayrollStatus { get; set; }
+        //[ForeignKey(nameof(PayrollStatusID))]
+        //public virtual PayrollStatus? PayrollStatus { get; set; }
 
         public virtual ICollection<PayrollItem> PayrollItems { get; set; }
     = new List<PayrollItem>();

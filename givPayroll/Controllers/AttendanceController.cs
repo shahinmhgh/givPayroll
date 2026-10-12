@@ -165,15 +165,33 @@ namespace givPayroll.Controllers
                     status = AppUtil.enumAttendanceWorkStatus.Incomplete;
                 else
                 {
-                    status = AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert;
-                    Payroll pay = _context.Payrolls.Where(i => i.PersonnelId == personnel.PersonnelId && i.PayrollYear == year && i.PayrollMonth == month).FirstOrDefault();
-                    if (pay != null)
+                    //status = AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert;
+                    Payroll? pay = _context.Payrolls
+                        .Where(i => i.PersonnelId == personnel.PersonnelId &&
+                        i.PayrollYear == year &&
+                        i.PayrollMonth == month).FirstOrDefault();
+                    if (pay == null)
+                    {
+                        //status = AppUtil.enumAttendanceWorkStatus.PayrollInserted;
+                        //if (pay.PayrollStatusID == (int)AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                        //    status = AppUtil.enumAttendanceWorkStatus.PayrollConfirmed;
+                        status = AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert;
+                    }
+                    else
                     {
                         status = AppUtil.enumAttendanceWorkStatus.PayrollInserted;
-                        if (pay.PayrollStatusID == (int)AppUtil.enumPayrollStatus.Confirmed)
+                        if (pay.Confirmed)
                             status = AppUtil.enumAttendanceWorkStatus.PayrollConfirmed;
+                        if (pay.Vouchered)
+                            status = AppUtil.enumAttendanceWorkStatus.PayrollVouchered;
                     }
                 }
+                //switch (status)
+                //{
+                //    case AppUtil.enumAttendanceWorkStatus.PayrollConfirmed:
+                //        break;
+ 
+                //}
 
                 var model = new AttendanceCheckViewModel
                 {
