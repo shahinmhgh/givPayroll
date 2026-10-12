@@ -300,15 +300,78 @@ public class PayrollController : Controller
             });
         else
         {
+            if (pay.Vouchered)
+                return Json(new
+                {
+                    success = false,
+                    message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " ثبت حسابداری شده است"
+                });
+
             try
             {
                 Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
-                pay.Confirmed = true;
+                bool iniConfirmed = pay.Confirmed;
+
+                if (pay.Confirmed)
+                    pay.Confirmed = false;
+                else
+                    pay.Confirmed = true;
+
                 await _context.SaveChangesAsync();
+                string mess = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + (iniConfirmed ? " تایید برداشته شد" : " تایید گردید");
+
                 return Json(new
                 {
                     success = true,
-                    message = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + " تایید گردید"
+                    message = mess
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
+                });
+
+            }
+        }
+
+    }
+
+    public async Task<ActionResult> VoucherPayroll(int personnelId, string ym)
+    {//1405/05
+        int year = Convert.ToInt16(ym.Substring(0, 4));
+        int month = Convert.ToInt16(ym.Substring(5, 2));
+        Payroll? pay = await _context.Payrolls.Where(i => i.PersonnelId == personnelId &&
+                        i.PayrollYear == year && i.PayrollMonth == month).FirstOrDefaultAsync();
+        if (pay == null)
+            return Json(new
+            {
+                success = false,
+                message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
+            });
+        else
+        {
+           
+
+            try
+            {
+                Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
+                bool iniConfirmed = pay.Confirmed;
+
+                if (pay.Vouchered)
+                    pay.Vouchered = false;
+                else
+                    pay.Vouchered = true;
+
+                await _context.SaveChangesAsync();
+                string mess = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + (iniConfirmed ? " ثبت حسابداری برداشته شد" : " ثبت حسابداری گردید");
+
+                return Json(new
+                {
+                    success = true,
+                    message = mess
                 });
             }
             catch (Exception ex)
@@ -345,10 +408,10 @@ public class PayrollController : Controller
         model.PersonnelOrder = _context.PersonnelOrders.Include("Details").Where(i => i.Id == personnelId && i.IsActive).FirstOrDefault();
 
         pay.PayrollItems = _context.PayrollItems
-            .Include(i=>i.SalaryItem).Include("PayrollAdjustment")
+            .Include(i => i.SalaryItem).Include("PayrollAdjustment")
             .Where(i => i.PayrollId == pay.Id).ToList();
         model.PayrollItems = pay.PayrollItems.ToList();
-       
+
         return model;
     }
     private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)

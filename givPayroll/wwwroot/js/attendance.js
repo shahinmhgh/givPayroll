@@ -240,6 +240,35 @@ function confirmPayroll(id, ym) {
     });
 
 }
+
+function VoucherPayroll(id, ym) {
+    $.ajax({
+        url: '/payroll/VoucherPayroll',
+        type: 'GET',
+        data: {
+            ym: ym,
+            personnelid: id,
+        },
+        success: function (result) {
+
+            Swal.fire({
+                icon: "information",
+                title: result.message
+            });
+
+        },
+        error: function (xhr) {
+            console.error(xhr);
+
+        },
+        complete: function () {
+
+
+        }
+    });
+
+}
+
 function SavePayrollPersonnel(id) {
     var attendanceYear = $("#attendanceYear").val();
     var attendanceMonth = $("#attendanceMonth").val();

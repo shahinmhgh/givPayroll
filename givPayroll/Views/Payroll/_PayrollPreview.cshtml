@@ -211,7 +211,7 @@
     var ym = Model.PayrollYear + @"/" + Model.PayrollMonth.ToString("00");
 }
 <div class="modal-footer">
-    <div>@ym</div>
+   @*  <div>@ym</div> *@
     <button type="button" style="fa fa-print" onclick="window.open('/payroll/SalaryPdf?layout=salary&id=@Model.PersonnelId&ym=@ym', '_blank')"
             class="btn btn-primary">
 
@@ -219,13 +219,13 @@
         چاپ
 
     </button>
-    <button type="button" style="fa fa-print" onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@Model.PersonnelId&ym=@ym', '_blank')"
+  @*   <button type="button" style="fa fa-print" onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@Model.PersonnelId&ym=@ym', '_blank')"
             class="btn btn-primary">
 
             
         فیش حقوقی
 
-    </button>
+    </button> *@
 
     <button type="button"
             class="btn btn-secondary"

@@ -79,7 +79,7 @@
                             // @disable
                         }
 
-                        <button type="button" class="btn   btn-outline-secondary  tooltip-btn " onclick="SavePayrollPersonnel(@row.PersonnelId);">
+                        <button type="button" class="btn   btn-secondary  tooltip-btn " onclick="SavePayrollPersonnel(@row.PersonnelId);">
                             <i class="fa fa-save"></i>
                             <span class="tooltip-text">
                                 ثبت حقوق
@@ -134,7 +134,7 @@
                     <td>
 
                         @* ثبت حسابداری *@
-                        <button type="button" class="btn  btn-warning tooltip-btn" onclick="alert('payroll accouting');">
+                        <button type="button" class="btn  btn-warning tooltip-btn" onclick=" VoucherPayroll(@row.PersonnelId, '@ym');">
                             <i class="fa fa-bank"></i>
                         </button>
                         @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollVouchered)
