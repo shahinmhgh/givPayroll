@@ -4,6 +4,7 @@
       href="~/pages/css/tooltip.css" />
 
 @{
+    var actionParam = @ViewBag.actionParam;
     var ym = ViewBag.ym;
 }
 <div class="table-responsive">
@@ -15,12 +16,27 @@
                 <th>پرسنل</th>
                 <th>وضعیت</th>
 
-                <th>کارکرد</th>
-                <th>پیش نمایش</th>
-                <th>ثبت حقوق</th>
-                <th>تایید حقوق</th>
-                <th>فیش حقوقی</th>
-                <th>ثبت در حسابداری</th>
+                @{
+                    switch (actionParam)
+                    {
+                        case "Check":
+                            <th>کارکرد</th>           @* attendance     *@
+                            <th>پیش نمایش</th>        @* preview        *@
+                            <th>ثبت حقوق</th>         @* payroll save   *@
+                            break;
+                        case "CheckOk":
+                            <th>تایید حقوق</th>       @* payroll ok     *@
+                            <th>فیش حقوقی</th>        @* payroll bill   *@
+                            break;
+                        case "CheckAcc":
+                            <th>پیش نمایش</th>        @* payroll bill   *@
+                            <th>ثبت در حسابداری</th>  @* payroll acc    *@
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
             </tr>
         </thead>
 
@@ -42,109 +58,129 @@
                         @row.StatusText
                     </td>
 
-                    <td>
-                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect)
-                        {
-                            <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
-                                <i class="fa fa-times-circle"></i>
-                                نادرست
-                            </button>
-                        }
-                        else if (row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
-                        {
-                            <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
-                                <i class="fa fa-times-circle"></i>
-                                ناقص
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-primary" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
-                                <i class="fa fa-calendar-check"></i>
-                                صحیح
-                            </button>
-                        }
-                    </td>
-                    <td>
-                        @* پیش نمایش *@
-                        <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
-                            <i class="fa fa-calculator"></i>
+                    @switch (actionParam)
+                    {
+                        case "Check":
+                            <td>
+                                @* attendance     *@
+                                @if (row.Status == AppUtil.enumAttendanceWorkStatus.Incorrect)
+                                {
+                                    <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
+                                        <i class="fa fa-times-circle"></i>
+                                        نادرست
+                                    </button>
+                                }
+                                else if (row.Status == AppUtil.enumAttendanceWorkStatus.Incomplete)
+                                {
+                                    <button type="button" class="btn btn-danger" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
+                                        <i class="fa fa-times-circle"></i>
+                                        ناقص
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary" onclick="buttonProc(@row.PersonnelId, '@row.IsCorrectErrText', '@row.hasWorkedErrText');">
+                                        <i class="fa fa-calendar-check"></i>
+                                        صحیح
+                                    </button>
+                                }
+                            </td>
+                            <td>
+                                @* preview        *@
+                                <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
+                                    <i class="fa fa-calculator"></i>
 
-                        </button>
-                    </td>
-                    <td>
-                        @*  ثبت حقوق *@
-                        @{
-                            var disable = row.Status != AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert ? "disabled" : "";
-                            // @disable
-                        }
+                                </button>
+                            </td>
+                            <td>
+                                @* payroll save   *@
+                                @{
+                                    var disable = row.Status != AppUtil.enumAttendanceWorkStatus.PayrollReadyForInsert ? "disabled" : "";
+                                    // @disable
+                                }
 
-                        <button type="button" class="btn   btn-secondary  tooltip-btn " onclick="SavePayrollPersonnel(@row.PersonnelId);">
-                            <i class="fa fa-save"></i>
-                            <span class="tooltip-text">
-                                ثبت حقوق
-                            </span>
-                        </button>
-                        @if (row.Inserted)
-                        {
-                            <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
-                        }
-                        else
-                        {
-                            <i class="fa-solid fa-circle-xmark text-danger"></i>
-                        }
+                                <button type="button" class="btn   btn-secondary  tooltip-btn " onclick="SavePayrollPersonnel(@row.PersonnelId);">
+                                    <i class="fa fa-save"></i>
+                                    <span class="tooltip-text">
+                                        ثبت حقوق
+                                    </span>
+                                </button>
+                                @if (row.Inserted)
+                                {
+                                    <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-circle-xmark text-danger"></i>
+                                }
+
                         
+                            </td>
 
-                    </td>
-                    <td>
-                        @* تایید حقوق *@
+                            break;
+                        case "CheckOk":
+                            <td>
+                                @* payroll ok     *@
 
-                        <button type="button" class="btn  btn-warning tooltip-btn" onclick=" confirmPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
-                            <i class="fa fa-clipboard-check"> </i>
-                            <span class="tooltip-text">
-                                تایید حقوق
-                            </span>
-                        </button>
-                        @if ( row.Confirmed)
-                        {
-                            <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
-                        }
-                        else
-                        {
-                            <i class="fa-solid fa-circle-xmark text-danger"></i>
-                        }
-                    </td>
-                    <td>
-                        @* فیش حقوقی *@
-                         
-                        @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
-                        {
+                                <button type="button" class="btn  btn-warning tooltip-btn" onclick=" confirmPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
+                                    <i class="fa fa-clipboard-check"> </i>
+                                    <span class="tooltip-text">
+                                        تایید حقوق
+                                    </span>
+                                </button>
+                                @if (row.Confirmed)
+                                {
+                                    <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-circle-xmark text-danger"></i>
+                                }
+                            </td>
+                            <td>
+                                @* payroll bill   *@
 
-                            <button type="button" class="btn  btn-info tooltip-btn" 
-                            onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@row.PersonnelId&ym=@ym', '_blank')">
-                                <i class="fa fa-clipboard-list"></i>
-                            </button>
-                        }
-                    </td>
+                                @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                                {
 
-                    <td>
-                            @* ثبت حسابداری *@
-                       @*  @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
-                        { *@
-                            <button type="button" class="btn  btn-warning tooltip-btn" onclick=" VoucherPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
-                                <i class="fa fa-bank"></i>
-                            </button>
-                            @if (row.Vouchered)
-                            {
-                                <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
-                            }
-                            else
-                            {
+                                    <button type="button" class="btn  btn-info tooltip-btn"
+                                            onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@row.PersonnelId&ym=@ym', '_blank')">
+                                        <i class="fa fa-clipboard-list"></i>
+                                    </button>
+                                }
+                            </td>
+                            break;
+                        case "CheckAcc":
+                            <td>
+                                @* preview        *@
+                                <button type="button" class="btn  btn-success" onclick="PayrollProc(@row.PersonnelId);">
+                                    <i class="fa fa-calculator"></i>
 
-                                <i class="fa-solid fa-circle-xmark text-danger"></i>
-                            }
-                         
-                    </td>
+                                </button>
+                            </td>
+                            <td>
+                                @* payroll acc    *@
+                                @*  @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
+                                { *@
+                                <button type="button" class="btn  btn-warning tooltip-btn" onclick=" VoucherPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
+                                    <i class="fa fa-bank"></i>
+                                </button>
+                                @if (row.Vouchered)
+                                {
+                                    <i class="fa fa-circle-check" style="color: green; background-color: white;"></i>
+                                }
+                                else
+                                {
+
+                                    <i class="fa-solid fa-circle-xmark text-danger"></i>
+                                }
+
+                            </td>
+                            break;
+                        default:
+                            break;
+                    }
+                    
                 </tr>
             }
 

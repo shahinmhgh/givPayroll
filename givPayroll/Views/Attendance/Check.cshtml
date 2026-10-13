@@ -1,9 +1,30 @@
 ﻿@model CalculateViewModel
 
 @{
+
     ViewData["Title"] = "محاسبه حقوق";
 }
 <input type="hidden" asp-for="attendancePersonnel" />
+@{
+    var actionParam = @ViewBag.actionParam;
+    var buttonText = "";
+    var titleText = "";
+    switch (actionParam)
+    {
+        case "Check":
+            buttonText = "ثبت همه";
+            titleText = "محاسبه و ثبت حقوق ماه";
+            break;
+        case "CheckOk":
+            buttonText = "تایید همه";
+            titleText = "تایید حقوق ماه";
+            break;
+        case "CheckAcc":
+            buttonText = "ثبت حسابداری همه";
+            titleText = "ثبت حسابداری حقوق ماه";
+            break;
+    }
+}
 
 <div class="container-fluid">
 
@@ -11,7 +32,7 @@
 
         <div class="card-header">
             <h5 class="mb-0">
-                محاسبه حقوق
+                @titleText
             </h5>
         </div>
 
@@ -128,8 +149,7 @@
                             class="btn btn-info" onclick="SavePayroll()">
 
                         <i class="fa fa-search"></i>
-                        ثبت حقوق ماه
-
+                        @buttonText
                     </button>
 
                 </div>
@@ -237,6 +257,7 @@
 
     <script>
         function checkAttendance() {
+            console.log('@ViewBag.actionParam')
 
             const year = $('select[name="year"]').val();
             //const month = $('select[name="month"]').val();
@@ -256,7 +277,8 @@
                 type: 'GET',
                 data: {
                     year: year,
-                    month: month
+                    month: month,
+                    actionParam: '@ViewBag.actionParam'
                 },
                 success: function(result) {
 
@@ -267,10 +289,10 @@
                     console.error(xhr);
 
                     $('#attendanceResult').html(`
-                                    <div class="alert alert-danger">
-                                        خطا در بررسی کارکرد پرسنل.
-                                    </div>
-                                `);
+                                            <div class="alert alert-danger">
+                                                خطا در بررسی کارکرد پرسنل.
+                                            </div>
+                                        `);
                 },
                 complete: function() {
 

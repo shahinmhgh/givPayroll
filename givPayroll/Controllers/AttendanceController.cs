@@ -31,8 +31,10 @@ namespace givPayroll.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Check(int? year, int? month)
+        public async Task<IActionResult> Check(int? year, int? month, string actionParam)
         {
+            //actionParam Check CheckOk CheckAcc
+            ViewBag.actionParam=actionParam;
             var currentYear = year ?? 1405;
             var currentMonth = month ?? 1;
 
@@ -93,6 +95,27 @@ namespace givPayroll.Controllers
 
                 .ToListAsync();
 
+            if (actionParam=="Check")
+                personnels = personnels
+                .Where(x => !_context.Payrolls.Any(p =>
+                    p.PersonnelId == x.PersonnelId &&
+                    p.PayrollYear == year &&
+                    p.PayrollMonth == month))
+                .ToList();
+            if (actionParam == "CheckOk")
+                personnels = personnels
+                .Where(x => _context.Payrolls.Any(p =>
+                    p.PersonnelId == x.PersonnelId &&
+                    p.PayrollYear == year &&
+                    p.PayrollMonth == month ))
+                .ToList();
+            if (actionParam == "CheckAcc")
+                personnels = personnels
+                .Where(x => _context.Payrolls.Any(p =>
+                    p.PersonnelId == x.PersonnelId &&
+                    p.PayrollYear == year &&
+                    p.PayrollMonth == month && p.Confirmed))
+                .ToList();
 
             // -----------------------------
             // 2. Attendance همان ماه

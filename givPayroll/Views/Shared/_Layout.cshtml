@@ -220,11 +220,28 @@
                                 <li>
                                     <a class="dropdown-item"
                                        asp-controller="Attendance"
-                                       asp-action="Check">
-                                        <span>محاسبه حقوق ماه</span>
+                                       asp-action="Check"
+                                       asp-route-actionParam="Check">
+                                        <span>محاسبه و ثبت حقوق ماه</span>
                                     </a>
                                 </li>
-                                 
+                                 <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Attendance"
+                                       asp-action="Check"
+                                       asp-route-actionParam="CheckOk">
+                                        <span>تایید حقوق ماه</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Attendance"
+                                       asp-action="Check"
+                                       asp-route-actionParam="CheckAcc">
+                                        <span>ثبت حسابداری حقوق ماه</span>
+                                    </a>
+                                </li>
+
                             </ul>
                         </li>
 
