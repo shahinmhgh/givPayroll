@@ -1,0 +1,120 @@
+﻿ 
+@model List<Staff>
+
+@{
+    ViewData["Title"] = "کارکنان";
+    var currentSort = ViewData["CurrentSort"] as string;
+}
+
+<div class="container mt-4">
+    <h3>کارکنان</h3>
+
+    <form asp-action="Index" method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text"
+                   name="searchString"
+                   value="@ViewData["CurrentFilter"]"
+                   class="form-control"
+                   placeholder="Search by first or last name..." />
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-search"></i> Search
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["StaffIDSort"]"
+                       class="text-decoration-none text-dark">
+                        Staff ID
+                        @if (currentSort == "id")
+                        {
+                            <i class="fa fa-sort-up"></i>
+                        }
+                        else if (currentSort == "id_desc")
+                        {
+                            <i class="fa fa-sort-down"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-sort text-muted"></i>
+                        }
+                    </a>
+                </th>
+
+                <th>
+                    <a asp-action="Index"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["FirstNameSort"]"
+                       class="text-decoration-none text-dark">
+                        First Name
+                        @if (currentSort == "firstName")
+                        {
+                            <i class="fa fa-sort-up"></i>
+                        }
+                        else if (currentSort == "firstName_desc")
+                        {
+                            <i class="fa fa-sort-down"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-sort text-muted"></i>
+                        }
+                    </a>
+                </th>
+
+                <th>
+                    <a asp-action="Index"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["LastNameSort"]"
+                       class="text-decoration-none text-dark">
+                        Last Name
+                        @if (currentSort == "lastName")
+                        {
+                            <i class="fa fa-sort-up"></i>
+                        }
+                        else if (currentSort == "lastName_desc")
+                        {
+                            <i class="fa fa-sort-down"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-sort text-muted"></i>
+                        }
+                    </a>
+                </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="3" class="text-center">
+                        No staff found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.StaffID</td>
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

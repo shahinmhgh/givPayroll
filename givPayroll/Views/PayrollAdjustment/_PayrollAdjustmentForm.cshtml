@@ -150,22 +150,59 @@
 
                 <input asp-for="
                        TotalAmount"
-       class="form-control amount-input"
-       type="text"
-       dir="ltr"
-       inputmode="numeric"
-       autocomplete="off"
-       value="@Model.TotalAmount.ToString("N0")" />
+                   class="form-control amount-input"
+                   type="text"
+                   dir="ltr"
+                   inputmode="numeric"
+                   autocomplete="off"
+                   value="@Model.TotalAmount.ToString("N0")" />
 
 
 
-<span asp-validation-for="TotalAmount"
-                      class="text-danger">
-                </span>
+                <span asp-validation-for="TotalAmount"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            <!-- Accounting -->
+            <div class="col-md-4">
+
+                <label asp-for="ProjectId"
+                       class="form-label">
+                </label>
+
+                <input asp-for="ProjectId"
+                       class="form-control"
+                       dir="ltr" />
+
+            </div>
+
+            <div class="col-md-4">
+
+                <label asp-for="PersonCategoryCode"
+                       class="form-label">
+                </label>
+
+                <input asp-for="PersonCategoryCode"
+                       class="form-control"
+                       dir="ltr" />
 
             </div>
 
 
+            <div class="col-md-4">
+
+                <label asp-for="PersonID"
+                       class="form-label">
+                </label>
+
+                <input asp-for="PersonID"
+                       class="form-control"
+                       type="number"
+                       dir="ltr" />
+
+            </div>
              
 
             <div class="mb-3">

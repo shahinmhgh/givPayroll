@@ -4,8 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace givPayroll.Models
 {
 
-
-    [Table("PersonnelContract")]
+    [Table("PersonnelContract", Schema = "Payroll")]
     public class PersonnelContract
     {
         [Display(Name = "فعال")]

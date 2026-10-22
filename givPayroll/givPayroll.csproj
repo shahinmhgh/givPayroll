@@ -3,6 +3,14 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+	
+	<Product>Payroll Management System</Product>
+    <Company>Kashvad Rayan Afzar</Company>
+	<Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+	
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-givPayroll-aaeb190b-090c-4744-9bc4-fd6cb3a90dc1</UserSecretsId>
@@ -66,7 +74,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
     <Folder Include="wwwroot\images\Personnel\" />
     <Folder Include="wwwroot\pages\js\" />
   </ItemGroup>

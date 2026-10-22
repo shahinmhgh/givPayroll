@@ -44,6 +44,20 @@ namespace givPayroll.Models
         [Required]
         public int SalaryItemId{ get; set; }
 
+        // select * from PersonCategory 
+        [MaxLength(50)]
+        [Display(Name = "کد حساب")]
+        public string? PersonCategoryCode { get; set; }
+
+        // select * from person
+        [Display(Name = "کد تفصیلی")]
+        public int PersonID { get; set; }
+
+        // select * from Project 
+        [Display(Name = "پروژه")]
+        public int ProjectId { get; set; }
+
+
         // Navigation Property
 
         [ForeignKey(nameof(SalaryItemId))]

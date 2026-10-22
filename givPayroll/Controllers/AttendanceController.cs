@@ -95,12 +95,13 @@ namespace givPayroll.Controllers
 
                 .ToListAsync();
 
+            // هر کسی که قابل ثبت است اعم از ثبت شده یا ثبت نشده
             if (actionParam=="Check")
                 personnels = personnels
-                .Where(x => !_context.Payrolls.Any(p =>
-                    p.PersonnelId == x.PersonnelId &&
-                    p.PayrollYear == year &&
-                    p.PayrollMonth == month))
+                //.Where(x => !_context.Payrolls.Any(p =>
+                //    p.PersonnelId == x.PersonnelId &&
+                //    p.PayrollYear == year &&
+                //    p.PayrollMonth == month))
                 .ToList();
             if (actionParam == "CheckOk")
                 personnels = personnels

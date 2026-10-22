@@ -26,11 +26,13 @@
                             break;
                         case "CheckOk":
                             <th>تایید حقوق</th>       @* payroll ok     *@
-                            <th>فیش حقوقی</th>        @* payroll bill   *@
+                            @* payroll bill   *@
+                            // <button type="button" class="btn btn-sm btn-primary fa fa-print" onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=0&ym=@ym', '_blank')"></button>
+                            <th>فیش حقوقی </th>
                             break;
                         case "CheckAcc":
                             <th>پیش نمایش</th>        @* payroll bill   *@
-                            <th>ثبت در حسابداری</th>  @* payroll acc    *@
+                            /* <th>ثبت در حسابداری</th> */  @* payroll acc    *@
                             break;
                         default:
                             break;
@@ -145,7 +147,7 @@
 
                                     <button type="button" class="btn  btn-info tooltip-btn"
                                             onclick="window.open('/payroll/SalaryPdf?layout=payslip&id=@row.PersonnelId&ym=@ym', '_blank')">
-                                        <i class="fa fa-clipboard-list"></i>
+                                        <i class="fa fa-print"></i>
                                     </button>
                                 }
                             </td>
@@ -158,10 +160,8 @@
 
                                 </button>
                             </td>
-                            <td>
-                                @* payroll acc    *@
-                                @*  @if (row.Status == AppUtil.enumAttendanceWorkStatus.PayrollConfirmed)
-                                { *@
+                            @* payroll acc    *@
+                            @* <td>
                                 <button type="button" class="btn  btn-warning tooltip-btn" onclick=" VoucherPayroll(@row.PersonnelId, '@ym', '@row.Confirmed', '@row.Vouchered');">
                                     <i class="fa fa-bank"></i>
                                 </button>
@@ -174,13 +174,12 @@
 
                                     <i class="fa-solid fa-circle-xmark text-danger"></i>
                                 }
-
-                            </td>
+                            </td> *@
                             break;
                         default:
                             break;
                     }
-                    
+
                 </tr>
             }
 

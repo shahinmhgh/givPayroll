@@ -202,32 +202,38 @@
 
 
             <!-- Accounting -->
+            <div class="col-md-4">
 
-            <div class="col-md-6">
-
-                <label asp-for="AccAccountCode"
-                       class="form-label">
-                </label>
-
-                <input asp-for="AccAccountCode"
-                       class="form-control"
-                       dir="ltr" />
+                <label> @Html.DisplayNameFor(m => m.ProjectId) </label>
+                <select asp-for="ProjectId" asp-items="ViewBag.ProjectId" class="form-select">
+                    <option value=""> -- پروژه را انتخاب کنید -- </option>
+                </select>
 
             </div>
 
+            <div class="col-md-4">
 
-            <div class="col-md-6">
+                <label> @Html.DisplayNameFor(m => m.PersonCategoryCode) </label>
+                <select asp-for="PersonCategoryCode" asp-items="ViewBag.PersonCategoryCode" class="form-select">
+                    <option value=""> -- کد معین را انتخاب کنید -- </option>
+                </select>
 
-                <label asp-for="AccUniqueId"
-                       class="form-label">
-                </label>
-
-                <input asp-for="AccUniqueId"
-                       class="form-control"
-                       type="number"
-                       dir="ltr" />
-
+            
             </div>
+
+
+            <div class="col-md-4">
+                <label asp-for="PersonID" class="form-label"></label>
+
+                <select asp-for="PersonID"
+                        asp-items="ViewBag.PersonID"
+                        class="form-select"
+                        id="PersonID">
+                    <option value="">-- کد تفصیلی را انتخاب کنید --</option>
+                </select>
+            </div>
+
+        
 
         </div>
 
@@ -326,8 +332,59 @@
         }
     }
 
-    $(document).ready(function() {
+    $(document).on('change', '#PersonCategoryCode', function() {
 
+        var categoryCode = $(this).val();
+        var personDropdown = $('#PersonID');
+
+        // Reset the persons dropdown
+        personDropdown.empty();
+
+        personDropdown.append(
+            $('<option>', {
+                value: '',
+                text: '-- کد تفصیلی را انتخاب کنید --'
+            })
+        );
+
+        // No category selected
+        if (!categoryCode) {
+            personDropdown.prop('disabled', true);
+            return;
+        }
+
+        personDropdown.prop('disabled', true);
+
+        $.ajax({
+            url: '@Url.Action("GetPersonsByCategoryCode", "SalaryItem")',
+            type: 'GET',
+            data: { categoryCode: categoryCode },
+
+            success: function(persons) {
+
+                $.each(persons, function(index, person) {
+                    personDropdown.append(
+                        $('<option>', {
+                            value: person.value,
+                            text: person.text
+                        })
+                    );
+                });
+
+                personDropdown.prop('disabled', false);
+            },
+
+            error: function(xhr) {
+                console.error(xhr);
+
+                alert('خطا در دریافت فهرست کدهای تفصیلی');
+                personDropdown.prop('disabled', false);
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        $('#PersonCategoryCode').trigger('change');
     });
 
     function validateFormula() {
@@ -335,7 +392,7 @@
 
          
         const formula = $("#FormulaValue").val().trim();
-        
+
         if (!formula) {
             return {
                 valid: true,
@@ -362,8 +419,7 @@
             !dictionarySet.has(word.toLowerCase())
         );
 
-        if (invalidWords == $('#Label').val())
-        {
+        if (invalidWords == $('#Label').val()) {
             return {
                 valid: true,
                 invalidWords: []

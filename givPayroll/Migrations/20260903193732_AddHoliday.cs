@@ -46,7 +46,7 @@ namespace givPayroll.Migrations
             migrationBuilder.InsertData(
                 schema: "ref",
                 table: "SalaryItem",
-                columns: new[] { "Id", "AccAccountCode", "AccUniqueId", "CalculationMode", "DateChanged", "DateCreated", "FormulaValue", "Label", "PlusMinus", "Priority", "SalaryItemName", "Source", "Unit", "UserChanged", "UserCreated" },
+                columns: new[] { "Id", "PersonCategoryCode", "PersonID", "CalculationMode", "DateChanged", "DateCreated", "FormulaValue", "Label", "PlusMinus", "Priority", "SalaryItemName", "Source", "Unit", "UserChanged", "UserCreated" },
                 values: new object[] { 11, null, null, "Manual", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", "LoanInstallment", -1, 140, "قسط وام", "PersonnelInstallment", "Amount", null, 0 });
         }
     }

@@ -46,6 +46,9 @@ namespace givPayroll.ViewModels
         public bool IsTaxBase { get; set; }
 
         public bool IsInsuranceBase { get; set; }
+        public int ProjectId { get; internal set; }
+        public string PersonCategoryCode { get; internal set; }
+        public int PersonID { get; internal set; }
     }
 
     public class PayrollAdjustmentPersonnelViewModel

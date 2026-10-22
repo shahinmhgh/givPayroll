@@ -3694,11 +3694,11 @@ namespace givPayroll.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<string>("AccAccountCode")
+                    b.Property<string>("PersonCategoryCode")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<long?>("AccUniqueId")
+                    b.Property<long?>("PersonID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("CalculationMode")

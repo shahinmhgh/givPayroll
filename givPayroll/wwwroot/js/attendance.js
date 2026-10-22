@@ -353,9 +353,12 @@ function SavePayrollPersonnel(id) {
         },
         success: function (result) {
 
-            alert(result.message);
-
-
+            //alert(result.message);
+            Swal.fire({
+                icon: result.icon,
+                title: result.message
+            });
+            checkAttendance();
         },
         error: function (xhr) {
 

@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using givPayroll.Data;
-using NCalc;
+﻿using givPayroll.Data;
 using givPayroll.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using NCalc;
 
 namespace givPayroll.Controllers
 {
@@ -182,7 +183,18 @@ namespace givPayroll.Controllers
             return Json(words);
         }
 
-     
+        [HttpGet]
+        public IActionResult GetPersonsByCategoryCode(string categoryCode)
+        {
+            if (string.IsNullOrWhiteSpace(categoryCode))
+            {
+                return Json(new List<SelectListItem>());
+            }
+
+            var persons =AppUtil.GetPersonsByCategoryCode(_context, categoryCode);
+
+            return Json(persons);
+        }
 
         // GET: SalaryItem/Edit/5
         [HttpGet]
@@ -192,6 +204,9 @@ namespace givPayroll.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
+            ViewBag.ProjectId = AppUtil.GetProject(_context);
+            ViewBag.PersonCategoryCode = AppUtil.GetMoein(_context);    
+            //ViewBag.PersonID = AppUtil.GetPerson(_context);
             if (model == null)
                 return NotFound();
 
@@ -230,9 +245,9 @@ namespace givPayroll.Controllers
             entity.PlusMinus = model.PlusMinus;
             entity.CalculationMode = model.CalculationMode ?? "";
             entity.FormulaValue = model.FormulaValue ?? "";
-            entity.AccAccountCode = model.AccAccountCode;
-            entity.AccUniqueId = model.AccUniqueId;
-
+            entity.PersonCategoryCode = model.PersonCategoryCode;
+            entity.PersonID = model.PersonID;
+            entity.ProjectId = model.ProjectId;
             await _context.SaveChangesAsync();
 
             return Json(new

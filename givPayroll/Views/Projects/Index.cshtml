@@ -1,0 +1,118 @@
+﻿@model List<Project>
+
+@{
+    ViewData["Title"] = "پروژه‌ها";
+}
+
+<div class="container mt-4">
+    <h3>پروژه‌ها</h3>
+
+    <form asp-action="Index" method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text"
+                   name="searchString"
+                   value="@ViewData["CurrentFilter"]"
+                   class="form-control"
+                   placeholder="Search by project name..." />
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-search"></i> جستجو
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                پاک کردن
+            </a>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+            @*     <th>
+                    <a asp-action="Index"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["ProjectIdSort"]"
+                       class="text-decoration-none text-dark">
+                        Project ID
+                        @if ((string?)ViewData["CurrentSort"] == "id")
+                        {
+                            <i class="fa fa-sort-up"></i>
+                        }
+                        else if ((string?)ViewData["CurrentSort"] == "id_desc")
+                        {
+                            <i class="fa fa-sort-down"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-sort text-muted"></i>
+                        }
+                    </a>
+                </th> *@
+
+                <th>
+                    <a asp-action="Index"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["ProjectNameSort"]"
+                       class="text-decoration-none text-dark">
+                        Project Name
+                        @if ((string?)ViewData["CurrentSort"] == "name")
+                        {
+                            <i class="fa fa-sort-up"></i>
+                        }
+                        else if ((string?)ViewData["CurrentSort"] == "name_desc")
+                        {
+                            <i class="fa fa-sort-down"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-sort text-muted"></i>
+                        }
+                    </a>
+                </th>
+
+                <th>
+                    <a asp-action="Index"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["StartDateSort"]"
+                       class="text-decoration-none text-dark">
+                        Start Date
+                        @if ((string?)ViewData["CurrentSort"] == "date")
+                        {
+                            <i class="fa fa-sort-up"></i>
+                        }
+                        else if ((string?)ViewData["CurrentSort"] == "date_desc")
+                        {
+                            <i class="fa fa-sort-down"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-sort text-muted"></i>
+                        }
+                    </a>
+                </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="3" class="text-center">
+                        No projects found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var project in Model)
+                {
+                    <tr>
+                        @* <td>@project.ProjectID</td> *@
+                        <td>@project.ProjectName</td>
+                        <td> @(project.StartDate.ToString().Insert(6, "/").Insert(4, "/"))</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

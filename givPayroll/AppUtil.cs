@@ -1,5 +1,11 @@
-﻿using NPOI.HSSF.UserModel;
+﻿using DocumentFormat.OpenXml.InkML;
+using givPayroll.Data;
+using givPayroll.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using NPOI.HSSF.UserModel;
 using NPOI.XSSF.UserModel;
+using SQLitePCL;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -41,6 +47,68 @@ namespace givPayroll
             Woman = 2
         }
 
+       
+
+        //select pc.* 
+        //from PersonCategory pc inner join
+        //     PersonCategoryLength pcl on len(pc.CategoryCode) = pcl.SumLevelLength
+        //where pcl.CategoryLevel = 3
+        public static List<SelectListItem> GetPersonsByCategoryCode(ApplicationDbContext _context,
+            String categoryCode )
+        {
+            return _context.PersonCategoryResults
+               .FromSqlInterpolated(
+                   $"SELECT * FROM dbo.GetPersonsByCategoryCode({categoryCode})")
+               .AsEnumerable()
+               .Select(x => new SelectListItem
+               {
+                   Value = x.PersonID.ToString(),
+                   Text = x.PersonFirstName  
+               })
+               .ToList();
+          
+        }
+
+        public static List<SelectListItem> GetMoein(ApplicationDbContext _context)
+        {
+            return _context.PersonCategories
+                .Join(
+                    _context.PersonCategoryLengths,
+                    pc => pc.CategoryCode.Length,
+                    pcl => pcl.SumLevelLength,
+                    (pc, pcl) => new { pc, pcl }
+                )
+                .Where(x => x.pcl.CategoryLevel == 3)
+                .OrderBy(x => x.pc.CategoryName)
+                .Select(x => new SelectListItem
+                {
+                    Value = x.pc.CategoryCode,
+                    Text = x.pc.CategoryName
+                })
+                .ToList();
+
+
+
+        }
+
+        public static List<SelectListItem> GetProject(ApplicationDbContext _context)
+        {
+            return _context.Projects.Select(x => new SelectListItem
+            {
+                Value = x.ProjectID.ToString(),
+                Text = x.ProjectName
+            }).ToList();
+        }
+
+        public static string FixYEKE(string Field2)
+        {
+
+            String ret;
+            ret = Field2.Replace("ی", "ي");
+            //  ret = ret.Replace("ک", "ك");
+            ret = ret.Replace("ك", "ک");
+            return ret;
+        }
         public static String M2S(DateTime gregorianDate)
         {
             var pc = new PersianCalendar();
@@ -246,5 +314,7 @@ namespace givPayroll
                 .OrderBy(x => x)
                 .ToList();
         }
+
+     
     }
 }

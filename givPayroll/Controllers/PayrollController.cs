@@ -81,22 +81,49 @@ public class PayrollController : Controller
     public async Task<IActionResult> SavePayrollPersonnel(int year, int month, int personnelId)
     {
         PayrollViewModel model = await GetPayrollData(year, month, personnelId);
-        string err = UpdatePayroll(model, personnelId, year, month);
+        // check if save is done or not
+        Payroll pay = _context.Payrolls.Where(i => i.PersonnelId == personnelId && i.PayrollMonth == month && i.PayrollYear == year).FirstOrDefault();
+        if (pay == null)
+        {
+            string err = UpdatePayroll(model, personnelId, year, month);
 
-        if (err == "")
-            return Json(new
+            if (err == "")
+                return Json(new
+                {
+                    success = true,
+                    message = "ثبت حقوق موفقیت آمیر انجام شد"
+                });
+            else
             {
-                success = true,
-                message = "ثبت حقوق موفقیت آمیر انجام شد"
-            });
+                _logger.LogError(err, "Error updating payroll.");
+                return Json(new
+                {
+                    success = false,
+                    message = err,
+                });
+            }
+        }
         else
         {
-            _logger.LogError(err, "Error updating payroll.");
-            return Json(new
+            _context.Payrolls.Remove(pay);
+            try
             {
-                success = false,
-                message = err,
-            });
+                _context.SaveChanges();
+                return Json(new
+                {
+                    success = true,
+                    message = "ثبت حقوق برداشته شد"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = " برداشته ثبت حقوق با خطا مواجه شد"
+                });
+            }
+           
         }
     }
     private string UpdatePayroll(
@@ -295,7 +322,7 @@ public class PayrollController : Controller
         if (pay == null)
             return Json(new
             {
-                icon= "error",
+                icon = "error",
                 success = false,
                 message = "اطلاعات حقوق برای این فرد در تاریخ " + ym + " پیدا نشد"
             });
@@ -357,7 +384,7 @@ public class PayrollController : Controller
             });
         else
         {
-           if (!pay.Confirmed)
+            if (!pay.Confirmed)
                 return Json(new
                 {
                     success = false,
@@ -399,7 +426,8 @@ public class PayrollController : Controller
     public static List<InsuTaxViewModel> lstInsurance = new List<InsuTaxViewModel>();
     public static List<InsuTaxViewModel> lstTax = new List<InsuTaxViewModel>();
 
-    private async Task<PayrollViewModel> GetPayrollInsertedData(int year, int month, int personnelId)
+    private async Task<PayrollViewModel> GetPayrollInsertedData(int year, int month,
+        int personnelId)
     {
         PayrollViewModel model = new PayrollViewModel();
         model.PayrollMonth = month;
@@ -443,6 +471,52 @@ public class PayrollController : Controller
         ViewBag.MinusList = MinusList;
         return model;
     }
+
+    private async Task<List<PayrollViewModel>> GetPayrollInsertedDataAll(int year,
+        int month)
+    {
+
+        List<PayrollViewModel> model = new List<PayrollViewModel>();
+
+        //model.PayrollMonth = month;
+        //model.PayrollYear = year;
+
+        //List<Payroll?> pay = _context.Payrolls
+        //        .FirstOrDefault(p =>
+        //            p.PayrollYear == year &&
+        //            p.PayrollMonth == month);
+        //model.IssueDate = DateTime.Now;
+        //model.Personnel = _context.Personnels.Include(x => x.PersonnelFamilies).Include(i => i.MaritalStatus).Where(i => i.Id == personnelId).FirstOrDefault();
+        //model.PersonnelOrder = _context.PersonnelOrders.Include("Details").Where(i => i.Id == personnelId && i.IsActive).FirstOrDefault();
+
+        //pay.PayrollItems = _context.PayrollItems
+        //    .Include(i => i.SalaryItem).Include("PayrollAdjustment")
+        //    .Where(i => i.PayrollId == pay.Id).ToList();
+        //model.PayrollItems = pay.PayrollItems.ToList();
+
+        //PlusList = model.PayrollItems
+        //   .Where(x => x.SalaryItem != null && x.SalaryItem.PlusMinus == 1)
+        //   .Select(x => new CalculateTaxDetail
+        //   {
+        //       Amount = x.Amount,
+        //       Title = x.SalaryItem.SalaryItemName
+        //   })
+        //   .ToList();
+
+        //MinusList = model.PayrollItems
+        //   .Where(x => x.SalaryItem != null && x.SalaryItem.PlusMinus == -1)
+        //   .Select(x => new CalculateTaxDetail
+        //   {
+        //       Amount = x.Amount,
+        //       Title = x.SalaryItem.SalaryItemName
+        //   })
+        //   .ToList();
+
+        //ViewBag.PlusList = PlusList;
+        //ViewBag.MinusList = MinusList;
+        return model;
+    }
+
     private async Task<PayrollViewModel> GetPayrollData(int year, int month, int personnelId)
     {
 

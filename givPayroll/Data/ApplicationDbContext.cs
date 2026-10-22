@@ -17,6 +17,24 @@ namespace givPayroll.Data
         {
         }
 
+        public DbSet<PersonCategoryResult> PersonCategoryResults
+            => Set<PersonCategoryResult>();
+
+        #region Other
+        public DbSet<Config> Configs { get; set; }
+        public DbSet<Person> Persons { get; set; }
+        public DbSet<PersonCategoryGroups> PersonCategoryGroups { get; set; }
+        public DbSet<PersonCategoryLength> PersonCategoryLengths { get; set; }
+        public DbSet<PersonCategoryLevel> PersonCategoryLevels { get; set; }
+        public DbSet<PersonGroup> PersonGroups { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<Voucher> Vouchers { get; set; }
+        public DbSet<VoucherRow> VoucherRows { get; set; }
+
+        public DbSet<PersonCategory> PersonCategories { get; set; }
+        public DbSet<Staff> staff { get; set; }
+        #endregion
+
         public DbSet<Personnel> Personnels { get; set; }
         public DbSet<MaritalStatus> MaritalStatus { get; set; }
         public DbSet<Education> Educations { get; set; }
@@ -26,7 +44,7 @@ namespace givPayroll.Data
         public DbSet<Gender> Genders { get; set; }
         public DbSet<MaritalStatus> MarriageStatus { get; set; }
         public DbSet<Parameter> Parameters { get; set; }
-        public DbSet<Company> Companies { get; set; }
+         
 
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<PersonnelContract> Contracts { get; set; }
@@ -59,6 +77,9 @@ namespace givPayroll.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<PersonCategoryResult>()
+                .HasNoKey();
 
             //None,
             //Incorrect,
@@ -545,19 +566,12 @@ namespace givPayroll.Data
             .Property(x => x.FormulaValue)
             .HasColumnType("nvarchar(max)");
 
-
-            builder.Entity<Company>().HasData(
-              new Company
-              { Id = 1, CompanyName = "Giv", InsuranceCode = "", Address = "تهران - ..." }
-            );
-
-            builder.Entity<Parameter>().HasData(
-
-                   new Parameter
-                   { Id = 1, Subject = "Insurance", OptionKey = "EmployeePercent", OptionName = "درصد بیمه کارمند", OptionValue = "7" },
-                    new Parameter
-                    { Id = 2, Subject = "Insurance", OptionKey = "CompanyPercent", OptionName = "درصد بیمه کارفرما", OptionValue = "23" }
-            );
+            //builder.Entity<Parameter>().HasData(
+            //       new Parameter
+            //       { Id = 1, Subject = "Insurance", OptionKey = "EmployeePercent", OptionName = "درصد بیمه کارمند", OptionValue = "7" },
+            //        new Parameter
+            //        { Id = 2, Subject = "Insurance", OptionKey = "CompanyPercent", OptionName = "درصد بیمه کارفرما", OptionValue = "23" }
+            //);
 
             builder.Entity<SalaryItem>(entity =>
             {
@@ -598,10 +612,10 @@ namespace givPayroll.Data
                     .HasColumnType("ntext")
                     .HasDefaultValue("");
 
-                entity.Property(x => x.AccAccountCode)
+                entity.Property(x => x.PersonCategoryCode)
                     .HasMaxLength(50);
 
-                entity.Property(x => x.AccUniqueId);
+                entity.Property(x => x.PersonID);
             });
 
             builder.Entity<PersonnelOrder>(entity =>

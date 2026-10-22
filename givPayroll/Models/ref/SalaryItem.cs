@@ -45,12 +45,18 @@ namespace givPayroll.Models
         [Column(TypeName = "ntext")]
         public string? FormulaValue { get; set; } = string.Empty;
 
+        // select * from PersonCategory 
         [MaxLength(50)]
         [Display(Name = "کد حساب")]
-        public string? AccAccountCode { get; set; }
+        public string? PersonCategoryCode { get; set; }
 
+        // select * from person
         [Display(Name = "کد تفصیلی")]
-        public long? AccUniqueId { get; set; }
+        public int PersonID { get; set; }
+
+        // select * from Project 
+        [Display(Name = "پروژه")]
+        public int ProjectId { get;   set; }
 
         [Required]
         [Display(Name = "تاریخ ایجاد")]
@@ -68,5 +74,6 @@ namespace givPayroll.Models
 
         public virtual ICollection<PayrollItem> PayrollItems { get; set; }  = new List<PayrollItem>();
         public virtual ICollection<SalaryItemRule> SalaryItemRules { get; set; } = new List<SalaryItemRule>();
+      
     }
 }

@@ -293,38 +293,43 @@ namespace givPayroll.Migrations
                     b.ToTable("Attendance", "Payroll");
                 });
 
-            modelBuilder.Entity("givPayroll.Models.Company", b =>
+            modelBuilder.Entity("givPayroll.Models.Config", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ActiveClientID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActiveClientID"));
 
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
+                    b.Property<int?>("ActivePriceListID")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("ActiveProjectID")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ActiveStockID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ActiveWholeSalePriceListID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CompanyID")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("InsuranceCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<string>("CompanyName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
 
-                    b.ToTable("Company", "dbo");
+                    b.Property<int?>("GeneralCustomerID")
+                        .HasColumnType("int");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "تهران - ...",
-                            CompanyName = "Giv",
-                            InsuranceCode = ""
-                        });
+                    b.HasKey("ActiveClientID");
+
+                    b.ToTable("Config", "dbo");
                 });
 
             modelBuilder.Entity("givPayroll.Models.ContractStatus", b =>
@@ -3121,24 +3126,6 @@ namespace givPayroll.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Parameters", "ref");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            OptionKey = "EmployeePercent",
-                            OptionName = "درصد بیمه کارمند",
-                            OptionValue = "7",
-                            Subject = "Insurance"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            OptionKey = "CompanyPercent",
-                            OptionName = "درصد بیمه کارفرما",
-                            OptionValue = "23",
-                            Subject = "Insurance"
-                        });
                 });
 
             modelBuilder.Entity("givPayroll.Models.Payroll", b =>
@@ -3202,6 +3189,16 @@ namespace givPayroll.Migrations
 
                     b.Property<bool>("Loan")
                         .HasColumnType("bit");
+
+                    b.Property<string>("PersonCategoryCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("PersonID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SalaryItemId")
                         .HasColumnType("int");
@@ -3364,6 +3361,285 @@ namespace givPayroll.Migrations
                         });
                 });
 
+            modelBuilder.Entity("givPayroll.Models.Person", b =>
+                {
+                    b.Property<long>("PersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CompanyID")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DiscountListID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DiscountListUsage")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<long?>("NewPersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("OldPersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("OriginPersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ParentPersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PersonAddress")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<string>("PersonCategoryCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("PersonFax")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("PersonFirstName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PersonFullName")
+                        .IsRequired()
+                        .HasMaxLength(511)
+                        .HasColumnType("varchar(511)");
+
+                    b.Property<int>("PersonGroupID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("PersonIsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PersonLastName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PersonMobile")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("PersonNote")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("PersonTel")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("PersonTypeID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PriceListID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonID");
+
+                    b.ToTable("Person", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.PersonCategory", b =>
+                {
+                    b.Property<string>("CategoryCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("AccountNature")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("AccountType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("CategoryGroupCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("CategoryIsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasSubsideryAccount")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasUniqueAccount")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoryCode");
+
+                    b.ToTable("PersonCategory", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.PersonCategoryGroups", b =>
+                {
+                    b.Property<string>("CategoryCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PersonGroupID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoryCode");
+
+                    b.ToTable("PersonCategoryGroups", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.PersonCategoryLength", b =>
+                {
+                    b.Property<int>("CategoryLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SumLevelLength")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoryLevel");
+
+                    b.ToTable("PersonCategoryLength", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.PersonCategoryLevel", b =>
+                {
+                    b.Property<int>("CategoryLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryLevelLength")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CategoryLevelName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CategoryLevel");
+
+                    b.ToTable("PersonCategoryLevel", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.PersonGroup", b =>
+                {
+                    b.Property<int>("PersonGroupID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsBank")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCost")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCostCenter")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCustomer")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMoneyBox")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPerson")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsShopCustomer")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsStaff")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVendor")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("MaxID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MinID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PersonGroupName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonGroupID");
+
+                    b.ToTable("PersonGroup", "dbo");
+                });
+
             modelBuilder.Entity("givPayroll.Models.Personnel", b =>
                 {
                     b.Property<int>("Id")
@@ -3459,7 +3735,7 @@ namespace givPayroll.Migrations
 
                     b.HasIndex("PersonnelOrderId");
 
-                    b.ToTable("PersonnelContract");
+                    b.ToTable("PersonnelContract", "Payroll");
                 });
 
             modelBuilder.Entity("givPayroll.Models.PersonnelFamily", b =>
@@ -3634,6 +3910,54 @@ namespace givPayroll.Migrations
                     b.ToTable("PersonnelOrderDetail", "Payroll");
                 });
 
+            modelBuilder.Entity("givPayroll.Models.Project", b =>
+                {
+                    b.Property<long>("ProjectID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EndDate")
+                        .HasMaxLength(8)
+                        .HasColumnType("char(8)");
+
+                    b.Property<string>("Manager")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("ManagerUserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProjectDesc")
+                        .HasColumnType("varchar(max)");
+
+                    b.Property<string>("ProjectName")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("StartDate")
+                        .HasMaxLength(8)
+                        .HasColumnType("char(8)");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectID");
+
+                    b.ToTable("Project", "dbo");
+                });
+
             modelBuilder.Entity("givPayroll.Models.RuleInsurance", b =>
                 {
                     b.Property<int>("Id")
@@ -3747,13 +4071,6 @@ namespace givPayroll.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<string>("AccAccountCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<long?>("AccUniqueId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("CalculationMode")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -3782,6 +4099,13 @@ namespace givPayroll.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasDefaultValue("");
 
+                    b.Property<string>("PersonCategoryCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("PersonID")
+                        .HasColumnType("int");
+
                     b.Property<int>("PlusMinus")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -3791,6 +4115,9 @@ namespace givPayroll.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
                     b.Property<string>("SalaryItemName")
                         .IsRequired()
@@ -3830,8 +4157,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "BaseSalary * DaysWorked",
                             IsSystem = 1,
                             Label = "BaseSalary",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 10,
+                            ProjectId = 0,
                             SalaryItemName = "حقوق پایه",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -3845,8 +4174,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*1.2/60*ExtraMinute",
                             IsSystem = 1,
                             Label = "OverTime",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 70,
+                            ProjectId = 0,
                             SalaryItemName = "اضافه کار",
                             Source = "Attendence",
                             Unit = "Hour",
@@ -3860,8 +4191,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(HousingAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "HousingAllowance",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 50,
+                            ProjectId = 0,
                             SalaryItemName = "حق مسکن",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -3875,8 +4208,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(ChildAllowance * ChildNo / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "ChildAllowance",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 60,
+                            ProjectId = 0,
                             SalaryItemName = "حق اولاد",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -3890,8 +4225,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*MissionMinute",
                             IsSystem = 1,
                             Label = "MissionAllownce",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 100,
+                            ProjectId = 0,
                             SalaryItemName = "ماموریت",
                             Source = "Attendence",
                             Unit = "Day",
@@ -3905,8 +4242,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*AbsenceMinute",
                             IsSystem = 1,
                             Label = "AbsenceDeduction",
+                            PersonID = 0,
                             PlusMinus = -1,
                             Priority = 80,
+                            ProjectId = 0,
                             SalaryItemName = "کسرکار",
                             Source = "Attendence",
                             Unit = "Hour",
@@ -3920,8 +4259,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*DelayMinute",
                             IsSystem = 1,
                             Label = "DelayDeduction",
+                            PersonID = 0,
                             PlusMinus = -1,
                             Priority = 90,
+                            ProjectId = 0,
                             SalaryItemName = "تاخیر",
                             Source = "Attendence",
                             Unit = "Hour",
@@ -3935,8 +4276,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Tax",
+                            PersonID = 0,
                             PlusMinus = -1,
                             Priority = 130,
+                            ProjectId = 0,
                             SalaryItemName = "مالیات",
                             Source = "RuleTax",
                             Unit = "Percent",
@@ -3950,8 +4293,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Insurance",
+                            PersonID = 0,
                             PlusMinus = -1,
                             Priority = 120,
+                            ProjectId = 0,
                             SalaryItemName = "بیمه سهم کارمند",
                             Source = "RuleInsurance",
                             Unit = "Percent",
@@ -3965,8 +4310,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(FoodAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "FoodAllowance",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 40,
+                            ProjectId = 0,
                             SalaryItemName = "بن و خواربار",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -3980,8 +4327,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(JobAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "JobAllowance",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 30,
+                            ProjectId = 0,
                             SalaryItemName = "فوق العاده شغل",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -3995,8 +4344,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(ResponsibilityAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "ResponsibilityAllowance",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 20,
+                            ProjectId = 0,
                             SalaryItemName = "حق مسئولیت",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4010,8 +4361,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Bonus",
+                            PersonID = 0,
                             PlusMinus = 1,
                             Priority = 110,
+                            ProjectId = 0,
                             SalaryItemName = "تعدیلات افزایش",
                             Source = "PayrollAdjustment",
                             Unit = "Amount",
@@ -4025,8 +4378,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Penalty",
+                            PersonID = 0,
                             PlusMinus = -1,
                             Priority = 111,
+                            ProjectId = 0,
                             SalaryItemName = "تعدیلات کاهشی",
                             Source = "PayrollAdjustment",
                             Unit = "Amount",
@@ -4059,6 +4414,255 @@ namespace givPayroll.Migrations
                     b.HasIndex("SalaryItemId");
 
                     b.ToTable("SalaryItemRule", "ref");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.Staff", b =>
+                {
+                    b.Property<int>("StaffID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(511)
+                        .HasColumnType("varchar(511)");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Mobile")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<int?>("OrgPostID")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("PersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PersonnelCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int?>("StaffGroupID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StaffType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Tel")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VisibleInClientIDs")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.HasKey("StaffID");
+
+                    b.ToTable("Staff", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.Voucher", b =>
+                {
+                    b.Property<long>("AutoID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AutoID"));
+
+                    b.Property<int>("ClientID")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DailyNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("Finalized")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("FinalizedByUserID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("InitiateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("InitiateUserID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModifyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LastModifyUserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MonthlyDate")
+                        .HasMaxLength(8)
+                        .HasColumnType("varchar(8)");
+
+                    b.Property<long?>("MonthlyNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("OldVoucherNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("VoucherDate")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("char(8)");
+
+                    b.Property<string>("VoucherDescription")
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)");
+
+                    b.Property<int>("VoucherFlag")
+                        .HasColumnType("int");
+
+                    b.Property<long>("VoucherID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("VoucherNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("VoucherRefClientID")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("VoucherRefID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("VoucherRefType")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("VoucherTypeID")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("WeeklyDate")
+                        .HasMaxLength(8)
+                        .HasColumnType("varchar(8)");
+
+                    b.Property<long?>("WeeklyNo")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AutoID");
+
+                    b.ToTable("Voucher", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.VoucherRow", b =>
+                {
+                    b.Property<long>("AutoID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AutoID"));
+
+                    b.Property<decimal?>("AmountValue")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<string>("CategoryCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("ClientID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Credit")
+                        .HasColumnType("decimal(21,3)");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DateValue")
+                        .HasMaxLength(8)
+                        .HasColumnType("varchar(8)");
+
+                    b.Property<decimal?>("Debit")
+                        .HasColumnType("decimal(21,3)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)");
+
+                    b.Property<DateTime?>("InitiateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("InitiateUserID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModifyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LastModifyUserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NumberValue")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<long?>("PersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ProjectID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("VoucherID")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("VoucherRowRefClientID")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("VoucherRowRefID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("VoucherRowRefType")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.HasKey("AutoID");
+
+                    b.ToTable("VoucherRow", "dbo");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
