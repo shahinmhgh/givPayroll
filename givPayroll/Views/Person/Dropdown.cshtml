@@ -1,0 +1,307 @@
+﻿@model  PersonDropdownViewModel
+
+@{
+    ViewData["Title"] = "Person Lookup";
+}
+
+<div class="container mt-4">
+    <h4>Person Lookup</h4>
+
+    <form asp-action="Dropdown" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="lookup-container position-relative"
+             style="max-width: 500px;">
+
+            <label class="form-label">Select Person</label>
+
+            <div class="input-group">
+                <input type="text"
+                       id="personDisplay"
+                       class="form-control"
+                       placeholder="Search or select a person..."
+                       autocomplete="off"
+                       readonly />
+
+                <button type="button"
+                        id="toggleDropdown"
+                        class="btn btn-outline-secondary">
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <input type="hidden"
+                   id="SelectedPersonID"
+                   name="SelectedPersonID"
+                   value="@Model.SelectedPersonID" />
+
+            <div id="personDropdown"
+                 class="dropdown-table shadow bg-white border rounded mt-1"
+                 style="display:none; position:absolute;
+                width:100%; z-index:1000;">
+
+                <div class="p-2">
+                    <input type="text"
+                           id="personSearch"
+                           class="form-control"
+                           placeholder="Search ID, first name or last name..." />
+                </div>
+
+                <div style="max-height:300px; overflow-y:auto;">
+                    <table class="table table-bordered table-responsive table-sm table-hover mb-0"
+                           id="personTable">
+
+                           <colgroup>
+                            <col style="width: 100px;" />
+                            <col style="width: 200px;" />
+                            <col style="width: 250px;" />
+                        </colgroup>
+
+                        <thead class="table-light"
+                               style="position:sticky; top:0; z-index:1;">
+                            <tr>
+                                <th  >
+                                    <button type="button"
+                                            class="btn btn-link p-0 text-dark text-decoration-none"
+                                            data-sort="id">
+                                        ID ↕
+                                    </button>
+                                </th>
+                                <th  >
+                                    <button type="button"
+                                            class="btn btn-link p-0 text-dark text-decoration-none"
+                                            data-sort="first">
+                                        First Name ↕
+                                    </button>
+                                </th>
+                                <th  >
+                                    <button type="button"
+                                            class="btn btn-link p-0 text-dark text-decoration-none"
+                                            data-sort="last">
+                                        Last Name ↕
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var p in Model.Persons)
+                            {
+                                <tr class="person-row"
+                                    data-id="@p.PersonID"
+                                    data-first="@p.FirstName"
+                                    data-last="@p.LastName"
+                                    style="cursor:pointer;">
+
+                                    <td  >@p.PersonID</td>
+                                    <td  >@p.FirstName</td>
+                                    <td  >@p.LastName</td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                    <div id="noResults"
+                         class="text-center text-muted p-3"
+                         style="display:none;">
+                        No records found.
+                    </div>
+                </div>
+            </div>
+
+            <span asp-validation-for="SelectedPersonID"
+                  class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">
+            Submit
+        </button>
+    </form>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success mt-3">
+            @ViewBag.Message
+        </div>
+    }
+</div>
+
+<style>
+    #personTable {
+    width: 550px;
+    table-layout: fixed;
+    }
+
+    #personTable th,
+    #personTable td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+   /*  #personTable th,
+    #personTable td {
+        white-space: nowrap;
+        padding: 8px 12px;
+    } */
+    #personDropdown {
+        width: 550px !important;
+    }
+
+    #personTable tbody tr:hover {
+        background-color: #e9f2ff;
+    }
+
+    #personTable tbody tr.selected {
+        background-color: #cfe2ff;
+    }
+
+    .dropdown-table {
+        background: white;
+    }
+
+    #personSearch {
+        width: 100%;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(function() {
+            const $dropdown = $('#personDropdown');
+            const $display = $('#personDisplay');
+            const $selectedId = $('#SelectedPersonID');
+            const $search = $('#personSearch');
+            const $rows = $('#personTable tbody tr');
+
+            function openDropdown() {
+                $dropdown.show();
+                $search.trigger('focus');
+                filterRows();
+            }
+
+            function closeDropdown() {
+                $dropdown.hide();
+            }
+
+            function filterRows() {
+                const term = $search.val().toLowerCase().trim();
+                let visibleCount = 0;
+
+                $rows.each(function() {
+                    const $row = $(this);
+
+                    const text = (
+                        $row.data('id') + ' ' +
+                        $row.data('first') + ' ' +
+                        $row.data('last')
+                    ).toLowerCase();
+
+                    const matches = text.includes(term);
+
+                    $row.toggle(matches);
+
+                    if (matches) visibleCount++;
+                });
+
+                $('#noResults').toggle(visibleCount === 0);
+            }
+
+            function selectRow($row) {
+                const id = $row.attr('data-id');
+                const first = $row.attr('data-first') || '';
+                const last = $row.attr('data-last') || '';
+
+                $selectedId.val(id);
+                $display.val(
+                    id + ' - ' + first + ' ' + last
+                );
+
+                $rows.removeClass('selected');
+                $row.addClass('selected');
+
+                closeDropdown();
+            }
+
+            $('#toggleDropdown').on('click', function() {
+                if ($dropdown.is(':visible')) {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
+            });
+
+            $display.on('click', openDropdown);
+
+            $search.on('input', filterRows);
+
+            $rows.on('click', function() {
+                selectRow($(this));
+            });
+
+            // Sort table rows by clicking column headers.
+            let sortDirections = {
+                id: true,
+                first: true,
+                last: true
+            };
+
+            $('[data-sort]').on('click', function() {
+                const key = $(this).data('sort');
+                const ascending = sortDirections[key];
+
+                sortDirections[key] = !ascending;
+
+                const sortedRows = $rows.get().sort(function(a, b) {
+                    let va, vb;
+
+                    if (key === 'id') {
+                        va = Number($(a).attr('data-id'));
+                        vb = Number($(b).attr('data-id'));
+                    } else {
+                        va = ($(a).attr('data-' + key) || '')
+                            .toLowerCase();
+                        vb = ($(b).attr('data-' + key) || '')
+                            .toLowerCase();
+                    }
+
+                    if (va < vb) return ascending ? -1 : 1;
+                    if (va > vb) return ascending ? 1 : -1;
+                    return 0;
+                });
+
+                $('#personTable tbody').append(sortedRows);
+
+                filterRows();
+            });
+
+            // Restore the selected display after POST.
+            const selectedId = $selectedId.val();
+
+            if (selectedId) {
+                const $row = $rows.filter(function() {
+                    return $(this).attr('data-id') === selectedId;
+                }).first();
+
+                if ($row.length) {
+                    selectRow($row);
+                }
+            }
+
+            // Close when clicking outside the lookup.
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.lookup-container').length) {
+                    closeDropdown();
+                }
+            });
+
+            // Prevent the dropdown from submitting the form.
+            $dropdown.on('click', 'button', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+}

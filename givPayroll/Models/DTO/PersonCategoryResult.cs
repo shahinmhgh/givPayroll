@@ -1,6 +1,6 @@
 public class PersonCategoryResult
 {
-    public int PersonID{ get; set; }
+    public Int64 PersonID{ get; set; }
 
     public string? PersonFirstName { get; set; }
 

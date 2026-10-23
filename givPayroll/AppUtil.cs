@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.InkML;
 using givPayroll.Data;
 using givPayroll.Models;
+using MathNet.Numerics.Financial;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NPOI.HSSF.UserModel;
@@ -47,26 +48,26 @@ namespace givPayroll
             Woman = 2
         }
 
-       
+
 
         //select pc.* 
         //from PersonCategory pc inner join
         //     PersonCategoryLength pcl on len(pc.CategoryCode) = pcl.SumLevelLength
         //where pcl.CategoryLevel = 3
-        public static List<SelectListItem> GetPersonsByCategoryCode(ApplicationDbContext _context,
-            String categoryCode )
+        public static List<SelectListItem> GetPersonsByCategoryCode(
+           ApplicationDbContext context,
+           string categoryCode)
         {
-            return _context.PersonCategoryResults
-               .FromSqlInterpolated(
-                   $"SELECT * FROM dbo.GetPersonsByCategoryCode({categoryCode})")
-               .AsEnumerable()
-               .Select(x => new SelectListItem
-               {
-                   Value = x.PersonID.ToString(),
-                   Text = x.PersonFirstName  
-               })
-               .ToList();
-          
+            var persons = context.Database
+                .SqlQuery<PersonCategoryResult>(
+                    $"SELECT * FROM dbo.GetPersonsByCategoryCode({categoryCode})")
+                .ToList();
+
+            return persons.Select(x => new SelectListItem
+            {
+                Value = x.PersonID.ToString(),
+                Text = x.PersonFirstName
+            }).ToList();
         }
 
         public static List<SelectListItem> GetMoein(ApplicationDbContext _context)
@@ -87,8 +88,42 @@ namespace givPayroll
                 })
                 .ToList();
 
+        }
 
+        public static List<SelectListItem> GetMoeinCategory(ApplicationDbContext _context)
+        {
+            var items = _context.PersonCategories
+      .Join(
+          _context.PersonCategoryLengths.Where(pcl => pcl.CategoryLevel == 3),
+          pc => pc.CategoryCode.Length,
+          pcl => pcl.SumLevelLength,
+          (pc, pcl) => pc
+      )
+      .Join(
+          _context.PersonCategoryGroups,
+          pc => pc.CategoryCode,
+          pcg => pcg.CategoryCode,
+          (pc, pcg) => new
+          {
+              pc.CategoryName,
+              pc.CategoryCode,
+              pcg.PersonGroupID
+          }
+      )
+      .Join(
+          _context.PersonGroups,
+          x => x.PersonGroupID,
+          pg => pg.PersonGroupID,
+          (x, pg) => new SelectListItem
+          {
+              Value = x.CategoryCode,
+              Text = x.CategoryName + " - " + pg.PersonGroupName
+          }
+      )
+      .OrderBy(x => x.Text)
+      .ToList();
 
+            return items;
         }
 
         public static List<SelectListItem> GetProject(ApplicationDbContext _context)
@@ -315,6 +350,6 @@ namespace givPayroll
                 .ToList();
         }
 
-     
+
     }
 }

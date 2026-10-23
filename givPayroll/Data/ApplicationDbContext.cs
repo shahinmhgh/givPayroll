@@ -17,21 +17,24 @@ namespace givPayroll.Data
         {
         }
 
-        public DbSet<PersonCategoryResult> PersonCategoryResults
-            => Set<PersonCategoryResult>();
+        //public DbSet<PersonCategoryResult> PersonCategoryResults
+        //    => Set<PersonCategoryResult>();
 
         #region Other
         public DbSet<Config> Configs { get; set; }
         public DbSet<Person> Persons { get; set; }
+
         public DbSet<PersonCategoryGroups> PersonCategoryGroups { get; set; }
+        public DbSet<PersonCategory> PersonCategories { get; set; }
         public DbSet<PersonCategoryLength> PersonCategoryLengths { get; set; }
         public DbSet<PersonCategoryLevel> PersonCategoryLevels { get; set; }
         public DbSet<PersonGroup> PersonGroups { get; set; }
+
         public DbSet<Project> Projects { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<VoucherRow> VoucherRows { get; set; }
 
-        public DbSet<PersonCategory> PersonCategories { get; set; }
+        
         public DbSet<Staff> staff { get; set; }
         #endregion
 
@@ -44,7 +47,7 @@ namespace givPayroll.Data
         public DbSet<Gender> Genders { get; set; }
         public DbSet<MaritalStatus> MarriageStatus { get; set; }
         public DbSet<Parameter> Parameters { get; set; }
-         
+
 
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<PersonnelContract> Contracts { get; set; }

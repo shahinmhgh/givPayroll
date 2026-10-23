@@ -159,6 +159,23 @@ namespace givPayroll.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PersonCategoryResult", b =>
+                {
+                    b.Property<string>("CategoryCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PersonFirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PersonID")
+                        .HasColumnType("bigint");
+
+                    b.ToTable("PersonCategoryResult");
+                });
+
             modelBuilder.Entity("givPayroll.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
