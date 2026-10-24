@@ -17,15 +17,33 @@ public class PersonController : Controller
     {
         var model = new PersonDropdownViewModel
         {
-            Persons = await _context.Persons
-                .AsNoTracking()
-                .OrderBy(p => p.PersonID)
-                .Select(p => new PersonDropdownItem
-                {
-                    PersonID = p.PersonID,
-                    FirstName = p.PersonFirstName,
-                    LastName = p.PersonLastName
-                })
+            Items = await _context.PersonCategories
+                .Join(
+                    _context.PersonCategoryLengths,
+                    pc => pc.CategoryCode.Length,
+                    pcl => pcl.SumLevelLength,
+                    (pc, pcl) => new { pc, pcl }
+                )
+                .Where(x => x.pcl.CategoryLevel == 3)
+                .Join(
+                    _context.PersonCategoryGroups,
+                    x => x.pc.CategoryCode,
+                    pcg => pcg.CategoryCode,
+                    (x, pcg) => new { x.pc, pcg }
+                )
+                .Join(
+                    _context.PersonGroups,
+                    x => x.pcg.PersonGroupID,
+                    pg => pg.PersonGroupID,
+                    (x, pg) => new MoinPersonGroupDropdownItem
+                    {
+                        CategoryName = x.pc.CategoryName,
+                        PersonGroupName = pg.PersonGroupName,
+                        CategoryCode = x.pc.CategoryCode
+                    }
+                )
+                .OrderBy(x => x.CategoryName)
+                .ThenBy(x => x.PersonGroupName)
                 .ToListAsync()
         };
 
@@ -35,44 +53,67 @@ public class PersonController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Dropdown(
-        PersonDropdownViewModel model)
+    PersonDropdownViewModel model)
     {
-        if (!model.SelectedPersonID.HasValue)
+        if (string.IsNullOrWhiteSpace(model.SelectedCategoryCode))
         {
             ModelState.AddModelError(
-                nameof(model.SelectedPersonID),
-                "Please select a person.");
+                nameof(model.SelectedCategoryCode),
+                "Please select a category.");
         }
         else
         {
-            var person = await _context.Persons
+            var exists = await _context.PersonCategories
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p =>
-                    p.PersonID == model.SelectedPersonID.Value);
+                .AnyAsync(pc =>
+                    pc.CategoryCode == model.SelectedCategoryCode &&
+                    _context.PersonCategoryLengths.Any(pcl =>
+                        pcl.CategoryLevel == 3 &&
+                        pcl.SumLevelLength == pc.CategoryCode.Length) &&
+                    _context.PersonCategoryGroups.Any(pcg =>
+                        pcg.CategoryCode == pc.CategoryCode));
 
-            if (person == null)
+            if (!exists)
             {
                 ModelState.AddModelError(
-                    nameof(model.SelectedPersonID),
-                    "The selected person was not found.");
+                    nameof(model.SelectedCategoryCode),
+                    "The selected category was not found.");
             }
             else
             {
                 ViewBag.Message =
-                    $"Selected person: {person.PersonFirstName} " +
-                    $"{person.PersonLastName} (ID: {person.PersonID})";
+                    $"Selected Category Code: {model.SelectedCategoryCode}";
             }
         }
 
-        model.Persons = await _context.Persons
-            .AsNoTracking()
-            .OrderBy(p => p.PersonID)
-            .Select(p => new PersonDropdownItem
-            {
-                PersonID = p.PersonID,
-                FirstName = p.PersonFirstName,
-                LastName = p.PersonLastName
-            })
+        // Reload dropdown data
+        model.Items = await _context.PersonCategories
+            .Join(
+                _context.PersonCategoryLengths,
+                pc => pc.CategoryCode.Length,
+                pcl => pcl.SumLevelLength,
+                (pc, pcl) => new { pc, pcl }
+            )
+            .Where(x => x.pcl.CategoryLevel == 3)
+            .Join(
+                _context.PersonCategoryGroups,
+                x => x.pc.CategoryCode,
+                pcg => pcg.CategoryCode,
+                (x, pcg) => new { x.pc, pcg }
+            )
+            .Join(
+                _context.PersonGroups,
+                x => x.pcg.PersonGroupID,
+                pg => pg.PersonGroupID,
+                (x, pg) => new MoinPersonGroupDropdownItem
+                {
+                    CategoryName = x.pc.CategoryName,
+                    PersonGroupName = pg.PersonGroupName,
+                    CategoryCode = x.pc.CategoryCode
+                }
+            )
+            .OrderBy(x => x.CategoryName)
+            .ThenBy(x => x.PersonGroupName)
             .ToListAsync();
 
         return View(model);

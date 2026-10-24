@@ -1,25 +1,26 @@
-﻿@model  PersonDropdownViewModel
+﻿
+@model  PersonDropdownViewModel
 
 @{
-    ViewData["Title"] = "Person Lookup";
+    ViewData["Title"] = "Person Group Lookup";
 }
 
 <div class="container mt-4">
-    <h4>Person Lookup</h4>
+    <h4>Person Group Lookup</h4>
 
     <form asp-action="Dropdown" method="post">
         @Html.AntiForgeryToken()
 
         <div class="lookup-container position-relative"
-             style="max-width: 500px;">
+             style="max-width:550px;">
 
-            <label class="form-label">Select Person</label>
+            <label class="form-label">Select Person Group</label>
 
             <div class="input-group">
                 <input type="text"
                        id="personDisplay"
                        class="form-control"
-                       placeholder="Search or select a person..."
+                       placeholder="Select a category..."
                        autocomplete="off"
                        readonly />
 
@@ -31,75 +32,74 @@
             </div>
 
             <input type="hidden"
-                   id="SelectedPersonID"
-                   name="SelectedPersonID"
-                   value="@Model.SelectedPersonID" />
+                   id="SelectedCategoryCode"
+                   name="SelectedCategoryCode"
+                   value="@Model.SelectedCategoryCode" />
 
             <div id="personDropdown"
                  class="dropdown-table shadow bg-white border rounded mt-1"
                  style="display:none; position:absolute;
-                width:100%; z-index:1000;">
+                        width:550px; z-index:1000;">
 
                 <div class="p-2">
                     <input type="text"
                            id="personSearch"
                            class="form-control"
-                           placeholder="Search ID, first name or last name..." />
+                           placeholder="Search category, group or code..." />
                 </div>
 
-                <div style="max-height:300px; overflow-y:auto;">
-                    <table class="table table-bordered table-responsive table-sm table-hover mb-0"
+                <div style="max-height:300px; overflow:auto;">
+                    <table class="table table-bordered table-sm table-hover mb-0"
                            id="personTable">
 
-                           <colgroup>
-                            <col style="width: 100px;" />
-                            <col style="width: 200px;" />
-                            <col style="width: 250px;" />
+                        <colgroup>
+                             <col style="width:120px;" />
+                            <col style="width:200px;" />
+                           <col style="width:250px;" />
                         </colgroup>
 
                         <thead class="table-light"
                                style="position:sticky; top:0; z-index:1;">
                             <tr>
-                                <th  >
+                               <th>
                                     <button type="button"
                                             class="btn btn-link p-0 text-dark text-decoration-none"
-                                            data-sort="id">
-                                        ID ↕
+                                            data-sort="code">
+                                        Category Code ↕
                                     </button>
                                 </th>
-                                <th  >
+                                <th>
                                     <button type="button"
                                             class="btn btn-link p-0 text-dark text-decoration-none"
-                                            data-sort="first">
-                                        First Name ↕
+                                            data-sort="group">
+                                        Person Group Name ↕
                                     </button>
                                 </th>
-                                <th  >
+                                 <th>
                                     <button type="button"
                                             class="btn btn-link p-0 text-dark text-decoration-none"
-                                            data-sort="last">
-                                        Last Name ↕
+                                            data-sort="category">
+                                        Category Name ↕
                                     </button>
                                 </th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            @foreach (var p in Model.Persons)
+                            @foreach (var item in Model.Items)
                             {
                                 <tr class="person-row"
-                                    data-id="@p.PersonID"
-                                    data-first="@p.FirstName"
-                                    data-last="@p.LastName"
+                                    data-category="@item.CategoryName"
+                                    data-group="@item.PersonGroupName"
+                                    data-code="@item.CategoryCode"
                                     style="cursor:pointer;">
 
-                                    <td  >@p.PersonID</td>
-                                    <td  >@p.FirstName</td>
-                                    <td  >@p.LastName</td>
+                                    <td>@item.CategoryCode</td>
+                                    <td>@item.PersonGroupName</td>
+                                    <td>@item.CategoryName</td>
                                 </tr>
                             }
                         </tbody>
-
                     </table>
 
                     <div id="noResults"
@@ -110,7 +110,7 @@
                 </div>
             </div>
 
-            <span asp-validation-for="SelectedPersonID"
+            <span asp-validation-for="SelectedCategoryCode"
                   class="text-danger"></span>
         </div>
 
@@ -129,8 +129,8 @@
 
 <style>
     #personTable {
-    width: 550px;
-    table-layout: fixed;
+        width: 570px;
+        table-layout: fixed;
     }
 
     #personTable th,
@@ -138,15 +138,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-
-   /*  #personTable th,
-    #personTable td {
-        white-space: nowrap;
-        padding: 8px 12px;
-    } */
-    #personDropdown {
-        width: 550px !important;
+        padding: 8px;
     }
 
     #personTable tbody tr:hover {
@@ -155,10 +147,6 @@
 
     #personTable tbody tr.selected {
         background-color: #cfe2ff;
-    }
-
-    .dropdown-table {
-        background: white;
     }
 
     #personSearch {
@@ -170,10 +158,10 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        $(function() {
+        $(function () {
             const $dropdown = $('#personDropdown');
             const $display = $('#personDisplay');
-            const $selectedId = $('#SelectedPersonID');
+            const $selectedCode = $('#SelectedCategoryCode');
             const $search = $('#personSearch');
             const $rows = $('#personTable tbody tr');
 
@@ -188,17 +176,19 @@
             }
 
             function filterRows() {
-                const term = $search.val().toLowerCase().trim();
+                const term = ($search.val() || '')
+                    .toLowerCase().trim();
+
                 let visibleCount = 0;
 
-                $rows.each(function() {
+                $rows.each(function () {
                     const $row = $(this);
 
-                    const text = (
-                        $row.data('id') + ' ' +
-                        $row.data('first') + ' ' +
-                        $row.data('last')
-                    ).toLowerCase();
+                    const text = [
+                        $row.attr('data-category'),
+                        $row.attr('data-group'),
+                        $row.attr('data-code')
+                    ].join(' ').toLowerCase();
 
                     const matches = text.includes(term);
 
@@ -211,13 +201,19 @@
             }
 
             function selectRow($row) {
-                const id = $row.attr('data-id');
-                const first = $row.attr('data-first') || '';
-                const last = $row.attr('data-last') || '';
+                const category =
+                    $row.attr('data-category') || '';
 
-                $selectedId.val(id);
+                const group =
+                    $row.attr('data-group') || '';
+
+                const code =
+                    $row.attr('data-code') || '';
+
+                $selectedCode.val(code);
+
                 $display.val(
-                    id + ' - ' + first + ' ' + last
+                    category + ' - ' + group + ' - ' + code
                 );
 
                 $rows.removeClass('selected');
@@ -226,51 +222,47 @@
                 closeDropdown();
             }
 
-            $('#toggleDropdown').on('click', function() {
-                if ($dropdown.is(':visible')) {
-                    closeDropdown();
-                } else {
-                    openDropdown();
-                }
+            $('#toggleDropdown').on('click', function () {
+                $dropdown.is(':visible')
+                    ? closeDropdown()
+                    : openDropdown();
             });
 
             $display.on('click', openDropdown);
 
             $search.on('input', filterRows);
 
-            $rows.on('click', function() {
+            $rows.on('click', function () {
                 selectRow($(this));
             });
 
-            // Sort table rows by clicking column headers.
-            let sortDirections = {
-                id: true,
-                first: true,
-                last: true
+            // Sort by clicking the column headers.
+            const sortDirections = {
+                category: true,
+                group: true,
+                code: true
             };
 
-            $('[data-sort]').on('click', function() {
+            $('[data-sort]').on('click', function (e) {
+                e.preventDefault();
+
                 const key = $(this).data('sort');
                 const ascending = sortDirections[key];
 
                 sortDirections[key] = !ascending;
 
-                const sortedRows = $rows.get().sort(function(a, b) {
-                    let va, vb;
+                const sortedRows = $rows.get().sort(function (a, b) {
+                    const va = (
+                        $(a).attr('data-' + key) || ''
+                    ).toLowerCase();
 
-                    if (key === 'id') {
-                        va = Number($(a).attr('data-id'));
-                        vb = Number($(b).attr('data-id'));
-                    } else {
-                        va = ($(a).attr('data-' + key) || '')
-                            .toLowerCase();
-                        vb = ($(b).attr('data-' + key) || '')
-                            .toLowerCase();
-                    }
+                    const vb = (
+                        $(b).attr('data-' + key) || ''
+                    ).toLowerCase();
 
-                    if (va < vb) return ascending ? -1 : 1;
-                    if (va > vb) return ascending ? 1 : -1;
-                    return 0;
+                    const result = va.localeCompare(vb);
+
+                    return ascending ? result : -result;
                 });
 
                 $('#personTable tbody').append(sortedRows);
@@ -278,12 +270,12 @@
                 filterRows();
             });
 
-            // Restore the selected display after POST.
-            const selectedId = $selectedId.val();
+            // Restore the selected category after POST.
+            const selectedCode = $selectedCode.val();
 
-            if (selectedId) {
-                const $row = $rows.filter(function() {
-                    return $(this).attr('data-id') === selectedId;
+            if (selectedCode) {
+                const $row = $rows.filter(function () {
+                    return $(this).attr('data-code') === selectedCode;
                 }).first();
 
                 if ($row.length) {
@@ -291,16 +283,12 @@
                 }
             }
 
-            // Close when clicking outside the lookup.
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('.lookup-container').length) {
+            // Close when clicking outside.
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest(
+                    '.lookup-container').length) {
                     closeDropdown();
                 }
-            });
-
-            // Prevent the dropdown from submitting the form.
-            $dropdown.on('click', 'button', function(e) {
-                e.preventDefault();
             });
         });
     </script>
