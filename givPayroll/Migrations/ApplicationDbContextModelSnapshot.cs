@@ -227,6 +227,9 @@ namespace givPayroll.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -240,6 +243,8 @@ namespace givPayroll.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -4531,6 +4536,79 @@ namespace givPayroll.Migrations
                     b.ToTable("Staff", "dbo");
                 });
 
+            modelBuilder.Entity("givPayroll.Models.User", b =>
+                {
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AccessibleClientIDs")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("DataAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DataReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateChanged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("PriceListID")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("ProjectID")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("UserChanged")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("UserCreated")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserFirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UserFullName")
+                        .IsRequired()
+                        .HasMaxLength(306)
+                        .HasColumnType("nvarchar(306)");
+
+                    b.Property<bool>("UserIsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserLastName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("UserPassword")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("UserRoleID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VisibleInClientIDs")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("UserID");
+
+                    b.ToTable("User", "dbo");
+                });
+
             modelBuilder.Entity("givPayroll.Models.Voucher", b =>
                 {
                     b.Property<long>("AutoID")
@@ -4746,6 +4824,15 @@ namespace givPayroll.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("givPayroll.Data.ApplicationUser", b =>
+                {
+                    b.HasOne("givPayroll.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("givPayroll.Models.Attendance", b =>

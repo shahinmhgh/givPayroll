@@ -1,0 +1,330 @@
+﻿@model givPayroll.ViewModels.IdentityUserListViewModel
+
+@{
+    ViewData["Title"] = "Identity Users";
+
+    string NextDirection(string column) =>
+        Model.SortColumn == column && Model.SortDirection == "asc"
+            ? "desc" : "asc";
+
+    string SortIcon(string column) =>
+        Model.SortColumn != column ? "fa-sort" :
+        Model.SortDirection == "asc" ? "fa-sort-up" : "fa-sort-down";
+}
+
+<div class="container-fluid mt-4">
+
+    <h4 class="mb-3">Identity Users</h4>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center
+        flex-wrap gap-2 mb-3">
+
+        <form asp-action="Index" method="get"
+              class="d-flex flex-wrap gap-2">
+
+            <input name="searchString"
+                   value="@Model.SearchString"
+                   class="form-control"
+                   placeholder="Search username, email, phone..."
+                   style="width:300px;" />
+
+            <input type="hidden" name="sortColumn"
+                   value="@Model.SortColumn" />
+            <input type="hidden" name="sortDirection"
+                   value="@Model.SortDirection" />
+            <input type="hidden" name="pageSize"
+                   value="@Model.PageSize" />
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-search"></i> Search
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">Clear</a>
+        </form>
+
+        <button type="button" id="btnCreateUser"
+                class="btn btn-success">
+            <i class="fa fa-plus"></i> Create User
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+
+            <thead class="table-light">
+                <tr>
+                    <th hidden>
+                        <a asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="Id"
+                           asp-route-sortDirection="@NextDirection("Id")"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="text-dark text-decoration-none">
+                            ID <i class="fa @SortIcon("Id")"></i>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="UserName"
+                           asp-route-sortDirection="@NextDirection("UserName")"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="text-dark text-decoration-none">
+                            Username <i class="fa @SortIcon("UserName")"></i>
+                        </a>
+                    </th>
+
+                      <th>
+                        <a asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="FullName"
+                           asp-route-sortDirection="@NextDirection("FullName")"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="text-dark text-decoration-none">
+                            Fullname <i class="fa @SortIcon("FullName")"></i>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="Email"
+                           asp-route-sortDirection="@NextDirection("Email")"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="text-dark text-decoration-none">
+                            Email <i class="fa @SortIcon("Email")"></i>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="PhoneNumber"
+                           asp-route-sortDirection="@NextDirection("PhoneNumber")"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="text-dark text-decoration-none">
+                            Phone <i class="fa @SortIcon("PhoneNumber")"></i>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="Lockout"
+                           asp-route-sortDirection="@NextDirection("Lockout")"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="text-dark text-decoration-none">
+                            Status <i class="fa @SortIcon("Lockout")"></i>
+                        </a>
+                    </th>
+
+                    <th style="width:160px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Users.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">No users found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var user in Model.Users)
+                    {
+                        bool locked = user.LockoutEnd.HasValue &&
+                            user.LockoutEnd.Value > DateTimeOffset.UtcNow;
+
+                        <tr>
+                            <td hidden>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>@user.PhoneNumber</td>
+                            <td>
+                                @if (locked)
+                                {
+                                    <span class="badge bg-danger">Locked</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                            </td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-sm btn-primary btnEditUser"
+                                        data-id="@user.Id">
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
+
+                                <form asp-action="ToggleLockout" method="post"
+                                      class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@user.Id" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm @(locked ? "btn-success" : "btn-warning")"
+                                            title="@(locked ? "Unlock user" : "Lock user")">
+                                        <i class="fa @(locked ? "fa-unlock" : "fa-lock")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center
+        flex-wrap gap-3">
+
+        <span>Total records: @Model.TotalRecords</span>
+
+        <form asp-action="Index" method="get"
+              class="d-flex align-items-center gap-2">
+
+            <input type="hidden" name="searchString"
+                   value="@Model.SearchString" />
+            <input type="hidden" name="sortColumn"
+                   value="@Model.SortColumn" />
+            <input type="hidden" name="sortDirection"
+                   value="@Model.SortDirection" />
+
+            <label for="pageSize">Page size:</label>
+            <select id="pageSize" name="pageSize"
+                    class="form-select form-select-sm"
+                    style="width:85px;"
+                    onchange="this.form.submit()">
+
+                @foreach (int size in new[] { 10, 20, 50, 100 })
+                {
+                    if (Model.PageSize == size)
+                    {
+                        <option value="@size" selected>@size</option>
+                    }
+                    else
+                    {
+                        <option value="@size">@size</option>
+                    }
+                }
+            </select>
+        </form>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+
+                    <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="@Model.SortColumn"
+                           asp-route-sortDirection="@Model.SortDirection"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-pageNumber="@(Model.PageNumber - 1)">
+                            Previous
+                        </a>
+                    </li>
+
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == Model.PageNumber ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-searchString="@Model.SearchString"
+                               asp-route-sortColumn="@Model.SortColumn"
+                               asp-route-sortDirection="@Model.SortDirection"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-pageNumber="@p">
+                                @p
+                            </a>
+                        </li>
+                    }
+
+                    <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-searchString="@Model.SearchString"
+                           asp-route-sortColumn="@Model.SortColumn"
+                           asp-route-sortDirection="@Model.SortDirection"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-pageNumber="@(Model.PageNumber + 1)">
+                            Next
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+<!-- AJAX injects the modal partial here -->
+<div id="modalContainer"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            
+            // Load a partial from the controller, then show its modal.
+            function loadUserModal(url) {
+                 
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    cache: false,
+                    success: function(html) {
+                        $("#modalContainer").html(html);
+
+                        var modalElement = document.getElementById("userModal");
+
+                        if (modalElement) {
+                            // Bootstrap 5
+                            bootstrap.Modal
+                                .getOrCreateInstance(modalElement)
+                                .show();
+                        } else {
+                            alert("The user modal was not returned.");
+                        }
+                    },
+                    error: function(xhr) {
+                        alert("Could not load the user modal. HTTP status: "
+                            + xhr.status);
+                    }
+                });
+            }
+
+            // CREATE: call controller action first.
+            $("#btnCreateUser").on("click", function() {
+                loadUserModal(
+                    '@Url.Action("CreateModal", "IdentityUsers")'
+                );
+            });
+
+            // EDIT: call controller action with the selected user's ID.
+            $(document).on("click", ".btnEditUser", function() {
+                var id = $(this).data("id");
+
+                loadUserModal(
+                    '@Url.Action("EditModal", "IdentityUsers")'
+                    + '?id=' + encodeURIComponent(id)
+                );
+            });
+
+        });
+    </script>
+}

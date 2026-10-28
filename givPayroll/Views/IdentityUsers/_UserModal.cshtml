@@ -1,0 +1,131 @@
+﻿@model givPayroll.Data.ApplicationUser
+
+@{
+    bool isEdit = ViewBag.IsEdit == true;
+}
+
+<div class="modal fade" id="userModal" tabindex="-1"
+     aria-labelledby="userModalTitle" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form asp-controller="IdentityUsers"
+                  asp-action="@(isEdit ? "Edit" : "Create")"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">
+                        @(isEdit ? "Edit User" : "Create User")
+                    </h5>
+
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    @if (isEdit)
+                    {
+                        <input type="hidden" name="id" value="@Model.Id" />
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label" for="userName">
+                            Username *
+                        </label>
+                        <input id="userName" name="userName"
+                               class="form-control"
+                               value="@Model.UserName"
+                               maxlength="256" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="userEmail">
+                            Email
+                        </label>
+                        <input id="userEmail" name="email"
+                               type="email" class="form-control"
+                               value="@Model.Email" maxlength="256" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="userPhoneNumber">
+                            Phone Number
+                        </label>
+                        <input id="userPhoneNumber" name="phoneNumber"
+                               class="form-control"
+                               value="@Model.PhoneNumber" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="userFullName">
+                            Full Number
+                        </label>
+                        <input id="userFullName" name="fullName"
+                               class="form-control"
+                               value="@Model.FullName" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label> @Html.DisplayNameFor(m => m.UserID) </label>
+                        <select asp-for="UserID" asp-items="ViewBag.UserID" class="form-select">
+                            <option value=""> -- کاربر را انتخاب کنید -- </option>
+                        </select>
+                    </div>
+
+                    @if (!isEdit)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label" for="userPassword">
+                                Password *
+                            </label>
+                            <input id="userPassword" name="password"
+                                   type="password" class="form-control"
+                                   minlength="6"
+                                   autocomplete="new-password"
+                                   required />
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn @(isEdit ? "btn-primary" : "btn-success")">
+                        @(isEdit ? "Save Changes" : "Create")
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+         
+       
+
+        $('#UserID').select2({
+            width: '100%',
+            dir: 'rtl',
+            // placeholder: '-- انتخاب پرسنل --',
+            allowClear: false,
+            dropdownParent: $('#userModal')
+        });
+
+        var userid = '@Model.UserID';
+         
+         $("UserID").val(userid).trigger('change');
+
+    });
+</script>

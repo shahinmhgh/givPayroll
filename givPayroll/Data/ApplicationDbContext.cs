@@ -29,6 +29,7 @@ namespace givPayroll.Data
         #region Other
         public DbSet<Config> Configs { get; set; }
         public DbSet<Person> Persons { get; set; }
+        public DbSet<User> User { get; set; }
 
         public DbSet<PersonCategoryGroups> PersonCategoryGroups { get; set; }
         public DbSet<PersonCategory> PersonCategories { get; set; }
