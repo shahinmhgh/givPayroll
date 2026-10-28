@@ -784,6 +784,7 @@ namespace givPayroll.Controllers
 
             model.PersonnelOrder = new PersonnelOrderViewModel();
             model.JobId = personnelorder.JobId;
+            
             model.PersonnelOrder.Id = personnelorder.Id;
             model.PersonnelOrder.PersonnelId = personnelorder.PersonnelId;
             model.PersonnelOrder.ContractId = personnelorder.ContractId;
@@ -798,7 +799,7 @@ namespace givPayroll.Controllers
             model.PersonnelOrder.JobId = personnelorder.JobId;
             model.PersonnelOrder.Job = personnelorder.Job;
             model.PersonnelOrder.Description = personnelorder.Description;
-
+            
             int i = 0;
             model.PersonnelOrder.Details = new List<PersonnelOrderDetailViewModel>();
             foreach (PersonnelOrderDetail item in personnelorderDetail)

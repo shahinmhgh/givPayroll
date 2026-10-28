@@ -17,6 +17,12 @@ namespace givPayroll.Data
         {
         }
 
+        public static string? PersonCategoryFullName(string categoryCode)
+        {
+            throw new NotSupportedException(
+                "This method can only be used in LINQ queries.");
+        }
+
         //public DbSet<PersonCategoryResult> PersonCategoryResults
         //    => Set<PersonCategoryResult>();
 
@@ -83,6 +89,14 @@ namespace givPayroll.Data
 
             builder.Entity<PersonCategoryResult>()
                 .HasNoKey();
+
+            builder
+            .HasDbFunction(
+                typeof(ApplicationDbContext).GetMethod(
+                    nameof(PersonCategoryFullName),
+                    new[] { typeof(string) })!)
+            .HasName("PersonCategoryFullName")
+            .HasSchema("dbo");
 
             //None,
             //Incorrect,
@@ -615,10 +629,10 @@ namespace givPayroll.Data
                     .HasColumnType("ntext")
                     .HasDefaultValue("");
 
-                entity.Property(x => x.PersonCategoryCode)
+                entity.Property(x => x.PersonCategoryCode1)
                     .HasMaxLength(50);
 
-                entity.Property(x => x.PersonID);
+                entity.Property(x => x.PersonID1);
             });
 
             builder.Entity<PersonnelOrder>(entity =>

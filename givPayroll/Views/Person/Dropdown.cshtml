@@ -1,20 +1,19 @@
-﻿
-@model  PersonDropdownViewModel
+﻿@model PersonDropdownViewModel
 
 @{
-    ViewData["Title"] = "Person Group Lookup";
+    ViewData["Title"] = "انتخاب معین و تفصیلی";
 }
 
 <div class="container mt-4">
-    <h4>Person Group Lookup</h4>
+    <h4>انتخاب معین و تفصیلی</h4>
 
     <form asp-action="Dropdown" method="post">
         @Html.AntiForgeryToken()
 
         <div class="lookup-container position-relative"
-             style="max-width:550px;">
+             style="max-width:800px;">
 
-            <label class="form-label">Select Person Group</label>
+            <label class="form-label">انتخاب معین</label>
 
             <div class="input-group">
                 <input type="text"
@@ -39,7 +38,7 @@
             <div id="personDropdown"
                  class="dropdown-table shadow bg-white border rounded mt-1"
                  style="display:none; position:absolute;
-                        width:550px; z-index:1000;">
+                width:800px; z-index:1000;">
 
                 <div class="p-2">
                     <input type="text"
@@ -53,15 +52,14 @@
                            id="personTable">
 
                         <colgroup>
-                             <col style="width:120px;" />
+                            <col style="width:60px;" />
                             <col style="width:200px;" />
-                           <col style="width:250px;" />
                         </colgroup>
 
                         <thead class="table-light"
                                style="position:sticky; top:0; z-index:1;">
                             <tr>
-                               <th>
+                                <th>
                                     <button type="button"
                                             class="btn btn-link p-0 text-dark text-decoration-none"
                                             data-sort="code">
@@ -75,28 +73,21 @@
                                         Person Group Name ↕
                                     </button>
                                 </th>
-                                 <th>
-                                    <button type="button"
-                                            class="btn btn-link p-0 text-dark text-decoration-none"
-                                            data-sort="category">
-                                        Category Name ↕
-                                    </button>
-                                </th>
+                               
                             </tr>
                         </thead>
 
                         <tbody>
-                            @foreach (var item in Model.Items)
+                            @foreach (var item in Model.ItemsMoin)
                             {
                                 <tr class="person-row"
-                                    data-category="@item.CategoryName"
-                                    data-group="@item.PersonGroupName"
+                                    data-category="@item.CategoryCode"
+                                    data-group="@item.CategoryFullName"
                                     data-code="@item.CategoryCode"
                                     style="cursor:pointer;">
 
                                     <td>@item.CategoryCode</td>
-                                    <td>@item.PersonGroupName</td>
-                                    <td>@item.CategoryName</td>
+                                    <td>@item.CategoryFullName</td>
                                 </tr>
                             }
                         </tbody>
@@ -111,6 +102,22 @@
             </div>
 
             <span asp-validation-for="SelectedCategoryCode"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="lookup-container position-relative mt-3"
+             style="max-width:800px;">
+
+            <label class="form-label">انتخاب تفصیلی</label>
+
+            <select id="SelectedPersonID"
+                    name="SelectedPersonID"
+                    class="form-select"
+                    disabled>
+                <option value="">Select a category first...</option>
+            </select>
+
+            <span asp-validation-for="SelectedPersonID"
                   class="text-danger"></span>
         </div>
 
@@ -129,25 +136,25 @@
 
 <style>
     #personTable {
-        width: 570px;
+        width: 830px;
         table-layout: fixed;
     }
 
-    #personTable th,
-    #personTable td {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding: 8px;
-    }
+        #personTable th,
+        #personTable td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 8px;
+        }
 
-    #personTable tbody tr:hover {
-        background-color: #e9f2ff;
-    }
+        #personTable tbody tr:hover {
+            background-color: #e9f2ff;
+        }
 
-    #personTable tbody tr.selected {
-        background-color: #cfe2ff;
-    }
+        #personTable tbody tr.selected {
+            background-color: #cfe2ff;
+        }
 
     #personSearch {
         width: 100%;
@@ -158,12 +165,27 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        $(function () {
+        $(function() {
+
+            
+
+            const $personSelect = $('#SelectedPersonID');
+            
             const $dropdown = $('#personDropdown');
             const $display = $('#personDisplay');
             const $selectedCode = $('#SelectedCategoryCode');
             const $search = $('#personSearch');
             const $rows = $('#personTable tbody tr');
+
+            const selectedCategory = $selectedCode.val();
+            const selectedPersonID = '@Model.SelectedPersonID';
+
+            if (selectedCategory) {
+                
+                loadTafsilPersons(selectedCategory, selectedPersonID);
+                // alert(selectedPersonID);
+                
+            }
 
             function openDropdown() {
                 $dropdown.show();
@@ -174,14 +196,24 @@
             function closeDropdown() {
                 $dropdown.hide();
             }
+ 
+            function fixPersianChars(text) {
+                if (!text) return text;
+
+                return text
+                    .replace('ی', 'ي')
+                    .replace('ک', 'ك');
+            }
 
             function filterRows() {
-                const term = ($search.val() || '')
+                let term = ($search.val() || '')
                     .toLowerCase().trim();
 
+                term = fixPersianChars(term);
+                //alert(term);
                 let visibleCount = 0;
 
-                $rows.each(function () {
+                $rows.each(function() {
                     const $row = $(this);
 
                     const text = [
@@ -211,6 +243,7 @@
                     $row.attr('data-code') || '';
 
                 $selectedCode.val(code);
+                $selectedCode.trigger('change');
 
                 $display.val(
                     category + ' - ' + group + ' - ' + code
@@ -222,17 +255,88 @@
                 closeDropdown();
             }
 
-            $('#toggleDropdown').on('click', function () {
+            function loadTafsilPersons(categoryCode, selectedPersonID) {
+                $personSelect.empty();
+
+                if (!categoryCode) {
+                    $personSelect
+                        .append(new Option('Select a category first...', ''))
+                        .prop('disabled', true);
+
+                    return;
+                }
+
+                $personSelect
+                    .append(new Option('Loading persons...', ''))
+                    .prop('disabled', true);
+
+                $.ajax({
+                    url: '/Person/GetTafsilPersons',
+                    type: 'GET',
+                    data: { categoryCode: categoryCode },
+
+                    success: function(persons) {
+                        $personSelect.empty();
+
+                        $personSelect.append(
+                            new Option('Select a person...', '')
+                        );
+
+                        $.each(persons, function(_, person) {
+                            const displayText =
+                                person.personGroupName + ' - ' +
+                                person.personFullName + ' - ' +
+                                person.personID;
+
+                            const option = new Option(
+                                displayText,
+                                person.personID
+                            );
+
+                            if (selectedPersonID != null &&
+                                String(person.personID) ===
+                                String(selectedPersonID)) {
+                                option.selected = true;
+                            }
+
+                            $personSelect.append(option);
+                        });
+
+                        $personSelect.prop('disabled', false);
+
+                        $('#SelectedPersonID').select2({
+                            width: '100%',
+                            dir: 'rtl',
+                            // placeholder: '-- انتخاب پرسنل --',
+                            allowClear: false,
+                            // dropdownParent: $('#personnelOrderModal')
+                        });
+                      
+                    },
+
+                    error: function() {
+                        $personSelect.empty()
+                            .append(new Option('Error loading persons', ''))
+                            .prop('disabled', true);
+                    }
+                });
+            }
+
+            $('#toggleDropdown').on('click', function() {
                 $dropdown.is(':visible')
                     ? closeDropdown()
                     : openDropdown();
+            });
+
+            $selectedCode.on('change', function() {
+                loadTafsilPersons($(this).val(), null);
             });
 
             $display.on('click', openDropdown);
 
             $search.on('input', filterRows);
 
-            $rows.on('click', function () {
+            $rows.on('click', function() {
                 selectRow($(this));
             });
 
@@ -243,7 +347,7 @@
                 code: true
             };
 
-            $('[data-sort]').on('click', function (e) {
+            $('[data-sort]').on('click', function(e) {
                 e.preventDefault();
 
                 const key = $(this).data('sort');
@@ -251,7 +355,7 @@
 
                 sortDirections[key] = !ascending;
 
-                const sortedRows = $rows.get().sort(function (a, b) {
+                const sortedRows = $rows.get().sort(function(a, b) {
                     const va = (
                         $(a).attr('data-' + key) || ''
                     ).toLowerCase();
@@ -274,7 +378,7 @@
             const selectedCode = $selectedCode.val();
 
             if (selectedCode) {
-                const $row = $rows.filter(function () {
+                const $row = $rows.filter(function() {
                     return $(this).attr('data-code') === selectedCode;
                 }).first();
 
@@ -284,7 +388,7 @@
             }
 
             // Close when clicking outside.
-            $(document).on('click', function (e) {
+            $(document).on('click', function(e) {
                 if (!$(e.target).closest(
                     '.lookup-container').length) {
                     closeDropdown();

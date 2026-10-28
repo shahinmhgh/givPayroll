@@ -15,20 +15,18 @@
 
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
+    <label id="PersonID1Field" hidden>@Model.PersonID1</label>
+    <label id="PersonID2Field" hidden>@Model.PersonID2</label>
 
     <div class="modal-header">
-
         <h5 class="modal-title">
             @(isEdit ? "ویرایش قلم حقوق" : "قلم حقوق جدید")
         </h5>
-
         <button type="button"
                 class="btn-close"
                 data-bs-dismiss="modal">
         </button>
-
     </div>
-
 
     <div class="modal-body">
 
@@ -43,75 +41,40 @@
             <!-- Priority -->
 
             <div class="col-md-2">
-
                 <label asp-for="Priority"
                        class="form-label">
                 </label>
-
                 <input asp-for="Priority"
                        class="form-control"
                        type="number" />
-
                 <span asp-validation-for="Priority"
                       class="text-danger">
                 </span>
-
             </div>
-
 
             <!-- Name -->
 
             <div class="col-md-4">
-
                 <label asp-for="SalaryItemName"
                        class="form-label">
                 </label>
-
                 <input asp-for="SalaryItemName"
                        class="form-control" />
-
                 <span asp-validation-for="SalaryItemName"
                       class="text-danger">
                 </span>
-
             </div>
-
 
             <!-- Label -->
 
             <div class="col-md-4">
-
                 <label asp-for="Label"
                        class="form-label">
                 </label>
-
                 <input asp-for="Label"
                        class="form-control"
                        dir="ltr" />
-
             </div>
-
-
-            <!-- Unit -->
-            @* <div class="col-md-3">
-
-                <label asp-for="Unit"
-                       class="form-label">
-                </label>
-
-                <select asp-for="Unit"
-                        class="form-select">
-
-                    <option value="">-- انتخاب --</option>
-                    <option value="Amount">Amount</option>
-                    <option value="Hour">Hour</option>
-                    <option value="Day">Day</option>
-                    <option value="Percent">Percent</option>
-
-                </select>
-
-            </div> *@
-
 
             <!-- Source -->
             <div class="col-md-3">
@@ -133,18 +96,13 @@
 
             </div>
 
-
             <!-- PlusMinus -->
-
             <div class="col-md-3">
-
                 <label asp-for="PlusMinus"
                        class="form-label">
                 </label>
-
                 <select asp-for="PlusMinus"
                         class="form-select">
-
                     <option value="1">
                         +
                     </option>
@@ -152,89 +110,78 @@
                     <option value="-1">
                         -
                     </option>
-
                 </select>
-
             </div>
 
-
-            <!-- CalculationMode -->
-            @*  <div class="col-md-3">
-
-                <label asp-for="CalculationMode"
-                       class="form-label">
-                </label>
-
-                <select asp-for="CalculationMode"
-                        class="form-select">
-
-                    <option value="">-- انتخاب --</option>
-                    <option value="Formula">Formula</option>
-                    <option value="Manual">Manual</option>
-                    <option value="Tax">Tax</option>
-                    <option value="Insurance">Insurance</option>
-
-                </select>
-
-            </div> *@
-
-
             <!-- Formula -->
-
             <div class="col-12">
-
                 <label asp-for="FormulaValue"
                        class="form-label">
                 </label>
-
                 <textarea asp-for="FormulaValue"
                           class="form-control"
                           rows="4"
                           dir="ltr"
                           style="font-family:Consolas,monospace;">
                 </textarea>
-
                 <span asp-validation-for="FormulaValue"
                       class="text-danger">
                 </span>
-
             </div>
 
+            <!-- Accounting start -->
+            <div class="row">
+                <div class="col-md-2">
+                    <label class="form-label"> @Html.DisplayNameFor(m => m.ProjectId1) </label>
+                    <select asp-for="ProjectId1" asp-items="ViewBag.ProjectId" class="form-select">
+                        <option value=""> -- پروژه را انتخاب کنید -- </option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"> @Html.DisplayNameFor(m => m.PersonCategoryCode1) </label>
+                    <select asp-for="PersonCategoryCode1" asp-items="ViewBag.PersonCategoryCode" class="form-select">
+                        <option value=""> -- کد معین را انتخاب کنید -- </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PersonID1" class="form-label"></label>
 
-            <!-- Accounting -->
-            <div class="col-md-4">
+                    <select asp-for="PersonID1"
+                            asp-items="ViewBag.PersonID1"
+                            class="form-select"
+                            id="PersonID1">
+                        <option value="">-- کد تفصیلی را انتخاب کنید --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row" id="accRow2">
+                <div class="col-md-2">
+                    <label class="form-label"> @Html.DisplayNameFor(m => m.ProjectId2) </label>
+                    <select asp-for="ProjectId2" asp-items="ViewBag.ProjectId" class="form-select">
+                        <option value=""> -- پروژه را انتخاب کنید -- </option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"> @Html.DisplayNameFor(m => m.PersonCategoryCode2) </label>
+                    <select asp-for="PersonCategoryCode2" asp-items="ViewBag.PersonCategoryCode" class="form-select">
+                        <option value=""> -- کد معین را انتخاب کنید -- </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PersonID2" class="form-label"></label>
 
-                <label> @Html.DisplayNameFor(m => m.ProjectId) </label>
-                <select asp-for="ProjectId" asp-items="ViewBag.ProjectId" class="form-select">
-                    <option value=""> -- پروژه را انتخاب کنید -- </option>
-                </select>
-
+                    <select asp-for="PersonID2"
+                            asp-items="ViewBag.PersonID2"
+                            class="form-select"
+                            id="PersonID2">
+                        <option value="">-- کد تفصیلی را انتخاب کنید --</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="col-md-4">
-
-                <label> @Html.DisplayNameFor(m => m.PersonCategoryCode) </label>
-                <select asp-for="PersonCategoryCode" asp-items="ViewBag.PersonCategoryCode" class="form-select">
-                    <option value=""> -- کد معین را انتخاب کنید -- </option>
-                </select>
-
-            
-            </div>
-
-
-            <div class="col-md-4">
-                <label asp-for="PersonID" class="form-label"></label>
-
-                <select asp-for="PersonID"
-                        asp-items="ViewBag.PersonID"
-                        class="form-select"
-                        id="PersonID">
-                    <option value="">-- کد تفصیلی را انتخاب کنید --</option>
-                </select>
-            </div>
+            <!-- Accounting end -->
 
         
-
         </div>
 
     </div>
@@ -298,6 +245,16 @@
     }
 
     function LoadForm() {
+        var source =$("#Source").val();
+        $("#accRow2").prop("hidden", true);
+       
+        if (source == "RuleInsurance" || source == "RuleTax")   {   
+            $("#accRow2").prop("hidden", false);
+        }
+
+        $('#PersonCategoryCode1').trigger('change');
+        $('#PersonCategoryCode2').trigger('change');
+
         ListWords(true);
 
         var source = $("#Source").val();
@@ -332,36 +289,35 @@
         }
     }
 
-    $(document).on('change', '#PersonCategoryCode', function() {
-
+    $(document).on('change', '#PersonCategoryCode1', function() {
+        $('#PersonCategoryCode1').select2({
+            width: '100%',
+            dir: 'rtl',
+            // placeholder: '-- انتخاب پرسنل --',
+            allowClear: false,
+            dropdownParent: $('#salaryItemModal')
+        });
         var categoryCode = $(this).val();
-        var personDropdown = $('#PersonID');
-
+        var personDropdown = $('#PersonID1');
         // Reset the persons dropdown
         personDropdown.empty();
-
         personDropdown.append(
             $('<option>', {
                 value: '',
                 text: '-- کد تفصیلی را انتخاب کنید --'
             })
         );
-
         // No category selected
         if (!categoryCode) {
             personDropdown.prop('disabled', true);
             return;
         }
-
         personDropdown.prop('disabled', true);
-
         $.ajax({
-            url: '@Url.Action("GetPersonsByCategoryCode", "SalaryItem")',
+            url: '/SalaryItem/GetPersonsByCategoryCode',
             type: 'GET',
             data: { categoryCode: categoryCode },
-
             success: function(persons) {
-
                 $.each(persons, function(index, person) {
                     personDropdown.append(
                         $('<option>', {
@@ -370,10 +326,76 @@
                         })
                     );
                 });
+                $('#PersonID1').select2({
+                    width: '100%',
+                    dir: 'rtl',
+                    // placeholder: '-- انتخاب پرسنل --',
+                    allowClear: false,
+                    dropdownParent: $('#salaryItemModal')
+                });
 
+                var PersonID1Field = $("#PersonID1Field")[0].innerText;
+                $("#PersonID1").val(PersonID1Field).trigger('change');
                 personDropdown.prop('disabled', false);
             },
+            error: function(xhr) {
+                console.error(xhr);
 
+                alert('خطا در دریافت فهرست کدهای تفصیلی');
+                personDropdown.prop('disabled', false);
+            }
+        });
+    });
+
+    $(document).on('change', '#PersonCategoryCode2', function() {
+        $('#PersonCategoryCode2').select2({
+            width: '100%',
+            dir: 'rtl',
+            // placeholder: '-- انتخاب پرسنل --',
+            allowClear: false,
+            dropdownParent: $('#salaryItemModal')
+        });
+        var categoryCode = $(this).val();
+        var personDropdown = $('#PersonID2');
+        // Reset the persons dropdown
+        personDropdown.empty();
+        personDropdown.append(
+            $('<option>', {
+                value: '',
+                text: '-- کد تفصیلی را انتخاب کنید --'
+            })
+        );
+        // No category selected
+        if (!categoryCode) {
+            personDropdown.prop('disabled', true);
+            return;
+        }
+        personDropdown.prop('disabled', true);
+        $.ajax({
+            url: '/SalaryItem/GetPersonsByCategoryCode',
+            type: 'GET',
+            data: { categoryCode: categoryCode },
+            success: function(persons) {
+                $.each(persons, function(index, person) {
+                    personDropdown.append(
+                        $('<option>', {
+                            value: person.value,
+                            text: person.text
+                        })
+                    );
+                });
+                $('#PersonID2').select2({
+                    width: '100%',
+                    dir: 'rtl',
+                    // placeholder: '-- انتخاب پرسنل --',
+                    allowClear: false,
+                    dropdownParent: $('#salaryItemModal')
+                });
+
+                var PersonID2Field = $("#PersonID2Field")[0].innerText;
+                $("#PersonID2").val(PersonID2Field).trigger('change');
+                personDropdown.prop('disabled', false);
+            },
             error: function(xhr) {
                 console.error(xhr);
 
@@ -384,7 +406,8 @@
     });
 
     $(document).ready(function() {
-        $('#PersonCategoryCode').trigger('change');
+        $('#PersonCategoryCode1').trigger('change');
+        $('#PersonCategoryCode2').trigger('change');
     });
 
     function validateFormula() {
@@ -487,6 +510,7 @@
                         timer: 1200,
                         showConfirmButton: false
                     });
+                    // window.location.href = window.location.href;
                     loadSalaryItems();
                 }
                 else {
@@ -522,20 +546,13 @@
                 });
 
             },
-
-
             complete: function() {
-
                 $("#salaryItemRuleLoading")
                     .hide();
-
-
                 $("#btnSaveSalaryItemRule")
                     .prop("disabled", false)
                     .html("ثبت");
-
             }
-
         });
 
 

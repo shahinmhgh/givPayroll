@@ -45,18 +45,33 @@ namespace givPayroll.Models
         [Column(TypeName = "ntext")]
         public string? FormulaValue { get; set; } = string.Empty;
 
+
         // select * from PersonCategory 
+        #region accouting
         [MaxLength(50)]
         [Display(Name = "کد حساب")]
-        public string? PersonCategoryCode { get; set; }
+        public string? PersonCategoryCode1 { get; set; }
 
         // select * from person
         [Display(Name = "کد تفصیلی")]
-        public int PersonID { get; set; }
+        public int PersonID1 { get; set; }
 
         // select * from Project 
         [Display(Name = "پروژه")]
-        public int ProjectId { get;   set; }
+        public int ProjectId1 { get;   set; }
+
+        [MaxLength(50)]
+        [Display(Name = "کد حساب")]
+        public string? PersonCategoryCode2 { get; set; }
+
+        // select * from person
+        [Display(Name = "کد تفصیلی")]
+        public int? PersonID2 { get; set; }
+
+        // select * from Project 
+        [Display(Name = "پروژه")]
+        public int? ProjectId2 { get; set; }
+        #endregion
 
         [Required]
         [Display(Name = "تاریخ ایجاد")]

@@ -8,6 +8,8 @@
     <input type="hidden"
            asp-for="Id" />
 
+    <label id="PersonIDField" hidden>@Model.PersonID</label>
+
     <div class="modal-header">
 
         <h5 class="modal-title">
@@ -40,8 +42,8 @@
 
                 <input type="text" asp-for="Description"
                        class="form-control">
-                
 
+                
                 <span asp-validation-for="Description"
                       class="text-danger">
                 </span>
@@ -142,7 +144,7 @@
 
             <!-- Total Amount -->
 
-            <div class="col-md-4 mb-3">
+            <div class="col-md-4  ">
 
                 <label asp-for="TotalAmount"
                        class="form-label">
@@ -150,63 +152,20 @@
 
                 <input asp-for="
                        TotalAmount"
-                   class="form-control amount-input"
-                   type="text"
-                   dir="ltr"
-                   inputmode="numeric"
-                   autocomplete="off"
-                   value="@Model.TotalAmount.ToString("N0")" />
+                       class="form-control amount-input"
+                       type="text"
+                       dir="ltr"
+                       inputmode="numeric"
+                       autocomplete="off"
+                       value="@Model.TotalAmount.ToString("N0")" />
 
-
-
+ 
                 <span asp-validation-for="TotalAmount"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-            <!-- Accounting -->
-            <div class="col-md-4">
-
-                <label asp-for="ProjectId"
-                       class="form-label">
-                </label>
-
-                <input asp-for="ProjectId"
-                       class="form-control"
-                       dir="ltr" />
+                      class="text-danger">
+                </span>
 
             </div>
-
-            <div class="col-md-4">
-
-                <label asp-for="PersonCategoryCode"
-                       class="form-label">
-                </label>
-
-                <input asp-for="PersonCategoryCode"
-                       class="form-control"
-                       dir="ltr" />
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <label asp-for="PersonID"
-                       class="form-label">
-                </label>
-
-                <input asp-for="PersonID"
-                       class="form-control"
-                       type="number"
-                       dir="ltr" />
-
-            </div>
-             
-
-            <div class="mb-3">
-
+            <div class="col-md-6  ">
                 <div class="form-check">
 
                     <input asp-for="IsTaxBase"
@@ -221,16 +180,6 @@
                     </label>
 
                 </div>
-
-            </div>
-
-
-            <!-- =============================================
-         INSURANCE
-         ============================================= -->
-
-            <div class="mb-3">
-
                 <div class="form-check">
 
                     <input asp-for="IsInsuranceBase"
@@ -245,8 +194,47 @@
                     </label>
 
                 </div>
-
             </div>
+
+            <!-- Accounting -->
+            <div class="row">
+                <div class="col-md-2">
+
+                    <label class="form-label"> @Html.DisplayNameFor(m => m.ProjectId) </label>
+                    <select asp-for="ProjectId" asp-items="ViewBag.ProjectId" class="form-select">
+                        <option value=""> -- پروژه را انتخاب کنید -- </option>
+                    </select>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label"> @Html.DisplayNameFor(m => m.PersonCategoryCode) </label>
+                    <select asp-for="PersonCategoryCode" asp-items="ViewBag.PersonCategoryCode" class="form-select">
+                        <option value=""> -- کد معین را انتخاب کنید -- </option>
+                    </select>
+
+
+                </div>
+
+
+                <div class="col-md-4">
+                    <label asp-for="PersonID" class="form-label"></label>
+
+                    <select asp-for="PersonID"
+                            asp-items="ViewBag.PersonID"
+                            class="form-select"
+                            id="PersonID">
+                        <option value="">-- کد تفصیلی را انتخاب کنید --</option>
+                    </select>
+                </div>
+            </div>
+
+             
+
+            
+
+          
 
  
             <!-- Loan -->
@@ -388,16 +376,16 @@
 
 </form>
 
-
 <script>
-
     initializePayrollAdjustmentForm();
-
 </script>
 <script>
     let contractDatePickers = {};
 
+    
+
     function initContractDatePickers() {
+        $('#PersonCategoryCode').trigger('change');
 
         initContractDatePicker(
             '@Model.StartDate.ToString("yyyy-MM-dd")',
@@ -409,6 +397,92 @@
             '#EndDateApp'
         );
     }
+
+    $(document).on('change', '#PersonCategoryCode', function() {
+
+        
+        $('#PersonCategoryCode').select2({
+            width: '100%',
+            dir: 'rtl',
+            // placeholder: '-- انتخاب پرسنل --',
+            allowClear: false,
+            dropdownParent: $('#payrollAdjustmentModal')
+        });
+
+        var categoryCode = $(this).val();
+        var personDropdown = $('#PersonID');
+
+        // Reset the persons dropdown
+        personDropdown.empty();
+
+        personDropdown.append(
+            $('<option>', {
+                value: '',
+                text: '-- کد تفصیلی را انتخاب کنید --'
+            })
+        );
+
+        // No category selected
+        if (!categoryCode) {
+            personDropdown.prop('disabled', true);
+            return;
+        }
+
+        personDropdown.prop('disabled', true);
+
+        $.ajax({
+            url: '/SalaryItem/GetPersonsByCategoryCode',
+            type: 'GET',
+            data: { categoryCode: categoryCode },
+
+            success: function(persons) {
+
+                $.each(persons, function(index, person) {
+                    personDropdown.append(
+                        $('<option>', {
+                            value: person.value,
+                            text: person.text
+                        })
+                    );
+                });
+
+                $('#PersonID').select2({
+                    width: '100%',
+                    dir: 'rtl',
+                    // placeholder: '-- انتخاب پرسنل --',
+                    allowClear: false,
+                    dropdownParent: $('#payrollAdjustmentModal')
+                });
+
+                var PersonIDField = $("#PersonIDField")[0].innerText;
+                $("#PersonID").val(PersonIDField).trigger('change');
+
+                //$('#PersonIDField').prop('hidden', true);
+                personDropdown.prop('disabled', false);
+            },
+
+            error: function(xhr) {
+                console.error(xhr);
+
+                alert('خطا در دریافت فهرست کدهای تفصیلی');
+                personDropdown.prop('disabled', false);
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        $('#PersonCategoryCode').trigger('change');
+        
+        //var personID = '@Model.PersonID';
+        //$("#PersonID").val(personID).trigger('change');
+        //$("#" + 'PersonID' + " option[value='" + personID + "']").attr("selected", true);
+        //$("#PersonID").val('@Model.PersonID').trigger('change');
+        //alert('@Model.PersonID');
+
+ 
+
+        
+    });
 
 
     function initContractDatePicker(initialGregorianDate, elementSelector) {
@@ -484,7 +558,7 @@
     $(document).on(
         'blur',
         '.amount-input',
-        function () {
+        function() {
 
             let value =
                 $(this)

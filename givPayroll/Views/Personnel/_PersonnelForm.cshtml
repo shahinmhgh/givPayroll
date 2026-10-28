@@ -73,8 +73,8 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <div id="BirthDateApp">
+                <div class="row mb-3">
+                    <div id="BirthDateApp" class="col-md-6">
                         <label class="form-label">
                             تاریخ تولد
                         </label>
@@ -91,14 +91,17 @@
                                :value="gregorianDate">
 
                     </div>
+                    <div class="col-md-4">
+                        <label>@Html.DisplayNameFor(m => m.Age)</label>
+                        <input readonly asp-for="Age" class="form-control bg-light" />
+                    </div>
                 </div>
-
-
-                 
-
+                
                 <div class="mb-3">
-                    <label>@Html.DisplayNameFor(m => m.Age)</label>
-                    <input readonly asp-for="Age" class="form-control bg-light" />
+                    <label> @Html.DisplayNameFor(m => m.StaffID) </label>
+                    <select asp-for="StaffID" asp-items="ViewBag.StaffID" class="form-select">
+                        <option value=""> -- نام کارکنان را انتخاب کنید -- </option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -190,6 +193,13 @@
 
         var BirthDate = '@Model.BirthDate';
        
+        $('#StaffID').select2({
+            width: '100%',
+            dir: 'rtl',
+            // placeholder: '-- انتخاب پرسنل --',
+            allowClear: false,
+            dropdownParent: $('#personnelModal')
+        });
 
         initPersonnelDatePicker(BirthDate, "#BirthDateApp")
       

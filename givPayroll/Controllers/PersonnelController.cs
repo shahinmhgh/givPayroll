@@ -27,7 +27,7 @@ namespace givPayroll.Controllers
         }
 
 
-   
+
         [HttpGet]
         public async Task<IActionResult> List(
             string firstName = "",
@@ -103,9 +103,14 @@ namespace givPayroll.Controllers
             var data = await query
                 .Include(i => i.MaritalStatus)
                 .Include(i => i.Education)
+                .Include(i => i.Staff)
+                .Include(i => i.Gender)
+                .Include(i => i.PersonnelFamilies)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+           
 
             ViewBag.SortColumn = sortColumn;
             ViewBag.SortDirection = sortDirection;
@@ -135,6 +140,7 @@ namespace givPayroll.Controllers
         {
             ViewBag.MaritalStatus = await GetMaritalStatus();
             ViewBag.Education = await GetEducation();
+            ViewBag.StaffID = await GetStaff();
             return PartialView("_PersonnelForm",
                 new Personnel());
         }
@@ -176,7 +182,7 @@ namespace givPayroll.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message="اطلاعات پرسنل با موفقیت ثبت شد" });
+            return Json(new { success = true, message = "اطلاعات پرسنل با موفقیت ثبت شد" });
         }
 
 
@@ -204,12 +210,24 @@ namespace givPayroll.Controllers
                 .ToListAsync();
         }
 
+        private async Task<List<SelectListItem>> GetStaff()
+        {
+            return await _context.staff
+                .OrderBy(x => x.LastName)
+                .Select(x => new SelectListItem
+                {
+                    Value = x.StaffID.ToString(),
+                    Text = x.FirstName + " " + x.LastName
+                })
+                .ToListAsync();
+        }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             ViewBag.MaritalStatus = await GetMaritalStatus();
             ViewBag.Education = await GetEducation();
+            ViewBag.StaffID = await GetStaff();
             var item = await _context.Personnels
                 .Include(p => p.PersonnelFamilies)
                 .FirstOrDefaultAsync(p => p.Id == id);

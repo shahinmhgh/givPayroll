@@ -46,9 +46,18 @@ namespace givPayroll.ViewModels
         public bool IsTaxBase { get; set; }
 
         public bool IsInsuranceBase { get; set; }
-        public int ProjectId { get; internal set; }
-        public string PersonCategoryCode { get; internal set; }
-        public int PersonID { get; internal set; }
+
+        [MaxLength(50)]
+        [Display(Name = "کد حساب")]
+        public string? PersonCategoryCode { get; set; }
+
+        // select * from person
+        [Display(Name = "کد تفصیلی")]
+        public int PersonID { get; set; }
+
+        // select * from Project 
+        [Display(Name = "پروژه")]
+        public int ProjectId { get; set; }
     }
 
     public class PayrollAdjustmentPersonnelViewModel

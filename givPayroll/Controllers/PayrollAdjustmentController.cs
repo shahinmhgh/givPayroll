@@ -139,8 +139,12 @@ namespace givPayroll.Controllers
                 AdjustmentTypeId = adjustment.AdjustmentTypeId,
                 Loan = adjustment.Loan,
                 TotalAmount = adjustment.TotalAmount,
-                IsTaxBase=adjustment.IsTaxBase,
-                IsInsuranceBase = adjustment.IsInsuranceBase
+                IsTaxBase = adjustment.IsTaxBase,
+                IsInsuranceBase = adjustment.IsInsuranceBase,
+
+                ProjectId = adjustment.ProjectId,
+                PersonCategoryCode  = adjustment.PersonCategoryCode,
+                PersonID = adjustment.PersonID
             };
 
             model.Personnels = await _context.PayrollAdjustmentPersonnels
@@ -162,6 +166,9 @@ namespace givPayroll.Controllers
                 .ToList();
 
             await LoadAdjustmentTypes(model);
+
+            ViewBag.ProjectId = AppUtil.GetProject(_context);
+            ViewBag.PersonCategoryCode = AppUtil.GetMoein(_context);
 
             return PartialView("_PayrollAdjustmentForm", model);
         }
@@ -253,6 +260,11 @@ namespace givPayroll.Controllers
                 adjustment.SalaryItemId = model.AdjustmentTypeId;
                 adjustment.IsTaxBase = model.IsTaxBase;
                 adjustment.IsInsuranceBase = model.IsInsuranceBase;
+
+                adjustment.ProjectId = model.ProjectId;
+                adjustment.PersonCategoryCode = model.PersonCategoryCode;
+                adjustment.PersonID = model.PersonID;
+
                 await _context.SaveChangesAsync();
 
 

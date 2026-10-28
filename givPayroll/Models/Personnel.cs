@@ -33,7 +33,14 @@ namespace givPayroll.Models
         [Display(Name = "وضعیت تاهل")]
         public int MaritalStatusId { get; set; }
 
-        
+        [ForeignKey(nameof(MaritalStatusId))]
+        public MaritalStatus MaritalStatus { get; set; } = null!;
+
+        [Display(Name = "ارتباط با جدول کارکنان")]
+        public int? StaffID { get; set; }
+
+        [ForeignKey(nameof(StaffID))]
+        public Staff? Staff { get; set; }// = null!;
 
         [MaxLength(50)]
         [Required(ErrorMessage = "شماره بیمه is required.")]
@@ -45,8 +52,7 @@ namespace givPayroll.Models
         [Display(Name = "کد کارمندی")]
         public String PersonnelNo { get; set; } = string.Empty;
 
-        [ForeignKey(nameof(MaritalStatusId))]
-        public MaritalStatus MaritalStatus { get; set; } = null!;
+        
 
         [Required(ErrorMessage = "Education is required")]
         [Display(Name = "تحصیلات")]

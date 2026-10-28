@@ -3699,6 +3699,9 @@ namespace givPayroll.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("StaffID")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EducationID");
@@ -3706,6 +3709,8 @@ namespace givPayroll.Migrations
                     b.HasIndex("GenderID");
 
                     b.HasIndex("MaritalStatusId");
+
+                    b.HasIndex("StaffID");
 
                     b.ToTable("Personnel", "Payroll");
                 });
@@ -4116,11 +4121,18 @@ namespace givPayroll.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasDefaultValue("");
 
-                    b.Property<string>("PersonCategoryCode")
+                    b.Property<string>("PersonCategoryCode1")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PersonID")
+                    b.Property<string>("PersonCategoryCode2")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("PersonID1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PersonID2")
                         .HasColumnType("int");
 
                     b.Property<int>("PlusMinus")
@@ -4133,7 +4145,10 @@ namespace givPayroll.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int>("ProjectId1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId2")
                         .HasColumnType("int");
 
                     b.Property<string>("SalaryItemName")
@@ -4174,10 +4189,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "BaseSalary * DaysWorked",
                             IsSystem = 1,
                             Label = "BaseSalary",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 10,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "حقوق پایه",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4191,10 +4206,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*1.2/60*ExtraMinute",
                             IsSystem = 1,
                             Label = "OverTime",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 70,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "اضافه کار",
                             Source = "Attendence",
                             Unit = "Hour",
@@ -4208,10 +4223,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(HousingAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "HousingAllowance",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 50,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "حق مسکن",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4225,10 +4240,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(ChildAllowance * ChildNo / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "ChildAllowance",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 60,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "حق اولاد",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4242,10 +4257,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*MissionMinute",
                             IsSystem = 1,
                             Label = "MissionAllownce",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 100,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "ماموریت",
                             Source = "Attendence",
                             Unit = "Day",
@@ -4259,10 +4274,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*AbsenceMinute",
                             IsSystem = 1,
                             Label = "AbsenceDeduction",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 80,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "کسرکار",
                             Source = "Attendence",
                             Unit = "Hour",
@@ -4276,10 +4291,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*DelayMinute",
                             IsSystem = 1,
                             Label = "DelayDeduction",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 90,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "تاخیر",
                             Source = "Attendence",
                             Unit = "Hour",
@@ -4293,10 +4308,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Tax",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 130,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "مالیات",
                             Source = "RuleTax",
                             Unit = "Percent",
@@ -4310,10 +4325,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Insurance",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 120,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "بیمه سهم کارمند",
                             Source = "RuleInsurance",
                             Unit = "Percent",
@@ -4327,10 +4342,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(FoodAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "FoodAllowance",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 40,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "بن و خواربار",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4344,10 +4359,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(JobAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "JobAllowance",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 30,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "فوق العاده شغل",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4361,10 +4376,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "(ResponsibilityAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "ResponsibilityAllowance",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 20,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "حق مسئولیت",
                             Source = "PersonnelOrder",
                             Unit = "Amount",
@@ -4378,10 +4393,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Bonus",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 110,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "تعدیلات افزایش",
                             Source = "PayrollAdjustment",
                             Unit = "Amount",
@@ -4395,10 +4410,10 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Penalty",
-                            PersonID = 0,
+                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 111,
-                            ProjectId = 0,
+                            ProjectId1 = 0,
                             SalaryItemName = "تعدیلات کاهشی",
                             Source = "PayrollAdjustment",
                             Unit = "Amount",
@@ -4865,11 +4880,17 @@ namespace givPayroll.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("givPayroll.Models.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffID");
+
                     b.Navigation("Education");
 
                     b.Navigation("Gender");
 
                     b.Navigation("MaritalStatus");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("givPayroll.Models.PersonnelContract", b =>

@@ -205,7 +205,8 @@ namespace givPayroll.Controllers
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             ViewBag.ProjectId = AppUtil.GetProject(_context);
-            ViewBag.PersonCategoryCode = AppUtil.GetMoein(_context);    
+            ViewBag.PersonCategoryCode = AppUtil.GetMoein(_context);
+        
             //ViewBag.PersonID = AppUtil.GetPerson(_context);
             if (model == null)
                 return NotFound();
@@ -245,9 +246,14 @@ namespace givPayroll.Controllers
             entity.PlusMinus = model.PlusMinus;
             entity.CalculationMode = model.CalculationMode ?? "";
             entity.FormulaValue = model.FormulaValue ?? "";
-            entity.PersonCategoryCode = model.PersonCategoryCode;
-            entity.PersonID = model.PersonID;
-            entity.ProjectId = model.ProjectId;
+
+            entity.ProjectId1 = model.ProjectId1;
+            entity.PersonCategoryCode1 = model.PersonCategoryCode1;
+            entity.PersonID1 = model.PersonID1;
+
+            entity.ProjectId2 = model.ProjectId2;
+            entity.PersonCategoryCode2 = model.PersonCategoryCode2;
+            entity.PersonID2 = model.PersonID2;
             await _context.SaveChangesAsync();
 
             return Json(new

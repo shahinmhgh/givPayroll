@@ -48,45 +48,119 @@ namespace givPayroll
             Woman = 2
         }
 
+        //public static string FixYEKE(string field)
+        //{
+        //    if (string.IsNullOrEmpty(field))
+        //        return field;
 
+        //    return field
+        //        .Replace("ي", "ی")
+        //        .Replace("ك", "ک");
+        //}
 
         //select pc.* 
         //from PersonCategory pc inner join
         //     PersonCategoryLength pcl on len(pc.CategoryCode) = pcl.SumLevelLength
         //where pcl.CategoryLevel = 3
         public static List<SelectListItem> GetPersonsByCategoryCode(
-           ApplicationDbContext context,
+           ApplicationDbContext _context,
            string categoryCode)
         {
-            var persons = context.Database
-                .SqlQuery<PersonCategoryResult>(
-                    $"SELECT * FROM dbo.GetPersonsByCategoryCode({categoryCode})")
-                .ToList();
+            //var persons = context.Database
+            //    .SqlQuery<PersonCategoryResult>(
+            //        $"SELECT * FROM dbo.GetPersonsByCategoryCode({categoryCode})")
+            //    .ToList();
+
+            //return persons.Select(x => new SelectListItem
+            //{
+            //    Value = x.PersonID.ToString(),
+            //    Text = x.PersonFirstName
+            //}).ToList();
+            var persons =  _context.Persons
+            .AsNoTracking()
+            .Join(
+                _context.PersonCategoryGroups,
+                p => p.PersonGroupID,
+                pcg => pcg.PersonGroupID,
+                (p, pcg) => new { p, pcg }
+            )
+            .Join(
+                _context.PersonGroups,
+                x => x.p.PersonGroupID,
+                pg => pg.PersonGroupID,
+                (x, pg) => new
+                {
+                    x.p.PersonID,
+                    pg.PersonGroupName,
+                    x.p.PersonFullName,
+                    x.pcg.CategoryCode
+                }
+            )
+            .Where(x => x.CategoryCode == categoryCode)
+            .OrderBy(x => x.PersonFullName)
+            .Select(x => new TafsilPersonGroupDropdownItem
+            {
+                PersonID = x.PersonID,
+                PersonGroupName = x.PersonGroupName,
+                PersonFullName = x.PersonFullName
+            })
+            .ToList();
+
+            foreach (var item in persons)
+            {
+                item.PersonFullName += " - " + item.PersonID;
+                item.PersonFullName =AppUtil.FixYEKE2(item.PersonFullName ?? "");
+
+                //item.PersonGroupName =
+                //    AppUtil.FixYEKE2(item.PersonGroupName ?? "");
+            }
 
             return persons.Select(x => new SelectListItem
             {
                 Value = x.PersonID.ToString(),
-                Text = x.PersonFirstName
+                Text = x.PersonFullName
             }).ToList();
+
         }
 
         public static List<SelectListItem> GetMoein(ApplicationDbContext _context)
         {
-            return _context.PersonCategories
-                .Join(
-                    _context.PersonCategoryLengths,
-                    pc => pc.CategoryCode.Length,
-                    pcl => pcl.SumLevelLength,
-                    (pc, pcl) => new { pc, pcl }
-                )
-                .Where(x => x.pcl.CategoryLevel == 3)
-                .OrderBy(x => x.pc.CategoryName)
-                .Select(x => new SelectListItem
-                {
-                    Value = x.pc.CategoryCode,
-                    Text = x.pc.CategoryName
-                })
-                .ToList();
+            var persons=
+                _context.PersonCategories
+                        .Join(
+                            _context.PersonCategoryLengths,
+                            pc => pc.CategoryCode.Length,
+                            pcl => pcl.SumLevelLength,
+                            (pc, pcl) => new { pc, pcl }
+                        )
+                        .Where(x => x.pcl.CategoryLevel == 3)
+                        .OrderBy(x => x.pc.CategoryCode)
+                        .Select(x => new SelectListItem
+                        {
+                            Value = x.pc.CategoryCode,
+                            Text = ApplicationDbContext.PersonCategoryFullName(x.pc.CategoryCode) + " - " + x.pc.CategoryCode
+                        }).ToList();
+
+            foreach (var item in persons)
+            {
+                item.Text = AppUtil.FixYEKE2(item.Text);
+            }
+            return persons;
+            //_context.PersonCategories
+            //    .Join(
+            //        _context.PersonCategoryLengths,
+            //        pc => pc.CategoryCode.Length,
+            //        pcl => pcl.SumLevelLength,
+            //        (pc, pcl) => new { pc, pcl }
+            //    )
+            //    .Where(x => x.pcl.CategoryLevel == 3)
+            //    .OrderBy(x => x.pc.CategoryName)
+            //    .Select(x => new SelectListItem
+            //    {
+            //        Value = x.pc.CategoryCode,
+            //        Text = x.pc.CategoryName
+            //    })
+            //    .ToList();
 
         }
 
@@ -140,10 +214,20 @@ namespace givPayroll
 
             String ret;
             ret = Field2.Replace("ی", "ي");
-            //  ret = ret.Replace("ک", "ك");
-            ret = ret.Replace("ك", "ک");
+            ret = ret.Replace("ک", "ك");
+            // ret = ret.Replace("ك", "ک");
             return ret;
         }
+        public static string FixYEKE2(string Field2)
+        {
+
+            String ret;
+            ret = Field2.Replace("ي", "ی");
+            ret = ret.Replace("ك", "ک");
+            // ret = ret.Replace("ك", "ک");
+            return ret;
+        }
+
         public static String M2S(DateTime gregorianDate)
         {
             var pc = new PersianCalendar();
