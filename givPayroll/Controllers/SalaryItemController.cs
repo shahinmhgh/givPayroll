@@ -178,7 +178,7 @@ namespace givPayroll.Controllers
                 .Select(x => x.FormulaValue)
                 .ToListAsync();
 
-            var words =AppUtil.ExtractFormulaWords(formulas);
+            var words = AppUtil.ExtractFormulaWords(formulas);
 
             return Json(words);
         }
@@ -191,7 +191,7 @@ namespace givPayroll.Controllers
                 return Json(new List<SelectListItem>());
             }
 
-            var persons =AppUtil.GetPersonsByCategoryCode(_context, categoryCode);
+            var persons = AppUtil.GetPersonsByCategoryCode(_context, categoryCode);
 
             return Json(persons);
         }
@@ -206,7 +206,7 @@ namespace givPayroll.Controllers
 
             ViewBag.ProjectId = AppUtil.GetProject(_context);
             ViewBag.PersonCategoryCode = AppUtil.GetMoein(_context);
-        
+
             //ViewBag.PersonID = AppUtil.GetPerson(_context);
             if (model == null)
                 return NotFound();
@@ -249,11 +249,13 @@ namespace givPayroll.Controllers
 
             entity.ProjectId1 = model.ProjectId1;
             entity.PersonCategoryCode1 = model.PersonCategoryCode1;
-            entity.PersonID1 = model.PersonID1;
+            if (model.PersonID1 != null)
+                entity.PersonID1 = model.PersonID1;
 
             entity.ProjectId2 = model.ProjectId2;
             entity.PersonCategoryCode2 = model.PersonCategoryCode2;
-            entity.PersonID2 = model.PersonID2;
+            if (model.PersonID2 != null)
+                entity.PersonID2 = model.PersonID2;
             await _context.SaveChangesAsync();
 
             return Json(new

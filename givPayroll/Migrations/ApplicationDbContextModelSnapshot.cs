@@ -4134,7 +4134,7 @@ namespace givPayroll.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PersonID1")
+                    b.Property<int?>("PersonID1")
                         .HasColumnType("int");
 
                     b.Property<int?>("PersonID2")
@@ -4194,7 +4194,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "BaseSalary * DaysWorked",
                             IsSystem = 1,
                             Label = "BaseSalary",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 10,
                             ProjectId1 = 0,
@@ -4211,7 +4210,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*1.2/60*ExtraMinute",
                             IsSystem = 1,
                             Label = "OverTime",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 70,
                             ProjectId1 = 0,
@@ -4228,7 +4226,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(HousingAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "HousingAllowance",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 50,
                             ProjectId1 = 0,
@@ -4245,7 +4242,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(ChildAllowance * ChildNo / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "ChildAllowance",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 60,
                             ProjectId1 = 0,
@@ -4262,7 +4258,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*MissionMinute",
                             IsSystem = 1,
                             Label = "MissionAllownce",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 100,
                             ProjectId1 = 0,
@@ -4279,7 +4274,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*AbsenceMinute",
                             IsSystem = 1,
                             Label = "AbsenceDeduction",
-                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 80,
                             ProjectId1 = 0,
@@ -4296,7 +4290,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(BaseSalary * MonthDays/220)*2/60*DelayMinute",
                             IsSystem = 1,
                             Label = "DelayDeduction",
-                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 90,
                             ProjectId1 = 0,
@@ -4313,7 +4306,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Tax",
-                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 130,
                             ProjectId1 = 0,
@@ -4330,7 +4322,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Insurance",
-                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 120,
                             ProjectId1 = 0,
@@ -4347,7 +4338,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(FoodAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "FoodAllowance",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 40,
                             ProjectId1 = 0,
@@ -4364,7 +4354,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(JobAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "JobAllowance",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 30,
                             ProjectId1 = 0,
@@ -4381,7 +4370,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "(ResponsibilityAllowance / MonthDays) * DaysWorked",
                             IsSystem = 1,
                             Label = "ResponsibilityAllowance",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 20,
                             ProjectId1 = 0,
@@ -4398,7 +4386,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Bonus",
-                            PersonID1 = 0,
                             PlusMinus = 1,
                             Priority = 110,
                             ProjectId1 = 0,
@@ -4415,7 +4402,6 @@ namespace givPayroll.Migrations
                             FormulaValue = "",
                             IsSystem = 1,
                             Label = "Penalty",
-                            PersonID1 = 0,
                             PlusMinus = -1,
                             Priority = 111,
                             ProjectId1 = 0,
@@ -4697,6 +4683,47 @@ namespace givPayroll.Migrations
                     b.HasKey("AutoID");
 
                     b.ToTable("Voucher", "dbo");
+                });
+
+            modelBuilder.Entity("givPayroll.Models.VoucherModel", b =>
+                {
+                    b.Property<decimal?>("Credit")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<decimal?>("Debit")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<int>("PayrollMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PayrollYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PersonCategoryCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("PersonID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonnelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlusMinus")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SalaryItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SalaryItemName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.ToTable("VoucherModels");
                 });
 
             modelBuilder.Entity("givPayroll.Models.VoucherRow", b =>

@@ -20,7 +20,7 @@
             titleText = "تایید حقوق ماه";
             break;
         case "CheckAcc":
-            buttonText = "ثبت حسابداری همه";
+            buttonText = "پیش نمایش ثبت سند حسابداری";
             titleText = "ثبت حسابداری حقوق ماه";
             break;
     }
@@ -146,7 +146,7 @@
                     </button>
 
                     <button type="button"
-                            class="btn btn-info" onclick="SavePayroll()">
+                            class="btn btn-info" onclick="SavePayrollPage(this)">
 
                         <i class="fa fa-search"></i>
                         @buttonText
@@ -182,7 +182,7 @@
 <div class="modal fade"
      id="attendanceModal" style="z-index: 1060 !important;">
 
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
 
         <div class="modal-content"
              id="attendanceModalContent">
@@ -237,7 +237,7 @@
             $.get(
                 "/Attendance/Edit/" + id,
 
-                function(data) {
+                function (data) {
                     $("#attendanceModalContent")
                         .html(data);
 
@@ -279,21 +279,21 @@
                     month: month,
                     actionParam: '@ViewBag.actionParam'
                 },
-                success: function(result) {
+                success: function (result) {
 
                     $('#attendanceResult').html(result);
                 },
-                error: function(xhr) {
+                error: function (xhr) {
 
                     console.error(xhr);
 
                     $('#attendanceResult').html(`
-                                            <div class="alert alert-danger">
-                                                خطا در بررسی کارکرد پرسنل.
-                                            </div>
-                                        `);
+                                                                    <div class="alert alert-danger">
+                                                                        خطا در بررسی کارکرد پرسنل.
+                                                                    </div>
+                                                                `);
                 },
-                complete: function() {
+                complete: function () {
 
                     button.prop('disabled', false);
 
@@ -302,6 +302,26 @@
                     );
                 }
             });
+        }
+
+        function SavePayrollPage(button) {
+            let buttonText = button.textContent.trim();
+            //alert(buttonText);
+            if (buttonText != "") {
+                if (buttonText == "پیش نمایش ثبت سند حسابداری") {
+                    // alert(buttonText); // پیش نمایش ثبت سند حسابداری
+                    //alert('accounting save');
+                    let ym =  $("#attendanceYear").val() + "/" + $("#attendanceMonth").val().padStart(2, '0');
+                    VoucherPayroll( ym);
+
+                }
+                if (buttonText == "تایید همه") {
+                    // alert(buttonText); // پیش نمایش ثبت سند حسابداری
+                    let ym =  $("#attendanceYear").val() + "/" + $("#attendanceMonth").val().padStart(2, '0');
+                    confirmPayroll(0, ym, true, false);
+                }
+            }
+
         }
     </script>
 }

@@ -123,7 +123,7 @@ public class PayrollController : Controller
                     message = " برداشته ثبت حقوق با خطا مواجه شد"
                 });
             }
-           
+
         }
     }
     private string UpdatePayroll(
@@ -284,6 +284,8 @@ public class PayrollController : Controller
 
     public async Task<IActionResult> PayrollPreview(int year, int month, int personnelId)
     {
+
+
         TaxDetail = new List<CalculateTaxDetail>();
         PlusList = new List<CalculateTaxDetail>();
         MinusList = new List<CalculateTaxDetail>();
@@ -313,12 +315,19 @@ public class PayrollController : Controller
             model[i].SalaryItem = await _context.SalaryItems.FindAsync(model[i].SalaryItemId);
         return PartialView("_PayrollInsuranceTax", model);
     }
+
     public async Task<ActionResult> confirmPayroll(int personnelId, string ym)
-    {//1405/05
+    {
         int year = Convert.ToInt16(ym.Substring(0, 4));
         int month = Convert.ToInt16(ym.Substring(5, 2));
-        Payroll? pay = await _context.Payrolls.Where(i => i.PersonnelId == personnelId &&
-                        i.PayrollYear == year && i.PayrollMonth == month).FirstOrDefaultAsync();
+        List<Payroll> pay = new List<Payroll>();
+        if (personnelId == 0)
+            pay = await _context.Payrolls.Where(
+                        i => i.PayrollYear == year && i.PayrollMonth == month).ToListAsync();
+        else
+            pay = await _context.Payrolls.Where(i => i.PersonnelId == personnelId &&
+                        i.PayrollYear == year && i.PayrollMonth == month).ToListAsync();
+
         if (pay == null)
             return Json(new
             {
@@ -328,7 +337,7 @@ public class PayrollController : Controller
             });
         else
         {
-            if (pay.Vouchered)
+            if (pay[0].Vouchered)
                 return Json(new
                 {
                     icon = "error",
@@ -338,16 +347,25 @@ public class PayrollController : Controller
 
             try
             {
-                Personnel person = _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefault();
-                bool iniConfirmed = pay.Confirmed;
+                Personnel person = new Personnel();
+                if (personnelId == 0)
+                    person = await _context.Personnels.Where(i => i.Id == personnelId).FirstOrDefaultAsync();
 
-                if (pay.Confirmed)
-                    pay.Confirmed = false;
-                else
-                    pay.Confirmed = true;
+                bool iniConfirmed = pay[0].Confirmed;
 
+                foreach (Payroll item in pay)
+                {
+                    if (iniConfirmed)
+                        item.Confirmed = false;
+                    else
+                        item.Confirmed = true;
+                }
                 await _context.SaveChangesAsync();
-                string mess = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + (iniConfirmed ? " تایید برداشته شد" : " تایید گردید");
+                string mess = "";
+                if (personnelId == 0)
+                    mess = "حقوق در سال و ماه " + ym + (iniConfirmed ? " تایید برداشته شد" : " تایید گردید");
+                else
+                    mess = "حقوق " + person.FirstName + " " + person.LastName + " در سال و ماه " + ym + (iniConfirmed ? " تایید برداشته شد" : " تایید گردید");
 
                 return Json(new
                 {
@@ -368,6 +386,14 @@ public class PayrollController : Controller
             }
         }
 
+    }
+    public async Task<ActionResult> VoucherPayrollPreview(string ym)
+    {
+        int year =Convert.ToInt32( ym.Substring(0, 4));
+        int month =Convert.ToInt32( ym.Substring(5,2));
+
+        List<VoucherModel> lst = await GetVoucherItems(year, month);
+        return PartialView("_VoucherPayrollPreview", lst);
     }
 
     public async Task<ActionResult> VoucherPayroll(int personnelId, string ym)
@@ -537,7 +563,7 @@ public class PayrollController : Controller
         #region PersonnelOrder
         //List<SalaryItem> lst1 = _context.SalaryItems.Where(i => i.Source == "PersonnelOrder").ToList();
 
-        PersonnelOrder activeOrderItem = _context.PersonnelOrders
+        PersonnelOrder? activeOrderItem = _context.PersonnelOrders
             .Include(x => x.Details)
             .ThenInclude(x => x.SalaryItem)
             .Where(i => i.PersonnelId == personnelId && i.IsActive).FirstOrDefault();
@@ -748,7 +774,8 @@ public class PayrollController : Controller
                     Amount = d.Amount,
                     Description = d.PayrollAdjustment.Description,
                     PlusMinus = d.PayrollAdjustment.SalaryItem.PlusMinus,
-                    formulavalue = ""
+                    formulavalue = "",
+                    PayrollAdjustmentId = d.PayrollAdjustmentId,
                 })
                 .FirstOrDefaultAsync();
 
@@ -760,6 +787,7 @@ public class PayrollController : Controller
                 item.PlusMinus = result3.PlusMinus;
                 item.Description = result3.Description;
                 item.FormulaValue = itemSalary3.FormulaValue;
+                item.PayrollAdjustmentId = result3.PayrollAdjustmentId;
                 model.PayrollItems.Add(item);
             }
 
@@ -961,7 +989,60 @@ public class PayrollController : Controller
 
         return model;
     }
+    public async Task<List<VoucherModel>> GetVoucherItems(int year, int month)
+    {
+        var result = await _context.VoucherModels
+            .FromSqlInterpolated($@"
+              
+ 
+SELECT      PayrollYear, PayrollMonth,  Payroll.Payroll.PersonnelId,
+ref.SalaryItem.ProjectId1 as ProjectId, ref.SalaryItem.PersonCategoryCode1 as PersonCategoryCode, ref.SalaryItem.PersonID1 as PersonID, 
+ref.SalaryItem.SalaryItemName,ref.SalaryItem.id as salaryitemid,  ref.SalaryItem.PlusMinus, 
+                        
+                         case when ref.SalaryItem.PlusMinus<0 then PayrollItem.Amount end as credit,
+                         case when ref.SalaryItem.PlusMinus>0 then PayrollItem.Amount end as debit 
+FROM            Payroll.Payroll INNER JOIN
+                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
+                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
+WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month}) AND (Payroll.PayrollItem.PayrollAdjustmentId IS NULL)
 
+ 
+union 
+
+SELECT        PayrollYear,PayrollMonth, Payroll.Payroll.PersonnelId,
+ref.SalaryItem.ProjectId2 as ProjectId, ref.SalaryItem.PersonCategoryCode2 as PersonCategoryCode,  ref.SalaryItem.PersonID2 as PersonID,
+ ref.SalaryItem.SalaryItemName,  ref.SalaryItem.Id AS salaryitemid, ref.SalaryItem.PlusMinus,
+            CASE WHEN ref.SalaryItem.PlusMinus > 0 THEN PayrollItem.Amount END AS credit,
+            CASE WHEN ref.SalaryItem.PlusMinus < 0 THEN PayrollItem.Amount END AS debit  
+FROM            Payroll.Payroll INNER JOIN
+                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
+                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
+WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month}) AND (Payroll.PayrollItem.PayrollAdjustmentId IS NULL) AND (ISNULL(ref.SalaryItem.ProjectId2, 0) <> 0)
+ 
+union 
+
+SELECT     PayrollYear, PayrollMonth,   Payroll.Payroll.PersonnelId, 
+Payroll.PayrollAdjustment.ProjectId , Payroll.PayrollAdjustment.PersonCategoryCode , 
+Payroll.PayrollAdjustment.PersonID , 
+                         ref.SalaryItem.SalaryItemName, ref.SalaryItem.id as salryitemid, ref.SalaryItem.PlusMinus, 
+                         
+                         case when ref.SalaryItem.PlusMinus<0 then Payroll.PayrollAdjustmentDetail.Amount end as credit,
+                         case when ref.SalaryItem.PlusMinus>0 then Payroll.PayrollAdjustmentDetail.Amount end as debit 
+FROM            Payroll.Payroll INNER JOIN
+                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
+                         Payroll.PayrollAdjustmentDetail ON Payroll.PayrollItem.PayrollAdjustmentId = Payroll.PayrollAdjustmentDetail.PayrollAdjustmentId AND Payroll.Payroll.PayrollMonth = Payroll.PayrollAdjustmentDetail.PayrollPersianMonth AND 
+                         Payroll.Payroll.PayrollYear = Payroll.PayrollAdjustmentDetail.PayrollPersianYear AND Payroll.Payroll.PersonnelId = Payroll.PayrollAdjustmentDetail.personnelId INNER JOIN
+                         Payroll.PayrollAdjustment ON Payroll.PayrollItem.PayrollAdjustmentId = Payroll.PayrollAdjustment.Id INNER JOIN
+                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
+WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month})
+
+order by personnelid, ref.SalaryItem.Id
+        ")
+            .AsNoTracking()
+            .ToListAsync();
+
+        return result;
+    }
 
     public List<CalculateTaxDetail> CalculateTax(decimal amount, List<RuleTax> rules, ref decimal TaxAmount)
     {

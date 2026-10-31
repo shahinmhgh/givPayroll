@@ -77,17 +77,19 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item"
-                                       asp-controller="Company"
+                                       asp-controller="Configs"
                                        asp-action="Index">
+                                        <i class="fa fa-building"></i>
                                         <span>اطلاعات شرکت</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a asp-controller="IdentityUsers"
-                                       asp-action="Index"
-                                       class="nav-link">
+                                    <a class="dropdown-item" 
+                                    asp-controller="IdentityUsers"
+                                       asp-action="Index">
+                                        
                                         <i class="fa fa-users"></i>
-                                        Users
+                                        <span>اطلاعات کاربران</span>
                                     </a>
                                 </li>
                             </ul>

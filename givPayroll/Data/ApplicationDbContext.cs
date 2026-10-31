@@ -25,6 +25,7 @@ namespace givPayroll.Data
 
         //public DbSet<PersonCategoryResult> PersonCategoryResults
         //    => Set<PersonCategoryResult>();
+        public DbSet<VoucherModel> VoucherModels { get; set; }
 
         #region Other
         public DbSet<Config> Configs { get; set; }

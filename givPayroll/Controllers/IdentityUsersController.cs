@@ -109,10 +109,10 @@ namespace givPayroll.Controllers
 
         // AJAX: load Create modal
         [HttpGet]
-        public IActionResult CreateModal()
+        public async Task<IActionResult> CreateModal()
         {
             ViewBag.IsEdit = false;
-
+            ViewBag.UserID = await GetUser();
             return PartialView(
                 "_UserModal", new ApplicationUser());
         }
@@ -154,7 +154,7 @@ namespace givPayroll.Controllers
             string userName,
             string? email,
             string? phoneNumber,
-            string password)
+            string password , string fullName, string UserID)
         {
             if (string.IsNullOrWhiteSpace(userName) ||
                 string.IsNullOrWhiteSpace(password))
@@ -171,7 +171,10 @@ namespace givPayroll.Controllers
                 Email = string.IsNullOrWhiteSpace(email)
                     ? null : email.Trim(),
                 PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber)
-                    ? null : phoneNumber.Trim()
+                    ? null : phoneNumber.Trim(),
+                UserID = Convert.ToInt32(UserID),
+                FullName = string.IsNullOrWhiteSpace(fullName)
+                    ? null : fullName.Trim()
             };
 
             var result = await _userManager.CreateAsync(user, password);
@@ -203,12 +206,12 @@ namespace givPayroll.Controllers
                 TempData["Error"] = "Username is required.";
                 return RedirectToAction(nameof(Index));
             }
-            user.UserID =Convert.ToInt32( UserID);
             user.UserName = userName.Trim();
             user.Email = string.IsNullOrWhiteSpace(email)
                 ? null : email.Trim();
             user.PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber)
                 ? null : phoneNumber.Trim();
+            user.UserID =Convert.ToInt32( UserID);
             user.FullName = string.IsNullOrWhiteSpace(fullName)
                 ? null : fullName.Trim();
 

@@ -1,4 +1,5 @@
 ﻿using givPayroll.Data;
+using givPayroll.Migrations;
 using givPayroll.Models;
 using givPayroll.Services;
 using givPayroll.ViewModels;
@@ -30,11 +31,14 @@ namespace givPayroll.Controllers
             _holidayService = holidayService;
         }
 
+        
+
+        static CalculateViewModel result = new CalculateViewModel();
         [HttpGet]
         public async Task<IActionResult> Check(int? year, int? month, string actionParam)
         {
             //actionParam Check CheckOk CheckAcc
-            ViewBag.actionParam=actionParam;
+            ViewBag.actionParam = actionParam;
             var currentYear = year ?? 1405;
             var currentMonth = month ?? 1;
 
@@ -42,7 +46,7 @@ namespace givPayroll.Controllers
             ViewBag.Month = currentMonth;
             ViewBag.Searched = year.HasValue && month.HasValue;
 
-            CalculateViewModel result = new CalculateViewModel();
+            result = new CalculateViewModel();
             FillMonths(result);
             if (!year.HasValue || !month.HasValue)
             {
@@ -96,7 +100,7 @@ namespace givPayroll.Controllers
                 .ToListAsync();
 
             // هر کسی که قابل ثبت است اعم از ثبت شده یا ثبت نشده
-            if (actionParam=="Check")
+            if (actionParam == "Check")
                 personnels = personnels
                 //.Where(x => !_context.Payrolls.Any(p =>
                 //    p.PersonnelId == x.PersonnelId &&
@@ -108,7 +112,7 @@ namespace givPayroll.Controllers
                 .Where(x => _context.Payrolls.Any(p =>
                     p.PersonnelId == x.PersonnelId &&
                     p.PayrollYear == year &&
-                    p.PayrollMonth == month ))
+                    p.PayrollMonth == month))
                 .ToList();
             if (actionParam == "CheckAcc")
                 personnels = personnels

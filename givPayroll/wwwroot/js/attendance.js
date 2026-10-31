@@ -214,6 +214,7 @@ function SavePayroll() {
     alert("SavePayroll" + " " + attendanceYear + "" + attendanceMonth);
 }
 function confirmPayroll(id, ym, confirmed, vouchered) {
+    
     confirmed = confirmed == "True";
     vouchered = vouchered == "True";
 
@@ -272,68 +273,113 @@ function confirmPayroll(id, ym, confirmed, vouchered) {
 
 }
 
-function VoucherPayroll(id, ym, confirmed, vouchered) {
-    confirmed = confirmed == "True";
-    vouchered = vouchered == "True";
+function VoucherPayroll(ym) {
+    // alert(confirmed); alert(confirmed == "True");
+     
+    // confirmed = confirmed == "True";
+    // vouchered = vouchered == "True";
     
-    if (!confirmed) {
-        Swal.fire({
-            icon: "error",
-            title: "ثبت حقوق تایید نشده"
-        });
-        return;
-    }
+    // if (!confirmed) {
+    //     Swal.fire({
+    //         icon: "error",
+    //         title: "ثبت حقوق تایید نشده"
+    //     });
+    //     return;
+    // }
 
-    Swal.fire({
-
-        title: 'تایید شود؟',
-        text:
-            'آیا از ثبت حسابداری حقوق مطمئن هستید؟',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText:
-            'بله، تایید شود',
-        cancelButtonText:
-            'انصراف',
-        confirmButtonColor:
-            '#d33',
-        cancelButtonColor:
-            '#6c757d'
-
-    }).then(
-        function (result) {
-            if (result.isConfirmed) {
-
-                $.ajax({
-                    url: '/payroll/VoucherPayroll',
-                    type: 'GET',
-                    data: {
-                        ym: ym,
-                        personnelid: id,
-                    },
-                    success: function (result) {
-                        Swal.fire({
-                            icon: result.icon,
-                            title: result.message
-                        });
-
-                        checkAttendance();
-
-                    },
-                    error: function (xhr) {
-                        console.error(xhr);
-
-                    },
-                    complete: function () {
+    $.get(
+        "/payroll/VoucherPayrollPreview",
+        { ym: ym },
+        function (data) {
+            $("#attendanceModalContent")
+                .html(data);
 
 
-                    }
-                });
+            $.validator.unobtrusive.parse(
+                "#attendanceForm"
+            );
 
 
-            }
+            $("#attendanceModal")
+                .modal("show");
         }
     );
+
+    // $.ajax({
+    //     url: '/payroll/VoucherPayrollPreview',
+    //     type: 'GET',
+    //     data: {
+    //         ym: ym
+    //     },
+    //     success: function (result) {
+    //         Swal.fire({
+    //             icon: result.icon,
+    //             title: result.message
+    //         });
+
+    //         checkAttendance();
+
+    //     },
+    //     error: function (xhr) {
+    //         console.error(xhr);
+
+    //     },
+    //     complete: function () {
+
+
+    //     }
+    // });
+
+    // Swal.fire({
+
+    //     title: 'تایید شود؟',
+    //     text:
+    //         'آیا از ثبت حسابداری حقوق مطمئن هستید؟',
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonText:
+    //         'بله، تایید شود',
+    //     cancelButtonText:
+    //         'انصراف',
+    //     confirmButtonColor:
+    //         '#d33',
+    //     cancelButtonColor:
+    //         '#6c757d'
+
+    // }).then(
+    //     function (result) {
+    //         if (result.isConfirmed) {
+
+    //             $.ajax({
+    //                 url: '/payroll/VoucherPayroll',
+    //                 type: 'GET',
+    //                 data: {
+    //                     ym: ym,
+    //                     personnelid: id,
+    //                 },
+    //                 success: function (result) {
+    //                     Swal.fire({
+    //                         icon: result.icon,
+    //                         title: result.message
+    //                     });
+
+    //                     checkAttendance();
+
+    //                 },
+    //                 error: function (xhr) {
+    //                     console.error(xhr);
+
+    //                 },
+    //                 complete: function () {
+
+
+    //                 }
+    //             });
+
+
+    //         }
+    //     }
+    // );
 
 }
 

@@ -38,8 +38,8 @@
                 <th>
                     Label
                 </th>
- 
 
+ 
                 <th>
                     منبع
                 </th>
@@ -65,13 +65,13 @@
             {
                 foreach (var item in Model)
                 {
-                       
-                        var amount = item.SalaryItemRules?
-                                .OrderByDescending(x => x.EffectiveDate)
-                                .FirstOrDefault()?.Amount;
-                        var mark = (amount.GetValueOrDefault()!=0) ? true : false;
-                    
-                    <tr >
+
+                    var amount = item.SalaryItemRules?
+                                                    .OrderByDescending(x => x.EffectiveDate)
+                                                    .FirstOrDefault()?.Amount;
+                    var mark = (amount.GetValueOrDefault() != 0) ? true : false;
+
+                    <tr>
 
                         <td style="width:25px!important">
                             <label class="fa @(mark ? "fa-bookmark" : "")" style="color:red"></label>
@@ -119,8 +119,8 @@
                             {
 
                                 <button type="button"
-                                class="btn btn-sm btn-warning tooltip-btn"
-                                onclick="openSalaryItemEdit(@item.Id)">
+                                        class="btn btn-sm btn-warning tooltip-btn"
+                                        onclick="openSalaryItemEdit(@item.Id)">
 
                                     <i class="fa fa-edit"></i>
                                     <span class="tooltip-text">ویرایش</span>
@@ -131,23 +131,25 @@
                                 <button type="button"
                                         class="btn btn-sm btn-danger tooltip-btn"
                                         onclick="deleteSalaryItem(@item.Id)"
-                                    @(item.IsSystem==1 ? "disabled" : "")>
+                                    @(item.IsSystem == 1 ? "disabled" : "")>
 
                                     <i class="fa fa-trash"></i>
                                     <span class="tooltip-text">حذف</span>
 
                                 </button>
 
-                                <button type="button" class="btn btn-sm btn-info tooltip-btn"
-                                        onclick="salaryItemRule(@item.Id)">
+                                
+                                    <button type="button" class="btn btn-sm btn-info tooltip-btn"
+                                        onclick="salaryItemRule(@item.Id)" @(item.IsSystem == 1 ? "disabled" : "")>
 
-                                    <i class="fa fa-cog"></i>
-                                    <span class="tooltip-text">قوانین حقوق</span>
+                                        <i class="fa fa-cog"></i>
+                                        <span class="tooltip-text">قوانین حقوق</span>
 
                                
-                                </button>
-                            } 
-                         @*    @if (@item.Label != "Insurance" && @item.Label != "Tax")
+                                    </button>
+                                 
+                            }
+                            @*    @if (@item.Label != "Insurance" && @item.Label != "Tax")
                             {
                             <button type="button" class="btn btn-sm btn-info tooltip-btn"
                                         onclick="salaryItemRule(@item.Id)">

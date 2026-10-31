@@ -54,7 +54,7 @@ namespace givPayroll.Models
 
         // select * from person
         [Display(Name = "کد تفصیلی")]
-        public int PersonID1 { get; set; }
+        public int? PersonID1 { get; set; }
 
         // select * from Project 
         [Display(Name = "پروژه")]

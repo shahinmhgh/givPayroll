@@ -17,6 +17,7 @@
     <input type="hidden" asp-for="Id" />
     <label id="PersonID1Field" hidden>@Model.PersonID1</label>
     <label id="PersonID2Field" hidden>@Model.PersonID2</label>
+    <label id="fldIsSystem" hidden>@Model.IsSystem</label>
 
     <div class="modal-header">
         <h5 class="modal-title">
@@ -130,7 +131,8 @@
             </div>
 
             <!-- Accounting start -->
-            <div class="row">
+            <div class="row" id="accRow1" style="margin-top:5px;">
+                <label class="form-label" style="background-color:whitesmoke;border:1px solid black"> بدهکار </label>
                 <div class="col-md-2">
                     <label class="form-label"> @Html.DisplayNameFor(m => m.ProjectId1) </label>
                     <select asp-for="ProjectId1" asp-items="ViewBag.ProjectId" class="form-select">
@@ -154,7 +156,9 @@
                     </select>
                 </div>
             </div>
+
             <div class="row" id="accRow2">
+                <label class="form-label" style="background-color:whitesmoke; border:1px solid black"> بستانکار </label>
                 <div class="col-md-2">
                     <label class="form-label"> @Html.DisplayNameFor(m => m.ProjectId2) </label>
                     <select asp-for="ProjectId2" asp-items="ViewBag.ProjectId" class="form-select">
@@ -245,10 +249,12 @@
     }
 
     function LoadForm() {
-        var source =$("#Source").val();
+
+        
+        var source = $("#Source").val();
         $("#accRow2").prop("hidden", true);
-       
-        if (source == "RuleInsurance" || source == "RuleTax")   {   
+
+        if (source == "RuleInsurance" || source == "RuleTax") {
             $("#accRow2").prop("hidden", false);
         }
 
@@ -287,9 +293,28 @@
 
                 break;
         }
+
+        var isSystem = $("#fldIsSystem")[0].innerText;
+
+        if (isSystem == 1) {
+            $("#SalaryItemName").prop("readonly", true);
+            $("#BaseSalary").prop("readonly", true);
+            $("#Source").on("mousedown keydown", function(e) {
+                e.preventDefault();
+            });
+            $("#PlusMinus").on("mousedown keydown", function(e) {
+                e.preventDefault();
+            });
+            $("#Label").prop("readonly", true);
+            $("#FormulaValue").prop("readonly", true);
+        }
     }
 
     $(document).on('change', '#PersonCategoryCode1', function() {
+        var IsSystem = '@Model.IsSystem';
+
+        
+
         $('#PersonCategoryCode1').select2({
             width: '100%',
             dir: 'rtl',
@@ -313,6 +338,11 @@
             return;
         }
         personDropdown.prop('disabled', true);
+
+        if (IsSystem) {
+            //personDropdown.prop('readonly', true);
+        }
+
         $.ajax({
             url: '/SalaryItem/GetPersonsByCategoryCode',
             type: 'GET',
@@ -460,8 +490,14 @@
         var form = $("#salaryItemForm");
         var id = $("#Id").val();
 
+      
+
         if (!form.valid()) {
-            return false;
+            form.validate().errorList.forEach(function (error) {
+                console.log(error.message + " " + error.no);
+            });
+             
+                return false;
         }
 
         const formulaResult = validateFormula();
@@ -490,7 +526,7 @@
                 'در حال ذخیره...'
             );
 
-        //alert($("#salaryItemRuleAmount").val());
+        
 
         //$("#salaryItemLoading").show();
 
@@ -501,6 +537,7 @@
             type: "POST",
             data: form.serialize(),
             success: function(result) {
+
                 if (result.success) {
                     $("#salaryItemModal").modal("hide");
 
