@@ -212,14 +212,19 @@ namespace givPayroll.Controllers
 
         private async Task<List<SelectListItem>> GetStaff()
         {
-            return await _context.staff
+            var persons = await _context.staff
                 .OrderBy(x => x.LastName)
                 .Select(x => new SelectListItem
                 {
                     Value = x.StaffID.ToString(),
-                    Text = x.FirstName + " " + x.LastName
+                    Text = AppUtil.FixYEKE2(x.FirstName + " " + x.LastName)
                 })
                 .ToListAsync();
+            //foreach (var item in persons)
+            //{
+            //    item.Text = AppUtil.FixYEKE2(item.Text);
+            //}
+            return persons;
         }
 
         [HttpGet]

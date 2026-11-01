@@ -1,8 +1,9 @@
-﻿@model List<givPayroll.Models.VoucherModel>
+﻿ 
+@model List<givPayroll.Models.VoucherModel>
 
 @{
-    var totalDebit = Model?.Sum(x => x.Debit ?? 0) ?? 0;
-    var totalCredit = Model?.Sum(x => x.Credit ?? 0) ?? 0;
+    var totalDebit = Model?.Sum(x => x.debit) ?? 0;
+    var totalCredit = Model?.Sum(x => x.credit) ?? 0;
     var difference = totalDebit - totalCredit;
 
     var first = Model?.FirstOrDefault();
@@ -12,7 +13,6 @@
 
     <!-- Header -->
     <div class="modal-header bg-primary text-white">
-
         <div>
             <h5 class="modal-title mb-1">
                 <i class="fa fa-file-invoice-dollar ms-2"></i>
@@ -22,9 +22,8 @@
             @if (first != null)
             {
                 <small>
-                    دوره حقوق:
-                    @first.PayrollYear /
-                    @first.PayrollMonth.ToString("00")
+                    تاریخ ایجاد:
+                    @first.InitiateDate.ToString("yyyy/MM/dd HH:mm")
                 </small>
             }
         </div>
@@ -33,7 +32,6 @@
                 class="btn-close btn-close-white"
                 data-bs-dismiss="modal">
         </button>
-
     </div>
 
     <!-- Body -->
@@ -42,7 +40,7 @@
         <!-- Summary -->
         <div class="row g-3 mb-3">
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="border rounded p-3 bg-light">
                     <small class="text-muted">تعداد ردیف‌ها</small>
                     <h5 class="mb-0 mt-1">
@@ -51,7 +49,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="border rounded p-3 bg-light">
                     <small class="text-muted">جمع بدهکار</small>
                     <h5 class="mb-0 mt-1 text-danger">
@@ -60,11 +58,20 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="border rounded p-3 bg-light">
                     <small class="text-muted">جمع بستانکار</small>
                     <h5 class="mb-0 mt-1 text-success">
                         @totalCredit.ToString("#,##0.###")
+                    </h5>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="border rounded p-3 bg-light">
+                    <small class="text-muted">اختلاف</small>
+                    <h5 class="mb-0 mt-1 @(difference == 0 ? "text-success" : "text-danger")">
+                        @Math.Abs(difference).ToString("#,##0.###")
                     </h5>
                 </div>
             </div>
@@ -81,16 +88,14 @@
                         <th style="width:50px">ردیف</th>
                         <th>کد معین</th>
                         <th>کد تفصیلی</th>
-                        <th>شرح حساب</th>
-                        <th>کد آیتم</th>
                         <th>پروژه</th>
+                        <th>شرح سند</th>
                         <th>بدهکار</th>
                         <th>بستانکار</th>
                     </tr>
                 </thead>
 
                 <tbody>
-
                     @if (Model != null && Model.Any())
                     {
                         var index = 1;
@@ -100,30 +105,22 @@
                             <tr>
                                 <td>@index</td>
 
-                                <td>
-                                    @(item.PersonCategoryCode ?? "-")
-                                </td>
+                                <td>@item.CategoryCode</td>
 
-                                <td>
-                                    @(item.PersonID?.ToString() ?? "-")
-                                </td>
+                                <td>@item.PersonID</td>
+
+                                <td>@item.ProjectID</td>
 
                                 <td class="text-start">
-                                    @item.SalaryItemName
-                                </td>
-
-                                <td>@item.SalaryItemId</td>
-
-                                <td>
-                                    @(item.ProjectId?.ToString() ?? "-")
+                                    @item.Description
                                 </td>
 
                                 <td class="text-end text-danger fw-bold">
-                                    @(item.Debit?.ToString("#,##0.###") ?? "-")
+                                    @item.debit.ToString("#,##0.###")
                                 </td>
 
                                 <td class="text-end text-success fw-bold">
-                                    @(item.Credit?.ToString("#,##0.###") ?? "-")
+                                    @item.credit.ToString("#,##0.###")
                                 </td>
                             </tr>
 
@@ -133,18 +130,16 @@
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center text-muted p-4">
+                            <td colspan="7" class="text-center text-muted p-4">
                                 اطلاعاتی برای نمایش وجود ندارد
                             </td>
                         </tr>
                     }
-
                 </tbody>
 
                 <tfoot class="table-secondary fw-bold">
-
                     <tr>
-                        <td colspan="6" class="text-end">
+                        <td colspan="5" class="text-end">
                             جمع کل
                         </td>
 
@@ -156,11 +151,9 @@
                             @totalCredit.ToString("#,##0.###")
                         </td>
                     </tr>
-
                 </tfoot>
 
             </table>
-
         </div>
 
         <!-- Balance Status -->
@@ -205,10 +198,8 @@
             <button type="button"
                     class="btn btn-secondary"
                     data-bs-dismiss="modal">
-
                 <i class="fa fa-times ms-1"></i>
                 انصراف
-
             </button>
 
             <button type="button"
@@ -218,11 +209,10 @@
 
                 <i class="fa fa-save ms-1"></i>
                 ثبت سند حسابداری
-
             </button>
 
         </div>
-
     </div>
 
 </div>
+```

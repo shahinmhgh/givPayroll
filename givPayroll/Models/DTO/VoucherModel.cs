@@ -7,31 +7,24 @@ namespace givPayroll.Models
     [Keyless]
     public class VoucherModel
     {
-        public int PayrollYear { get; set; }
+        public int VoucherID { get; set; }
 
-        public int PayrollMonth { get; set; }
+        public int ClientID { get; set; }
 
-        public int PersonnelId { get; set; }
+        public string CategoryCode { get; set; } = string.Empty;
 
-        public int? ProjectId { get; set; }
+        public long PersonID { get; set; }
 
-        [StringLength(50)]
-        public string? PersonCategoryCode { get; set; }
+        public int ProjectID { get; set; }
 
-        public int? PersonID { get; set; }
+        public string Description { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(50)]
-        public string SalaryItemName { get; set; } = string.Empty;
+        public decimal debit { get; set; }
 
-        public int SalaryItemId { get; set; }
+        public decimal credit { get; set; }
 
-        public int PlusMinus { get; set; }
+        public int InitiateUserID { get; set; }
 
-        [Column(TypeName = "decimal(18,3)")]
-        public decimal? Credit { get; set; }
-
-        [Column(TypeName = "decimal(18,3)")]
-        public decimal? Debit { get; set; }
+        public DateTime InitiateDate { get; set; }
     }
 }

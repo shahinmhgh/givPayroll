@@ -392,7 +392,7 @@ public class PayrollController : Controller
         int year =Convert.ToInt32( ym.Substring(0, 4));
         int month =Convert.ToInt32( ym.Substring(5,2));
 
-        List<VoucherModel> lst = await GetVoucherItems(year, month);
+        List<VoucherModel> lst = await GetVoucherItems(year, month, 1);
         return PartialView("_VoucherPayrollPreview", lst);
     }
 
@@ -987,63 +987,82 @@ public class PayrollController : Controller
            })
            .ToList();
 
+        // fix amount
+        foreach (PayrollItem item in model.PayrollItems)
+            item.Amount = Math.Round(item.Amount, 0);
         return model;
     }
-    public async Task<List<VoucherModel>> GetVoucherItems(int year, int month)
+    //    public async Task<List<VoucherModel>> GetVoucherItems(int year, int month)
+    //    {
+    //        var result = await _context.VoucherModels
+    //            .FromSqlInterpolated($@"
+
+
+    //SELECT      PayrollYear, PayrollMonth,  Payroll.Payroll.PersonnelId,
+    //ref.SalaryItem.ProjectId1 as ProjectId, ref.SalaryItem.PersonCategoryCode1 as PersonCategoryCode, ref.SalaryItem.PersonID1 as PersonID, 
+    //ref.SalaryItem.SalaryItemName,ref.SalaryItem.id as salaryitemid,  ref.SalaryItem.PlusMinus, 
+
+    //                         case when ref.SalaryItem.PlusMinus<0 then PayrollItem.Amount end as credit,
+    //                         case when ref.SalaryItem.PlusMinus>0 then PayrollItem.Amount end as debit 
+    //FROM            Payroll.Payroll INNER JOIN
+    //                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
+    //                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
+    //WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month}) AND (Payroll.PayrollItem.PayrollAdjustmentId IS NULL)
+
+
+    //union 
+
+    //SELECT        PayrollYear,PayrollMonth, Payroll.Payroll.PersonnelId,
+    //ref.SalaryItem.ProjectId2 as ProjectId, ref.SalaryItem.PersonCategoryCode2 as PersonCategoryCode,  ref.SalaryItem.PersonID2 as PersonID,
+    // ref.SalaryItem.SalaryItemName,  ref.SalaryItem.Id AS salaryitemid, ref.SalaryItem.PlusMinus,
+    //            CASE WHEN ref.SalaryItem.PlusMinus > 0 THEN PayrollItem.Amount END AS credit,
+    //            CASE WHEN ref.SalaryItem.PlusMinus < 0 THEN PayrollItem.Amount END AS debit  
+    //FROM            Payroll.Payroll INNER JOIN
+    //                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
+    //                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
+    //WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month}) AND (Payroll.PayrollItem.PayrollAdjustmentId IS NULL) AND (ISNULL(ref.SalaryItem.ProjectId2, 0) <> 0)
+
+    //union 
+
+    //SELECT     PayrollYear, PayrollMonth,   Payroll.Payroll.PersonnelId, 
+    //Payroll.PayrollAdjustment.ProjectId , Payroll.PayrollAdjustment.PersonCategoryCode , 
+    //Payroll.PayrollAdjustment.PersonID , 
+    //                         ref.SalaryItem.SalaryItemName, ref.SalaryItem.id as salryitemid, ref.SalaryItem.PlusMinus, 
+
+    //                         case when ref.SalaryItem.PlusMinus<0 then Payroll.PayrollAdjustmentDetail.Amount end as credit,
+    //                         case when ref.SalaryItem.PlusMinus>0 then Payroll.PayrollAdjustmentDetail.Amount end as debit 
+    //FROM            Payroll.Payroll INNER JOIN
+    //                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
+    //                         Payroll.PayrollAdjustmentDetail ON Payroll.PayrollItem.PayrollAdjustmentId = Payroll.PayrollAdjustmentDetail.PayrollAdjustmentId AND Payroll.Payroll.PayrollMonth = Payroll.PayrollAdjustmentDetail.PayrollPersianMonth AND 
+    //                         Payroll.Payroll.PayrollYear = Payroll.PayrollAdjustmentDetail.PayrollPersianYear AND Payroll.Payroll.PersonnelId = Payroll.PayrollAdjustmentDetail.personnelId INNER JOIN
+    //                         Payroll.PayrollAdjustment ON Payroll.PayrollItem.PayrollAdjustmentId = Payroll.PayrollAdjustment.Id INNER JOIN
+    //                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
+    //WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month})
+
+    //order by personnelid, ref.SalaryItem.Id
+    //        ")
+    //            .AsNoTracking()
+    //            .ToListAsync();
+
+    //        return result;
+    //    }
+    public async Task<List<VoucherModel>> GetVoucherItems(
+        int year,
+        int month,
+        int userId)
     {
         var result = await _context.VoucherModels
             .FromSqlInterpolated($@"
-              
- 
-SELECT      PayrollYear, PayrollMonth,  Payroll.Payroll.PersonnelId,
-ref.SalaryItem.ProjectId1 as ProjectId, ref.SalaryItem.PersonCategoryCode1 as PersonCategoryCode, ref.SalaryItem.PersonID1 as PersonID, 
-ref.SalaryItem.SalaryItemName,ref.SalaryItem.id as salaryitemid,  ref.SalaryItem.PlusMinus, 
-                        
-                         case when ref.SalaryItem.PlusMinus<0 then PayrollItem.Amount end as credit,
-                         case when ref.SalaryItem.PlusMinus>0 then PayrollItem.Amount end as debit 
-FROM            Payroll.Payroll INNER JOIN
-                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
-                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
-WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month}) AND (Payroll.PayrollItem.PayrollAdjustmentId IS NULL)
-
- 
-union 
-
-SELECT        PayrollYear,PayrollMonth, Payroll.Payroll.PersonnelId,
-ref.SalaryItem.ProjectId2 as ProjectId, ref.SalaryItem.PersonCategoryCode2 as PersonCategoryCode,  ref.SalaryItem.PersonID2 as PersonID,
- ref.SalaryItem.SalaryItemName,  ref.SalaryItem.Id AS salaryitemid, ref.SalaryItem.PlusMinus,
-            CASE WHEN ref.SalaryItem.PlusMinus > 0 THEN PayrollItem.Amount END AS credit,
-            CASE WHEN ref.SalaryItem.PlusMinus < 0 THEN PayrollItem.Amount END AS debit  
-FROM            Payroll.Payroll INNER JOIN
-                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
-                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
-WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month}) AND (Payroll.PayrollItem.PayrollAdjustmentId IS NULL) AND (ISNULL(ref.SalaryItem.ProjectId2, 0) <> 0)
- 
-union 
-
-SELECT     PayrollYear, PayrollMonth,   Payroll.Payroll.PersonnelId, 
-Payroll.PayrollAdjustment.ProjectId , Payroll.PayrollAdjustment.PersonCategoryCode , 
-Payroll.PayrollAdjustment.PersonID , 
-                         ref.SalaryItem.SalaryItemName, ref.SalaryItem.id as salryitemid, ref.SalaryItem.PlusMinus, 
-                         
-                         case when ref.SalaryItem.PlusMinus<0 then Payroll.PayrollAdjustmentDetail.Amount end as credit,
-                         case when ref.SalaryItem.PlusMinus>0 then Payroll.PayrollAdjustmentDetail.Amount end as debit 
-FROM            Payroll.Payroll INNER JOIN
-                         Payroll.PayrollItem ON Payroll.Payroll.Id = Payroll.PayrollItem.PayrollId INNER JOIN
-                         Payroll.PayrollAdjustmentDetail ON Payroll.PayrollItem.PayrollAdjustmentId = Payroll.PayrollAdjustmentDetail.PayrollAdjustmentId AND Payroll.Payroll.PayrollMonth = Payroll.PayrollAdjustmentDetail.PayrollPersianMonth AND 
-                         Payroll.Payroll.PayrollYear = Payroll.PayrollAdjustmentDetail.PayrollPersianYear AND Payroll.Payroll.PersonnelId = Payroll.PayrollAdjustmentDetail.personnelId INNER JOIN
-                         Payroll.PayrollAdjustment ON Payroll.PayrollItem.PayrollAdjustmentId = Payroll.PayrollAdjustment.Id INNER JOIN
-                         ref.SalaryItem ON Payroll.PayrollItem.SalaryItemId = ref.SalaryItem.Id
-WHERE        (Payroll.Payroll.PayrollYear = {year}) AND (Payroll.Payroll.PayrollMonth = {month})
-
-order by personnelid, ref.SalaryItem.Id
+            EXEC Payroll.PayrollAccPreview
+                @year = {year},
+                @month = {month},
+                @userId = {userId}
         ")
             .AsNoTracking()
             .ToListAsync();
 
         return result;
     }
-
     public List<CalculateTaxDetail> CalculateTax(decimal amount, List<RuleTax> rules, ref decimal TaxAmount)
     {
         List<CalculateTaxDetail> ret = new List<CalculateTaxDetail>();
