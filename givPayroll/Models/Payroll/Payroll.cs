@@ -59,7 +59,8 @@ namespace givPayroll.Models
 
         public virtual ICollection<PayrollItem> PayrollItems { get; set; }
     = new List<PayrollItem>();
-
+        public DateTime PayrollDate { get; internal set; }
+        
     }
 
 }

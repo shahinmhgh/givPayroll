@@ -47,5 +47,6 @@ namespace givPayroll.Models
         [ForeignKey(nameof(PayrollAdjustmentId))]
         public virtual PayrollAdjustment? PayrollAdjustment { get; set; }
         public int PlusMinus { get; internal set; }
+        public int SalaryItemRuleId { get; internal set; }
     }
 }

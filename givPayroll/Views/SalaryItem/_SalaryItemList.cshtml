@@ -137,10 +137,10 @@
                                     <span class="tooltip-text">حذف</span>
 
                                 </button>
-
+                                @* @(item.IsSystem == 1 ? "disabled" : "") *@
                                 
                                     <button type="button" class="btn btn-sm btn-info tooltip-btn"
-                                        onclick="salaryItemRule(@item.Id)" @(item.IsSystem == 1 ? "disabled" : "")>
+                                        onclick="salaryItemRule(@item.Id)" >
 
                                         <i class="fa fa-cog"></i>
                                         <span class="tooltip-text">قوانین حقوق</span>

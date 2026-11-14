@@ -3161,6 +3161,9 @@ namespace givPayroll.Migrations
                     b.Property<DateTime?>("IssueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("PayrollDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PayrollMonth")
                         .HasColumnType("int");
 
@@ -3318,6 +3321,9 @@ namespace givPayroll.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("SalaryItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SalaryItemRuleId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -4687,41 +4693,37 @@ namespace givPayroll.Migrations
 
             modelBuilder.Entity("givPayroll.Models.VoucherModel", b =>
                 {
-                    b.Property<decimal?>("Credit")
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<decimal?>("Debit")
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<int>("PayrollMonth")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PayrollYear")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PersonCategoryCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("PersonID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PersonnelId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlusMinus")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SalaryItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SalaryItemName")
+                    b.Property<string>("CategoryCode")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("InitiateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InitiateUserID")
+                        .HasColumnType("int");
+
+                    b.Property<long>("PersonID")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ProjectID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VoucherID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("credit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("debit")
+                        .HasColumnType("decimal(18,2)");
 
                     b.ToTable("VoucherModels");
                 });

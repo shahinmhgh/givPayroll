@@ -16,7 +16,7 @@ namespace givPayroll.Models
                 return AppUtil.M2S(IssueDate.GetValueOrDefault());
             }
         }
-
+        public DateTime PayrollDate { get; internal set; }
         [DataType(DataType.Date)]
         [Display(Name = "تاریخ صدور")]
         public DateTime? IssueDate { get; set; }

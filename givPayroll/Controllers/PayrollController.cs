@@ -12,7 +12,9 @@ using Microsoft.Playwright;
 using NCalc;
 using NPOI.OpenXmlFormats.Wordprocessing;
 using NPOI.POIFS.Crypt.Dsig.Facets;
+using NPOI.SS.Formula.Functions;
 using NPOI.Util.Optional;
+using System.Configuration;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace givPayroll.Controllers;
@@ -155,6 +157,7 @@ public class PayrollController : Controller
                     PayrollMonth = month,
                     IssueDate = DateTime.Now,
                     PersonnelId = personnelId,
+                    PayrollDate = AppUtil.S2M(year + "/" + month.ToString("00") + "/01").AddMonths(1).AddDays(-1)
                     //PayrollStatusID = (int)AppUtil.enumPayrollStatus.None
                 };
 
@@ -173,8 +176,7 @@ public class PayrollController : Controller
             foreach (PayrollItem item in model.PayrollItems)
             {
                 // Match existing items by their database ID.
-                PayrollItem payItem = payrollItems
-                    .FirstOrDefault(i => i.Id == item.Id);
+                PayrollItem payItem = payrollItems.FirstOrDefault(i => i.Id == item.Id);
 
                 if (payItem == null)
                 {
@@ -195,6 +197,7 @@ public class PayrollController : Controller
                 payItem.PlusMinus = item.PlusMinus;
                 payItem.Description = item.Description;
                 payItem.FormulaValue = item.FormulaValue;
+                payItem.SalaryItemRuleId = item.SalaryItemRuleId; // SalaryItemRuleId(item.SalaryItemId, pay.PayrollDate);
             }
 
             _context.SaveChanges();
@@ -208,6 +211,21 @@ public class PayrollController : Controller
             return ex.Message;
         }
     }
+
+    private int SalaryItemRuleId(int SalaryItemId, DateTime PayrollDate)
+    {
+        //select top 1 r.IsInsuranceBase from ref.SalaryItemRule r where r.SalaryItemId = SalaryItemId and r.EffectiveDate <= PayrollDate order by p.IssueDate desc
+        int isInsuranceBase = _context.SalaryItemRules
+                .Where(r =>
+                    r.SalaryItemId == SalaryItemId &&
+                    r.EffectiveDate <= PayrollDate)
+                .OrderByDescending(r => r.EffectiveDate)
+                .Select(r => r.Id)
+                .FirstOrDefault();
+
+        return isInsuranceBase;
+    }
+
     //private string UpdatePayroll(PayrollViewModel model, int personnelId, int year, int month)
     //{
     //    var payrollItems = _context.Payrolls.AsNoTracking()
@@ -389,8 +407,8 @@ public class PayrollController : Controller
     }
     public async Task<ActionResult> VoucherPayrollPreview(string ym)
     {
-        int year =Convert.ToInt32( ym.Substring(0, 4));
-        int month =Convert.ToInt32( ym.Substring(5,2));
+        int year = Convert.ToInt32(ym.Substring(0, 4));
+        int month = Convert.ToInt32(ym.Substring(5, 2));
 
         List<VoucherModel> lst = await GetVoucherItems(year, month, 1);
         return PartialView("_VoucherPayrollPreview", lst);
@@ -559,6 +577,7 @@ public class PayrollController : Controller
         model.PayrollMonth = month;
         model.Personnel = _context.Personnels.Include(x => x.PersonnelFamilies).Include(i => i.MaritalStatus).Where(i => i.Id == personnelId).FirstOrDefault();
         model.PersonnelOrder = _context.PersonnelOrders.Include("Details").Where(i => i.Id == personnelId && i.IsActive).FirstOrDefault();
+        model.PayrollDate = AppUtil.S2M(year + "/" + month.ToString("00") + "/01").AddMonths(1).AddDays(-1);
 
         #region PersonnelOrder
         //List<SalaryItem> lst1 = _context.SalaryItems.Where(i => i.Source == "PersonnelOrder").ToList();
@@ -743,6 +762,7 @@ public class PayrollController : Controller
                     SalaryItemId = salaryItem.Id,
                     PlusMinus = salaryItem.PlusMinus,
                     FormulaValue = salaryItem.FormulaValue,
+                    SalaryItemRuleId = SalaryItemRuleId(salaryItem.Id, model.PayrollDate),
                     Amount = amount
                 });
             }
@@ -799,29 +819,55 @@ public class PayrollController : Controller
         .Distinct()
         .ToList();
 
-        var insuranceRules = await _context.SalaryItemRules
-            .Where(r => salaryItemIds.Contains(r.SalaryItem.Id))
-            .ToDictionaryAsync(r => r.SalaryItem.Id);
+        //var insuranceRules = await _context.SalaryItemRules
+        //    .Where(r => salaryItemIds.Contains(r.SalaryItem.Id))
+        //    .ToDictionaryAsync(r => r.SalaryItem.Id);
 
         decimal totalInsuranceAmount = 0;
         foreach (PayrollItem item in model.PayrollItems)
             item.SalaryItem = _context.SalaryItems.Where(i => i.Id == item.SalaryItemId).FirstOrDefault();
 
         //// empoyee rate
-        decimal employeeRate = await _context.PersonnelOrders
-          .Where(po => po.IsActive && po.PersonnelId == personnelId)
-          .Join(
-              _context.RuleInsurances,
-              po => po.RuleInsuranceGroupId,
-              ri => ri.RuleInsuranceGroupId,
-              (po, ri) => ri.EmployeeRate
-          )
-          .FirstOrDefaultAsync();
+        //decimal employeeRate1 = await _context.PersonnelOrders
+        //  .Where(po => po.IsActive && po.PersonnelId == personnelId)
+        //  .Join(
+        //      _context.RuleInsurances,
+        //      po => po.RuleInsuranceGroupId,
+        //      ri => ri.RuleInsuranceGroupId,
+        //      (po, ri) => ri.EmployeeRate
+        //  )
+        //  .FirstOrDefaultAsync();
+
+        var resultRate = await _context.PersonnelOrders
+            .Where(po => po.PersonnelId == personnelId && po.IsActive)
+            .Join(
+                _context.RuleInsurances,
+                po => po.RuleInsuranceGroupId,
+                ri => ri.RuleInsuranceGroupId,
+                (po, ri) => new { po, ri }
+            )
+            .Where(x => x.ri.EffectiveDate ==
+                _context.RuleInsurances
+                    .Where(r => r.RuleInsuranceGroupId == x.ri.RuleInsuranceGroupId)
+                    .Max(r => r.EffectiveDate)
+            )
+            .Select(x => new
+            {
+                x.ri.EffectiveDate,
+                x.ri.EmployeeRate,
+            })
+            .ToListAsync();
+
+        decimal employeeRate = 0;
+        if (resultRate.Count() != 0)
+            employeeRate = resultRate[0].EmployeeRate;
+
         employeeRate = employeeRate / 100;
 
         foreach (var itemPayroll in model.PayrollItems)
-            if (insuranceRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
-                rule.IsInsuranceBase)
+            //if (insuranceRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
+            //    rule.IsInsuranceBase)
+            if (itemPayroll.SalaryItemRuleId != 0)
             {
                 InsuTaxViewModel obj = new InsuTaxViewModel();
                 obj.SalaryItemId = itemPayroll.SalaryItemId;
@@ -890,14 +936,15 @@ public class PayrollController : Controller
            .Distinct()
            .ToList();
 
-        var taxRules = await _context.SalaryItemRules
-            .Where(r => salaryItemIdsTax.Contains(r.SalaryItem.Id))
-            .ToDictionaryAsync(r => r.SalaryItem.Id);
+        //var taxRules = await _context.SalaryItemRules
+        //    .Where(r => salaryItemIdsTax.Contains(r.SalaryItem.Id))
+        //    .ToDictionaryAsync(r => r.SalaryItem.Id);
 
         decimal totalTaxAmount = 0;
         foreach (var itemPayroll in model.PayrollItems)
-            if (taxRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
-                rule.IsTaxBase)
+            //if (taxRules.TryGetValue(itemPayroll.SalaryItemId, out var rule) &&
+            //    rule.IsTaxBase)
+            if (itemPayroll.SalaryItemRuleId != 0)
             {
                 InsuTaxViewModel obj = new InsuTaxViewModel();
                 obj.SalaryItemId = itemPayroll.SalaryItemId;
